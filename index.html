@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Helpdesk Monitoring Dashboard</title>
+
+    <!-- External Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js">
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+    <!-- ============================================================ -->
+    <!-- HEADER -->
+    <!-- ============================================================ -->
+    <header class="header" role="banner">
+        <div class="header-left">
+            <div class="logo" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none">
+                    <rect x="1" y="8" width="3" height="7" rx="1" fill="white" opacity=".4" />
+                    <rect x="6" y="4" width="3" height="11" rx="1" fill="white" opacity=".75" />
+                    <rect x="11" y="1" width="3" height="14" rx="1" fill="white" />
+                </svg>
+            </div>
+            <span class="header-title" id="appTitle">Helpdesk Monitor</span>
+        </div>
+        <div class="header-right">
+            <button class="badge-live" id="syncBadge" title="Click to refresh">
+                <span class="dot" id="syncDot"></span>
+                <span id="syncLabel">Live</span>
+            </button>
+            <button class="header-btn" id="btnRefresh" title="Refresh data">&#x21bb;</button>
+            <button class="header-btn" id="btnLang" title="Toggle language">🌐 EN</button>
+            <button class="header-btn" id="btnTheme">☀️</button>
+        </div>
+    </header>
+
+    <!-- ============================================================ -->
+    <!-- MENU TABS -->
+    <!-- ============================================================ -->
+    <nav class="menu-tabs" role="tablist">
+        <button class="menu-tab active" id="menuTabTicket" data-menu="ticket" role="tab">
+            <svg class="menu-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 7a2 2 0 012-2h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4V7z" />
+            </svg>
+            <span id="lblMenuTicket">Ticket</span>
+        </button>
+        <button class="menu-tab" id="menuTabTask" data-menu="task" role="tab">
+            <svg class="menu-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 11l3 3L22 4" />
+                <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+            </svg>
+            <span id="lblMenuTask">Task</span>
+        </button>
+    </nav>
+
+    <!-- ============================================================ -->
+    <!-- FILTER BAR -->
+    <!-- ============================================================ -->
+    <section class="filter-bar" aria-label="Filters">
+        <div class="filter-group">
+            <span class="filter-label" id="lblPeriod">Period</span>
+            <div class="filter-group-row">
+                <select id="filterMonth">
+                    <option value="all" id="optAllMonths">All Months</option>
+                </select>
+                <select id="filterWeek">
+                    <option value="all" id="optAllWeeks">All Weeks</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="filter-separator"></div>
+
+        <div class="filter-group">
+            <span class="filter-label" id="lblDateRange">Date Range</span>
+            <div class="filter-group-row">
+                <input type="date" class="date-input" id="filterDateFrom" />
+                <span class="date-range-label" id="lblDateTo">to</span>
+                <input type="date" class="date-input" id="filterDateTo" />
+            </div>
+        </div>
+
+        <div class="filter-separator"></div>
+
+        <div class="filter-group" id="filterDimensionGroup">
+            <span class="filter-label" id="lblDimension">Dimension</span>
+            <div class="filter-group-row">
+                <select id="filterProduct">
+                    <option value="all" id="optAllProducts">All Products</option>
+                </select>
+                <select id="filterTier">
+                    <option value="all" id="optAllTiers">All Tiers</option>
+                </select>
+                <select id="filterShift">
+                    <option value="all" id="optAllShifts">All Shifts</option>
+                </select>
+                <select id="filterStaff">
+                    <option value="all" id="optAllStaffTicket">All Staff</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="filter-separator" id="filterSeparatorDim"></div>
+
+        <button class="filter-reset" id="btnResetFilters">Reset</button>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- MAIN CONTENT -->
+    <!-- ============================================================ -->
+    <main class="main">
+        <!-- ==================== TICKET PANEL ==================== -->
+        <section class="menu-panel active" id="panelTicket" role="tabpanel">
+
+            <!-- KPI Overview -->
+            <div class="section-header">
+                <span id="lblOverview">Overview</span>
+                <span class="section-badge" id="kpiBadge">All Data</span>
+            </div>
+            <div class="kpi-grid" id="kpiGrid"></div>
+
+            <!-- Escalation Panel -->
+            <div class="section-header">
+                <span id="lblEscalation">Escalation Overview</span>
+            </div>
+            <div class="escalation-panel" id="escalationPanel"></div>
+
+            <!-- Charts -->
+            <div class="section-header">
+                <span id="lblDistribution">Distribution &amp; Categories</span>
+            </div>
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title" id="chartPriTitle">Priority Distribution</div>
+                        <div class="chart-subtitle" id="chartPriSub">By ticket urgency level</div>
+                    </div>
+                    <div class="chart-wrapper"><canvas id="chartPriority"></canvas></div>
+                    <div class="chart-legend" id="legendPriority"></div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title" id="chartTierTitle">Client Tier · Issue vs Non-Issue</div>
+                        <div class="chart-subtitle" id="chartTierSub">Distribution by client segment</div>
+                    </div>
+                    <div class="chart-wrapper"><canvas id="chartTier"></canvas></div>
+                    <div class="chart-legend" id="legendTier"></div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title" id="chartProdTitle">Product · Issue vs Non-Issue</div>
+                        <div class="chart-subtitle" id="chartProdSub">Comparison by product</div>
+                    </div>
+                    <div class="chart-wrapper-md"><canvas id="chartProduct"></canvas></div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title" id="chartFeatTitle">Feature · Issue vs Non-Issue</div>
+                        <div class="chart-subtitle" id="chartFeatSub">Distribution by feature</div>
+                    </div>
+                    <div class="chart-wrapper-md"><canvas id="chartFeature"></canvas></div>
+                </div>
+
+                <div class="chart-card chart-wide">
+                    <div class="chart-header">
+                        <div class="chart-title" id="chartStaffTitle">Tickets per Staff</div>
+                        <div class="chart-subtitle" id="chartStaffSub">Number of tickets handled per staff</div>
+                    </div>
+                    <div class="chart-wrapper-md"><canvas id="chartTicketStaff"></canvas></div>
+                </div>
+            </div>
+
+            <div class="section-header">
+                <span id="lblTrend">Trend &amp; Pattern</span>
+            </div>
+            <div class="chart-grid">
+                <div class="chart-card chart-wide">
+                    <div class="chart-header">
+                        <div class="chart-title" id="chartTrendTitle">7-Day Ticket Trend</div>
+                        <div class="chart-subtitle" id="chartTrendSub">Daily volume — Issue vs Non-Issue</div>
+                    </div>
+                    <div class="chart-wrapper-tall"><canvas id="chartTrend"></canvas></div>
+                    <div class="trend-comparison" id="trendComparison"></div>
+                </div>
+
+                <div class="chart-card chart-wide">
+                    <div class="chart-header">
+                        <div class="chart-title" id="chartShiftTitle">Shift Distribution</div>
+                        <div class="chart-subtitle" id="chartShiftSub">Morning · Day · Night</div>
+                    </div>
+                    <div class="chart-wrapper-md"><canvas id="chartShift"></canvas></div>
+                    <div class="chart-legend" id="legendShift"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TASK PANEL ==================== -->
+        <section class="menu-panel" id="panelTask" role="tabpanel">
+
+            <!-- Task KPI -->
+            <div class="section-header">
+                <span id="lblTaskOverview">Task Overview</span>
+                <span class="section-badge" id="taskBadge">All Data</span>
+            </div>
+            <div class="kpi-grid task-stats" id="taskKpiGrid"></div>
+
+            <!-- Task Charts -->
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title" id="chartTaskStatusTitle">Task Status</div>
+                        <div class="chart-subtitle" id="chartTaskStatusSub">Distribution by status</div>
+                    </div>
+                    <div class="chart-wrapper"><canvas id="chartTaskStatus"></canvas></div>
+                    <div class="chart-legend" id="legendTaskStatus"></div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title" id="chartTaskStaffTitle">Tasks per Staff</div>
+                        <div class="chart-subtitle" id="chartTaskStaffSub">Number of tasks handled</div>
+                    </div>
+                    <div class="chart-wrapper-md"><canvas id="chartTaskStaff"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Task Table -->
+            <div class="chart-card task-table-container">
+                <div class="chart-header">
+                    <div class="chart-title" id="chartTaskTableTitle">Task List</div>
+                    <div class="chart-subtitle" id="chartTaskTableSub">All helpdesk team tasks</div>
+                </div>
+                <div class="task-filters">
+                    <input type="text" class="task-search" id="taskSearchInput" placeholder="Search task / staff..." />
+                    <select id="taskFilterStaffSelect">
+                        <option value="all" id="optTaskAllStaff">All Staff</option>
+                    </select>
+                    <select id="taskFilterStatusSelect">
+                        <option value="all" id="optTaskAllStatus">All Status</option>
+                        <option value="Done">Done</option>
+                        <option value="Progress">Progress</option>
+                    </select>
+                </div>
+                <div class="task-table-wrapper">
+                    <table class="task-table">
+                        <thead>
+                            <tr>
+                                <th id="thTaskStaff">Staff</th>
+                                <th id="thTaskName">Task</th>
+                                <th id="thTaskTag">Tag</th>
+                                <th id="thTaskDuration">Duration</th>
+                                <th id="thTaskStatusHeader">Status</th>
+                                <th id="thTaskDate">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="taskTableBody"></tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="taskPagination"></div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- ============================================================ -->
+    <!-- FOOTER -->
+    <!-- ============================================================ -->
+    <footer class="footer" id="footerText">
+        Helpdesk Monitoring Dashboard &nbsp;&middot;&nbsp; Data: Google Sheets
+    </footer>
+
+    <!-- ============================================================ -->
+    <!-- SCRIPTS -->
+    <!-- ============================================================ -->
+    <script src="script.js"></script>
+
+</body>
+</html>
