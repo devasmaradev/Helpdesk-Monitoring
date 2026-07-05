@@ -6,9 +6,9 @@ const CONFIG = {
     APP: {
         name: 'Helpdesk Monitor',
         version: '2.0.0',
-        defaultLanguage: 'en', // default EN
-        defaultTheme: 'light', // default LIGHT
-        refreshInterval: 60000,
+        defaultLanguage: 'en',
+        defaultTheme: 'light',
+        refreshInterval: 600000,
     },
     CHART: {
         colors: {
@@ -29,7 +29,6 @@ const CONFIG = {
             issue: '#f43f5e',
             non: '#10b981',
         },
-        font: { family: 'Inter, sans-serif', size: 11 },
         cutout: '65%',
         borderRadius: 5,
         tension: 0.35,
@@ -38,18 +37,10 @@ const CONFIG = {
         pageSize: 10,
     },
     API: {
-        baseUrl: 'https://script.google.com/macros/s/AKfycbw_-uPyFzh-1wQfwTOENZ67dufH6FS7mcZn-xz_HgVp6ZcTUKUE9BSo21l4iKyX0JBJ/exec',
-        tickets: 'https://script.google.com/macros/s/AKfycbw_-uPyFzh-1wQfwTOENZ67dufH6FS7mcZn-xz_HgVp6ZcTUKUE9BSo21l4iKyX0JBJ/exec?action=tickets',
-        tasks: 'https://script.google.com/macros/s/AKfycbw_-uPyFzh-1wQfwTOENZ67dufH6FS7mcZn-xz_HgVp6ZcTUKUE9BSo21l4iKyX0JBJ/exec?action=tasks',
-        all: 'https://script.google.com/macros/s/AKfycbw_-uPyFzh-1wQfwTOENZ67dufH6FS7mcZn-xz_HgVp6ZcTUKUE9BSo21l4iKyX0JBJ/exec?action=all',
-    },
-    DATES: {
-        months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-        weeks: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'],
-        shifts: ['Pagi', 'Siang', 'Malam'],
+        tickets: 'https://script.google.com/macros/s/AKfycbwOiyJoD3rFgzo78MQxj6cNod6vyB5lwAEx0HVjSKr3NNGAMBJ5pE1d31ECE0tYEJrExg/exec?action=tickets',
+        tasks: 'https://script.google.com/macros/s/AKfycbwOiyJoD3rFgzo78MQxj6cNod6vyB5lwAEx0HVjSKr3NNGAMBJ5pE1d31ECE0tYEJrExg/exec?action=tasks',
     },
     PRIORITIES: ['Critical', 'High', 'Medium', 'Low'],
-    TIERS: ['Tier1', 'Tier2', 'Tier3'],
 };
 
 /* ================================================================
@@ -94,6 +85,7 @@ const LOCALE = {
         subPercent: '% dari total',
         subForwarded: 'Diteruskan ke tim lain',
         subAHT: 'Rata-rata waktu merespon',
+        subART: 'Rata-rata waktu dari mulai ditangani hingga selesai',
         subSLA: 'Tiket yang memenuhi SLA',
         escTotal: 'Total Eskalasi',
         escActive: 'Masih Aktif',
@@ -130,10 +122,10 @@ const LOCALE = {
         taskAllStaff: 'Semua Staff',
         taskAllStatus: 'Semua Status',
         taskSearchPlaceholder: 'Cari task / staff...',
-        thStaff: 'Staff',
+        thClient: 'Client',
         thTask: 'Task',
         thTag: 'Tag',
-        thDuration: 'Durasi',
+        thEscalatedto: 'Eskalasi ke',
         thStatus: 'Status',
         thDate: 'Tanggal',
         menuTicket: 'Ticket',
@@ -198,6 +190,7 @@ const LOCALE = {
         subPercent: '% of total',
         subForwarded: 'Forwarded to another team',
         subAHT: 'Avg response time',
+        subART: 'Avg time from start to resolution',
         subSLA: 'Tickets within SLA',
         escTotal: 'Total Escalations',
         escActive: 'Still Active',
@@ -234,10 +227,10 @@ const LOCALE = {
         taskAllStaff: 'All Staff',
         taskAllStatus: 'All Status',
         taskSearchPlaceholder: 'Search task / staff...',
-        thStaff: 'Staff',
+        thClient: 'Client',
         thTask: 'Task',
         thTag: 'Tag',
-        thDuration: 'Duration',
+        thEscalatedto: 'Escalated to',
         thStatus: 'Status',
         thDate: 'Date',
         menuTicket: 'Ticket',
@@ -294,6 +287,7 @@ const appState = {
         taskSearch: '',
         taskFilterStaff: 'all',
         taskFilterStatus: 'all',
+        dateAutoFilled: false,
     },
     charts: {},
     meta: {
@@ -309,17 +303,63 @@ const appState = {
 
 const Utils = {
 
+    /** Date utilities */
     Date: {
+        /** Parse DD/MM/YYYY to Date object */
         parseDate: (str) => {
+            if (!str) return null;
             const parts = str.split('/').map(Number);
             return new Date(parts[2], parts[1] - 1, parts[0]);
         },
 
+        /** Parse YYYY-MM-DD to Date object */
         parseDateInput: (str) => {
+            if (!str) return null;
             const parts = str.split('-').map(Number);
             return new Date(parts[0], parts[1] - 1, parts[2]);
         },
 
+        /** Get calendar date/time parts of an ISO datetime string, in Asia/Jakarta timezone */
+        toJakartaParts: (isoStr) => {
+            if (!isoStr) return null;
+            const d = new Date(isoStr);
+            if (isNaN(d.getTime())) return null;
+            const fmt = new Intl.DateTimeFormat('en-US', {
+                timeZone: 'Asia/Jakarta',
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+            });
+            const parts = fmt.formatToParts(d).reduce((acc, p) => { acc[p.type] = p.value; return acc; }, {});
+            return {
+                year: Number(parts.year),
+                month: Number(parts.month),
+                day: Number(parts.day),
+                hour: Number(parts.hour === '24' ? '0' : parts.hour),
+                minute: Number(parts.minute),
+                second: Number(parts.second),
+            };
+        },
+
+        /** Convert ISO datetime string (Ticket Date) to "DD/MM/YYYY" using its Asia/Jakarta calendar date */
+        isoToDDMMYYYY: (isoStr) => {
+            const p = Utils.Date.toJakartaParts(isoStr);
+            if (!p) return '';
+            return `${String(p.day).padStart(2, '0')}/${String(p.month).padStart(2, '0')}/${p.year}`;
+        },
+
+        /** Convert ISO datetime string (Task Start Time) to "DD-Mon-YYYY HH:MM:SS" so existing task-date utilities keep working unchanged */
+        isoToTaskDateString: (isoStr) => {
+            const p = Utils.Date.toJakartaParts(isoStr);
+            if (!p) return '';
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const dd = String(p.day).padStart(2, '0');
+            const hh = String(p.hour).padStart(2, '0');
+            const mi = String(p.minute).padStart(2, '0');
+            const ss = String(p.second).padStart(2, '0');
+            return `${dd}-${monthNames[p.month - 1]}-${p.year} ${hh}:${mi}:${ss}`;
+        },
+
+        /** Parse task date format "DD-Mon-YYYY HH:MM:SS" to Date */
         parseTaskDate: (str) => {
             if (!str) return null;
             const [datePart, timePart] = str.split(' ');
@@ -329,11 +369,13 @@ const Utils = {
             return new Date(Number(y), monthMap[mon], Number(d), hh || 0, mm || 0, ss || 0);
         },
 
+        /** Get date only from task date string */
         taskDateOnly: (str) => {
             const dt = Utils.Date.parseTaskDate(str);
             return dt ? new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()) : null;
         },
 
+        /** Format time as HH:MM */
         formatTime: (date) => {
             if (!date) return '';
             const h = String(date.getHours()).padStart(2, '0');
@@ -341,22 +383,22 @@ const Utils = {
             return `${h}:${m}`;
         },
 
+        /** Format task date from "DD-Mon-YYYY" to "DD/MM/YYYY" */
         formatTaskDate: (str) => {
             if (!str) return '';
             const parts = str.split(' ');
             const datePart = parts[0] || '';
-            if (datePart) {
-                const [d, mon, y] = datePart.split('-');
-                const monthMap = { Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06', 
-                                Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12' };
-                const monthNum = monthMap[mon] || mon;
-                const day = String(Number(d)).padStart(2, '0');
-                return `${day}/${monthNum}/${y}`;
-            }
-            return datePart;
+            if (!datePart) return '';
+            const [d, mon, y] = datePart.split('-');
+            const monthMap = { Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06', 
+                            Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12' };
+            const monthNum = monthMap[mon] || mon;
+            const day = String(Number(d)).padStart(2, '0');
+            return `${day}/${monthNum}/${y}`;
         },
     },
 
+    /** String utilities */
     String: {
         truncate: (str, maxLen) => {
             if (!str || str.length <= maxLen) return str || '';
@@ -377,8 +419,21 @@ const Utils = {
             if (!str) return '';
             return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
         },
+
+        /** Format "Tier1" -> "Tier 1" for display only */
+        formatTier: (tier) => {
+            if (!tier) return '';
+            return tier.replace(/^Tier(\d+)$/, 'Tier $1');
+        },
+
+        /** Strip spreadsheet epoch placeholder artifacts (e.g. blank time cells showing 1899/1900) */
+        sanitizePlaceholderDate: (str) => {
+            if (!str) return '';
+            return /1899|1900/.test(str) ? '' : str;
+        },
     },
 
+    /** Math utilities */
     Math: {
         sum: (arr) => arr.reduce((a, b) => a + b, 0),
         average: (arr) => arr.length ? Utils.Math.sum(arr) / arr.length : 0,
@@ -387,6 +442,7 @@ const Utils = {
         round: (val, decimals) => Number(val.toFixed(decimals)),
     },
 
+    /** Array utilities */
     Array: {
         distinct: (arr) => [...new Set(arr)],
         groupBy: (arr, key) => {
@@ -411,11 +467,26 @@ const Utils = {
         totalPages: (arr, size) => Math.max(1, Math.ceil(arr.length / size)),
     },
 
+    /** Duration utilities */
     Duration: {
         parse: (str) => {
             if (!str) return 0;
-            const parts = str.split(':').map(Number);
+            // Handle full ISO datetime strings from the sheet (time-only cells serialize with an epoch date)
+            const isoMatch = str.match(/T(\d{1,2}):(\d{2}):(\d{2})/);
+            const timePart = isoMatch ? `${isoMatch[1]}:${isoMatch[2]}:${isoMatch[3]}` : str;
+            const parts = timePart.split(':').map(Number);
+            if (parts.some(isNaN)) return 0;
             return parts[0] * 60 + parts[1] + (parts[2] || 0) / 60;
+        },
+
+        /** Parse a time-like string (plain "HH:MM:SS" or ISO datetime) to total seconds. Returns null if invalid. */
+        parseTimeToSeconds: (str) => {
+            if (!str) return null;
+            const isoMatch = str.match(/T(\d{1,2}):(\d{2}):(\d{2})/);
+            const timePart = isoMatch ? `${isoMatch[1]}:${isoMatch[2]}:${isoMatch[3]}` : str;
+            const parts = timePart.split(':').map(Number);
+            if (parts.length < 2 || parts.some(isNaN)) return null;
+            return parts[0] * 3600 + parts[1] * 60 + (parts[2] || 0);
         },
 
         format: (minutes) => {
@@ -423,11 +494,21 @@ const Utils = {
             return `${(minutes / 60).toFixed(1)}h`;
         },
 
+        /** Format total minutes into "H:MM:SS" — jam tidak dibatasi 24 (mengikuti gaya [hh]:mm:ss) */
+        formatHMS: (totalMinutes) => {
+            const totalSeconds = Math.round((totalMinutes || 0) * 60);
+            const h = Math.floor(totalSeconds / 3600);
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            const s = totalSeconds % 60;
+            return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        },
+
         sum: (items, key) => {
             return items.reduce((acc, item) => acc + Utils.Duration.parse(item[key] || ''), 0);
         },
     },
 
+    /** Color utilities */
     Color: {
         toRGBA: (hex, alpha) => {
             const r = parseInt(hex.slice(1, 3), 16);
@@ -437,6 +518,7 @@ const Utils = {
         },
     },
 
+    /** DOM utilities */
     DOM: {
         get: (id) => document.getElementById(id),
         qs: (sel, ctx) => (ctx || document).querySelector(sel),
@@ -449,6 +531,7 @@ const Utils = {
         },
     },
 
+    /** Debounce function */
     debounce: (fn, delay) => {
         let timer = null;
         return (...args) => {
@@ -457,6 +540,7 @@ const Utils = {
         };
     },
 
+    /** Generate unique ID */
     uid: () => Date.now().toString(36) + Math.random().toString(36).slice(2),
 };
 
@@ -464,6 +548,7 @@ const Utils = {
    TRANSLATION
    ================================================================ */
 
+/** Get translated text */
 function t(key, params) {
     const lang = appState.ui.language;
     const translations = LOCALE[lang] || LOCALE.id;
@@ -478,6 +563,7 @@ function t(key, params) {
     return text;
 }
 
+/** Get current language */
 function getLang() {
     return appState.ui.language;
 }
@@ -486,10 +572,12 @@ function getLang() {
    THEME
    ================================================================ */
 
+/** Get current theme */
 function getTheme() {
     return appState.ui.theme;
 }
 
+/** Toggle between light/dark theme */
 function toggleTheme() {
     const newTheme = getTheme() === 'dark' ? 'light' : 'dark';
     appState.ui.theme = newTheme;
@@ -498,22 +586,27 @@ function toggleTheme() {
     return newTheme;
 }
 
+/** Check if dark theme is active */
 function isDark() {
     return getTheme() === 'dark';
 }
 
+/** Get grid color based on theme */
 function getGridColor() {
     return isDark() ? 'rgba(36,40,64,.9)' : 'rgba(226,232,240,.9)';
 }
 
+/** Get tick color based on theme */
 function getTickColor() {
     return isDark() ? '#475569' : '#94a3b8';
 }
 
+/** Get text color based on theme */
 function getTextColor() {
     return isDark() ? '#e2e8f0' : '#0f172a';
 }
 
+/** Get surface color based on theme */
 function getSurfaceColor() {
     return isDark() ? '#111318' : '#ffffff';
 }
@@ -524,187 +617,122 @@ function getSurfaceColor() {
 
 const DataLoader = {
 
-    async fetchCSV(url) {
+    /**
+     * Fetch JSON data from the API endpoint with cache busting
+     * API shape: { success: boolean, total: number, data: [ {..record}, ... ] }
+     */
+    async fetchJSON(url) {
         const bust = (url.includes('?') ? '&' : '?') + '_t=' + Date.now();
         const response = await fetch(url + bust, { cache: 'no-store' });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const text = await response.text();
-        return this.parseCSV(text);
+        const json = await response.json();
+        if (!json || json.success === false || !Array.isArray(json.data)) {
+            throw new Error('Invalid API response shape');
+        }
+        return json.data;
     },
 
-    parseCSV(text) {
-        const rows = [];
-        let row = [],
-            field = '',
-            inQuotes = false;
-        for (let i = 0; i < text.length; i++) {
-            const c = text[i],
-                next = text[i + 1];
-            if (inQuotes) {
-                if (c === '"' && next === '"') { field += '"';
-                    i++; } else if (c === '"') { inQuotes = false; } else { field += c; }
-            } else {
-                if (c === '"') { inQuotes = true; } else if (c === ',') { row.push(field);
-                    field = ''; } else if (c === '\r') { } else if (c === '\n') { row.push(field);
-                    rows.push(row);
-                    row = [];
-                    field = ''; } else { field += c; }
+    /**
+     * Get a field value from a record object, matching by name loosely
+     * (case-insensitive, ignoring spaces/punctuation) so header text
+     * variations in the sheet ("On SLA?", "Client Category", etc.) still resolve.
+     */
+    getField(obj, ...names) {
+        const normalize = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+        for (const n of names) {
+            if (obj[n] !== undefined && obj[n] !== null && obj[n] !== '') {
+                return String(obj[n]).trim();
             }
         }
-        if (field.length || row.length) { row.push(field);
-            rows.push(row); }
-        return rows.filter(r => r.length > 1 || (r.length === 1 && r[0] !== ''));
-    },
-
-    buildHeaderMap(headerRow) {
-        const map = {};
-        headerRow.forEach((h, i) => {
-            const key = h.trim().toLowerCase().replace(/\s+/g, '');
-            map[key] = i;
-        });
-        return map;
-    },
-
-    col(rowArr, map, ...names) {
+        const keys = Object.keys(obj);
         for (const n of names) {
-            // Normalisasi nama yang dicari: lowercase + hapus spasi
-            const key = n.toLowerCase().replace(/\s+/g, '');
-            
-            // Coba cari langsung di map
-            if (map[key] !== undefined) {
-                const v = rowArr[map[key]];
-                if (v !== undefined && v !== '') return v.trim();
-            }
-            
-            // Coba cari dengan mencocokkan substring (untuk header yang punya spasi tersembunyi)
-            for (const [mapKey, index] of Object.entries(map)) {
-                // Jika mapKey mengandung nama yang dicari (case insensitive)
-                if (mapKey.toLowerCase().includes(key) || key.includes(mapKey.toLowerCase())) {
-                    const v = rowArr[index];
-                    if (v !== undefined && v !== '') return v.trim();
-                }
+            const target = normalize(n);
+            const found = keys.find(k => normalize(k) === target);
+            if (found && obj[found] !== undefined && obj[found] !== null && obj[found] !== '') {
+                return String(obj[found]).trim();
             }
         }
         return '';
     },
 
+    /**
+     * Map ticket records (from JSON API) to structured objects
+     */
+    mapTicketRows(records) {
+        const out = [];
+        (records || []).forEach(rec => {
+            const rawDate = this.getField(rec, 'Ticket Date', 'Date');
+            if (!rawDate) return;
+
+            out.push({
+                date: Utils.Date.isoToDDMMYYYY(rawDate),
+                day: this.getField(rec, 'Day'),
+                month: this.getField(rec, 'Month'),
+                week: this.getField(rec, 'Week'),
+                product: this.getField(rec, 'Product'),
+                type: this.getField(rec, 'Type'),
+                esc: this.normalizeYesNo(this.getField(rec, 'Escalation Status', 'Escalation')),
+                status: this.getField(rec, 'Status'),
+                priority: this.getField(rec, 'Priority'),
+                feature: this.getField(rec, 'Feature'),
+                shift: this.getField(rec, 'Shift'),
+                tier: this.getField(rec, 'Client Category', 'Tier'),
+                onSLA: this.normalizeYesNo(this.getField(rec, 'On SLA?', 'On SLA', 'OnSLA')),
+                ht: this.getField(rec, 'Handling Time'),
+                client: this.getField(rec, 'Client Name'),
+                problem: this.getField(rec, 'Problem'),
+                startTime: this.getField(rec, 'Start Time'),
+                solvedTime: this.getField(rec, 'Solved/Escalated Time', 'Solved Time'),
+                staff: this.getField(rec, 'Created by', 'Staff'),
+                escalatedTo: this.getField(rec, 'Escalated to'),
+            });
+        });
+        return out;
+    },
+
+    /**
+     * Map task records (from JSON API) to structured objects
+     */
+    mapTaskRows(records) {
+        const out = [];
+        (records || []).forEach(rec => {
+            const staff = this.getField(rec, 'Staff Member', 'Staff');
+            const task = this.getField(rec, 'Task');
+            if (!staff && !task) return;
+
+            const rawStart = this.getField(rec, 'Start Time');
+
+            out.push({
+                staff: staff,
+                task: task,
+                month: this.getField(rec, 'Month'),
+                week: this.getField(rec, 'Week'),
+                start: Utils.Date.isoToTaskDateString(rawStart), // drives both date filter & table "Date" column
+                end: this.getField(rec, 'End Time'),
+                note: this.getField(rec, 'Note'),
+                duration: this.getField(rec, 'Duration'),
+                status: this.getField(rec, 'Status'),
+            });
+        });
+        return out;
+    },
+
+    /**
+     * Normalize yes/no-like values (strips spaces so "On SLA" / "Off SLA" match correctly)
+     */
     normalizeYesNo(value) {
-        const s = (value || '').trim().toLowerCase();
+        const s = (value || '').trim().toLowerCase().replace(/\s+/g, '');
         if (['yes', 'y', 'onsla', 'true', '1', 'escalated'].includes(s)) return 'Yes';
-        if (['no', 'n', 'offsla', 'off sla', 'false', '0'].includes(s)) return 'No';
+        if (['no', 'n', 'offsla', 'false', '0'].includes(s)) return 'No';
         return value || '';
     },
 
-    normalizeTime(s) { return (s || '').trim(); },
-
-    mapTicketRows(rows) {
-        if (rows.length < 2) return [];
-        
-        // Gunakan index langsung (hardcoded) karena posisi kolom sudah diketahui
-        const dateIdx = 0;
-        const dayIdx = 1;
-        const monthIdx = 2;
-        const weekIdx = 3;
-        const clientIdx = 4;
-        const staffIdx = 5;
-        const productIdx = 6;
-        const typeIdx = 7;
-        const escIdx = 8;
-        const statusIdx = 9;
-        const priorityIdx = 10;
-        const featureIdx = 11;
-        const startTimeIdx = 12;
-        const htIdx = 14;
-        const tierIdx = 16; // <-- PERBAIKAN: dari 17 menjadi 16
-        const problemIdx = 17; // <-- PERBAIKAN: dari 18 menjadi 17
-        const onSLAIdx = 18; // <-- PERBAIKAN: dari 19 menjadi 18
-        const shiftIdx = 19; // <-- PERBAIKAN: dari 20 menjadi 19
-        
-        const out = [];
-        for (let i = 1; i < rows.length; i++) {
-            const r = rows[i];
-            if (!r || r.every(c => !c || !c.trim())) continue;
-            
-            const date = r[dateIdx]?.trim() || '';
-            if (!date) continue;
-            
-            const month = r[monthIdx]?.trim() || '';
-            const week = r[weekIdx]?.trim() || '';
-            
-            // Debug untuk data pertama
-            if (i <= 3) {
-                console.log(`📝 Row ${i} parsed (direct index):`, { 
-                    date, 
-                    month, 
-                    week,
-                    tier: r[tierIdx]?.trim() || '',
-                    shift: r[shiftIdx]?.trim() || '',
-                    problem: r[problemIdx]?.trim() || '',
-                });
-            }
-            
-            out.push({
-                date: date,
-                day: r[dayIdx]?.trim() || '',
-                month: month,
-                week: week,
-                product: r[productIdx]?.trim() || '',
-                type: r[typeIdx]?.trim() || '',
-                esc: this.normalizeYesNo(r[escIdx]?.trim() || ''),
-                status: r[statusIdx]?.trim() || '',
-                priority: r[priorityIdx]?.trim() || '',
-                feature: r[featureIdx]?.trim() || '',
-                shift: r[shiftIdx]?.trim() || '',
-                tier: r[tierIdx]?.trim() || '',
-                onSLA: this.normalizeYesNo(r[onSLAIdx]?.trim() || ''),
-                ht: r[htIdx]?.trim() || '',
-                client: r[clientIdx]?.trim() || '',
-                problem: r[problemIdx]?.trim() || '',
-                startTime: r[startTimeIdx]?.trim() || '',
-                staff: r[staffIdx]?.trim() || '',
-            });
-        }
-        console.log(`✅ Mapped ${out.length} tickets`);
-        
-        if (out.length > 0) {
-            console.log('📊 Sample mapped ticket:', out[0]);
-            console.log('📅 Month values sample:', out.slice(0, 5).map(t => t.month));
-            console.log('📊 Tier values sample:', out.slice(0, 5).map(t => t.tier));
-        }
-        
-        return out;
-    },
-
-    mapTaskRows(rows) {
-        if (rows.length < 2) return [];
-        const map = this.buildHeaderMap(rows[0]);
-        const out = [];
-        for (let i = 1; i < rows.length; i++) {
-            const r = rows[i];
-            if (!r || r.every(c => !c || !c.trim())) continue;
-            const staff = this.col(r, map, 'StaffMember', 'Staff Member', 'Staff');
-            const task = this.col(r, map, 'Task');
-            if (!staff && !task) continue;
-            out.push({
-                staff,
-                task,
-                month: this.col(r, map, 'Month', 'month', 'Bulan'),
-                week: this.col(r, map, 'Week', 'week', 'Minggu'),
-                start: this.col(r, map, 'StartTime', 'Start Time'),
-                end: this.col(r, map, 'EndTime', 'End Time'),
-                note: this.col(r, map, 'Note'),
-                duration: this.col(r, map, 'Duration'),
-                status: this.col(r, map, 'Status'),
-                week: this.col(r, map, 'Week'),
-            });
-        }
-        return out;
-    },
-
+    /**
+     * Load data from API endpoints
+     */
     async load() {
-        const protocol = window.location.protocol;
-
-        if (protocol === 'file:') {
+        // Skip if file protocol
+        if (window.location.protocol === 'file:') {
             console.warn('File protocol detected, cannot fetch data');
             appState.tickets = [];
             appState.tasks = [];
@@ -714,13 +742,13 @@ const DataLoader = {
         }
 
         try {
-            const [ticketRows, taskRows] = await Promise.all([
-                this.fetchCSV(CONFIG.API.tickets),
-                this.fetchCSV(CONFIG.API.tasks),
+            const [ticketRecords, taskRecords] = await Promise.all([
+                this.fetchJSON(CONFIG.API.tickets),
+                this.fetchJSON(CONFIG.API.tasks),
             ]);
 
-            const mappedTickets = this.mapTicketRows(ticketRows);
-            const mappedTasks = this.mapTaskRows(taskRows);
+            const mappedTickets = this.mapTicketRows(ticketRecords);
+            const mappedTasks = this.mapTaskRows(taskRecords);
 
             if (mappedTickets.length === 0 && mappedTasks.length === 0) {
                 throw new Error('Empty dataset from API');
@@ -749,6 +777,9 @@ const DataLoader = {
 
 const DataProcessor = {
 
+    /**
+     * Calculate KPI metrics from ticket data
+     */
     calculateKPIs(data) {
         const total = data.length;
         const closed = data.filter(r => r.status === 'Closed').length;
@@ -758,16 +789,16 @@ const DataProcessor = {
         const onSLA = data.filter(r => r.onSLA === 'Yes').length;
         const slaRate = total > 0 ? Math.round((onSLA / total) * 100) : 0;
 
-        const totalMinutes = data.reduce((acc, r) => {
-            if (!r.ht) return acc;
-            const parts = r.ht.split(':').map(Number);
-            return acc + parts[0] * 60 + parts[1] + (parts[2] || 0) / 60;
-        }, 0);
-        const aht = total > 0 ? totalMinutes / total : 0;
+        const htEntries = data.filter(r => r.ht);
+        const totalMinutes = htEntries.reduce((acc, r) => acc + Utils.Duration.parse(r.ht), 0);
+        const aht = htEntries.length > 0 ? totalMinutes / htEntries.length : 0;
 
         return { total, closed, issue, nonIssue, activeEsc, slaRate, aht };
     },
 
+    /**
+     * Calculate escalation statistics
+     */
     calculateEscalationStats(data) {
         const esc = data.filter(r => r.esc === 'Yes');
         const total = esc.length;
@@ -775,6 +806,7 @@ const DataProcessor = {
         const closed = esc.filter(r => r.status === 'Closed').length;
         const rate = data.length > 0 ? (total / data.length) * 100 : 0;
 
+        // By product
         const products = [...new Set(data.map(r => r.product))].sort();
         const byProduct = products
             .map(p => ({
@@ -785,26 +817,29 @@ const DataProcessor = {
             }))
             .filter(x => x.total > 0);
 
-        // By tier - dinamis dari data
+        // By tier
         const tierSet = [...new Set(data.map(r => r.tier))].filter(Boolean).sort();
+        const palette = ['#5b73ff', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b'];
         const byTier = tierSet
             .map((t, i) => ({
                 name: t,
                 label: t,
                 total: esc.filter(r => r.tier === t).length,
                 active: esc.filter(r => r.tier === t && r.status !== 'Closed').length,
-                color: CONFIG.CHART.colors[t] || ['#5b73ff', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b'][i % 5],
+                color: CONFIG.CHART.colors[t] || palette[i % palette.length],
             }))
             .filter(x => x.total > 0);
 
+        // By type
         const byType = [
             { name: t('issue'), key: 'Issue', total: esc.filter(r => r.type === 'Issue').length, active: esc.filter(r => r.type === 'Issue' && r.status !== 'Closed').length, color: CONFIG.CHART.colors.issue },
             { name: t('nonIssue'), key: 'Non Issue', total: esc.filter(r => r.type === 'Non Issue').length, active: esc.filter(r => r.type === 'Non Issue' && r.status !== 'Closed').length, color: CONFIG.CHART.colors.non },
         ].filter(x => x.total > 0);
 
+        // Active escalation rows
         const activeRows = active > 0 ? esc
             .filter(r => r.status !== 'Closed')
-            .map((r, idx) => {
+            .map((r) => {
                 const priColor = CONFIG.CHART.colors[r.priority] || CONFIG.CHART.colors.Low;
                 const prodColor = CONFIG.CHART.colors[r.product] || CONFIG.CHART.colors.Tier1;
                 const prodShort = r.product.replace('Sociomile ', 'SM ');
@@ -813,11 +848,8 @@ const DataProcessor = {
                 const clientShort = clientMatch ? clientMatch[1].trim() : clientFull;
                 const compMatch = clientFull.match(/\(([^)]+)\)/);
                 const company = compMatch ? compMatch[1] : '';
-                const [dd, mm] = r.date.split('/');
-                const ticketId = `ESC-${mm}${dd}-${String(idx + 1).padStart(2, '0')}`;
 
                 return {
-                    id: ticketId,
                     client: clientShort,
                     company,
                     problem: r.problem || '-',
@@ -825,15 +857,19 @@ const DataProcessor = {
                     productColor: prodColor,
                     priority: r.priority,
                     priorityColor: priColor,
-                    date: r.date,
-                    startTime: r.startTime || '',
+                    date: Utils.String.sanitizePlaceholderDate(r.date),
+                    startTime: Utils.String.sanitizePlaceholderDate(r.startTime),
                     shift: r.shift,
+                    escalatedTo: r.escalatedTo || '-',
                 };
             }) : [];
 
         return { total, active, closed, rate, byProduct, byTier, byType, activeRows };
     },
 
+    /**
+     * Calculate task metrics
+     */
     calculateTaskMetrics(data) {
         const total = data.length;
         const done = data.filter(t => t.status === 'Done').length;
@@ -843,6 +879,9 @@ const DataProcessor = {
         return { total, done, progress, totalMinutes, staffCount };
     },
 
+    /**
+     * Get previous period data for comparison
+     */
     getPreviousPeriodData(data, filters) {
         const { month, week, dateFrom, dateTo } = filters;
 
@@ -856,7 +895,7 @@ const DataProcessor = {
             if (to) to.setHours(23, 59, 59, 999);
 
             if (!from || !to) {
-                const dates = [...new Set(data.map(r => r.date))].map(Utils.Date.parseDate).sort((a, b) => a - b);
+                const dates = [...new Set(data.map(r => r.date))].map(Utils.Date.parseDate).filter(Boolean).sort((a, b) => a - b);
                 if (dates.length === 0) return [];
                 if (!from) from = dates[0];
                 if (!to) { to = new Date(dates[dates.length - 1]);
@@ -869,12 +908,12 @@ const DataProcessor = {
 
             return data.filter(r => {
                 const rd = Utils.Date.parseDate(r.date);
-                return rd >= prevFrom && rd <= prevTo;
+                return rd && rd >= prevFrom && rd <= prevTo;
             });
         }
 
         if (week !== 'all') {
-            const weeks = CONFIG.DATES.weeks;
+            const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'];
             const idx = weeks.indexOf(week);
             const prevWeek = idx > 0 ? weeks[idx - 1] : null;
             if (!prevWeek) return [];
@@ -888,6 +927,9 @@ const DataProcessor = {
         return data.filter(r => prevSet.has(r.date));
     },
 
+    /**
+     * Prepare priority distribution data
+     */
     preparePriorityData(data) {
         const labels = CONFIG.PRIORITIES;
         const values = labels.map(p => data.filter(r => r.priority === p).length);
@@ -895,21 +937,26 @@ const DataProcessor = {
         return { labels, values, colors };
     },
 
+    /**
+     * Prepare tier distribution data
+     */
     prepareTierData(data) {
         const tiers = [...new Set(data.map(r => r.tier))].filter(Boolean).sort();
-        
         if (tiers.length === 0) {
-            return { labels: [], issue: [], nonIssue: [], totals: [] };
+            return { labels: [], rawTiers: [], issue: [], nonIssue: [], totals: [] };
         }
 
-        const labels = tiers;
+        const labels = tiers.map(t => Utils.String.formatTier(t));
         const issue = tiers.map(t => data.filter(r => r.tier === t && r.type === 'Issue').length);
         const nonIssue = tiers.map(t => data.filter(r => r.tier === t && r.type === 'Non Issue').length);
         const totals = tiers.map(t => data.filter(r => r.tier === t).length);
-        
-        return { labels, issue, nonIssue, totals };
+
+        return { labels, rawTiers: tiers, issue, nonIssue, totals };
     },
 
+    /**
+     * Prepare product distribution data
+     */
     prepareProductData(data) {
         const products = [...new Set(data.map(r => r.product))].sort();
         const labels = products.map(p => p.replace('Sociomile ', 'SM '));
@@ -918,6 +965,9 @@ const DataProcessor = {
         return { labels, issue, nonIssue };
     },
 
+    /**
+     * Prepare feature distribution data
+     */
     prepareFeatureData(data) {
         const features = [...new Set(data.map(r => r.feature || 'Lainnya'))];
         const labels = features;
@@ -926,6 +976,9 @@ const DataProcessor = {
         return { labels, issue, nonIssue };
     },
 
+    /**
+     * Prepare staff workload data
+     */
     prepareStaffData(data) {
         const unassignedLabel = t('unassigned');
         const staffs = [...new Set(data.map(r => r.staff || unassignedLabel))].sort();
@@ -939,14 +992,15 @@ const DataProcessor = {
         };
     },
 
+    /**
+     * Prepare 7-day trend data
+     */
     prepareTrendData(data) {
         const allDates = [...new Set(data.map(r => r.date))].sort((a, b) => Utils.Date.parseDate(a) - Utils.Date.parseDate(b));
         const last7 = allDates.slice(-7);
         const days = t('days');
         const labels = last7.map(dt => {
-            // dt format: "01/01/2026"
             const [dd, mm, yy] = dt.split('/').map(Number);
-            // Ambil nama hari
             const dayName = days[new Date(yy, mm - 1, dd).getDay()];
             return `${dayName} ${dd}/${String(mm).padStart(2, '0')}`;
         });
@@ -955,8 +1009,11 @@ const DataProcessor = {
         return { labels, issue, nonIssue };
     },
 
+    /**
+     * Prepare shift distribution data
+     */
     prepareShiftData(data) {
-        const shifts = CONFIG.DATES.shifts;
+        const shifts = ['Pagi', 'Siang', 'Malam'];
         const labels = [t('morning'), t('day'), t('night')];
         const issue = shifts.map(s => data.filter(r => r.shift === s && r.type === 'Issue').length);
         const nonIssue = shifts.map(s => data.filter(r => r.shift === s && r.type === 'Non Issue').length);
@@ -964,31 +1021,35 @@ const DataProcessor = {
         return { labels, issue, nonIssue, totals };
     },
 
+    /**
+     * Get unique staff list from data
+     */
     getStaffList(data) {
         return [...new Set(data.map(r => r.staff).filter(Boolean))].sort();
     },
 
+    /**
+     * Calculate average response time
+     */
     calculateAverageResponseTime(data) {
         let totalSeconds = 0;
         let count = 0;
-        
+
         data.forEach(r => {
-            if (r.ht) {
-                const parts = r.ht.split(':').map(Number);
-                if (parts.length === 3) {
-                    totalSeconds += parts[0] * 3600 + parts[1] * 60 + parts[2];
-                    count++;
-                } else if (parts.length === 2) {
-                    totalSeconds += parts[0] * 60 + parts[1];
-                    count++;
-                }
-            }
+            const start = Utils.Duration.parseTimeToSeconds(r.startTime);
+            const solved = Utils.Duration.parseTimeToSeconds(r.solvedTime);
+            if (start === null || solved === null) return;
+
+            let diff = solved - start;
+            if (diff < 0) diff += 24 * 3600; // handle case crossing midnight
+            totalSeconds += diff;
+            count++;
         });
-        
+
         const avgSeconds = count > 0 ? totalSeconds / count : 0;
         const minutes = Math.floor(avgSeconds / 60);
         const seconds = Math.round(avgSeconds % 60);
-        
+
         return {
             avgSeconds: avgSeconds,
             formatted: minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`,
@@ -1004,25 +1065,30 @@ const DataProcessor = {
 
 const FilterEngine = {
 
+    /**
+     * Apply ticket filters to data
+     */
     applyTicketFilters(data, filters) {
         const { month, week, dateFrom, dateTo, product, tier, shift, staff } = filters;
 
         return data.filter(r => {
-            // Fix: Compare month correctly - both use full format like "[1] January 2026"
             if (month !== 'all' && r.month !== month) return false;
             if (week !== 'all' && r.week !== week) return false;
 
             if (dateFrom || dateTo) {
                 const rd = Utils.Date.parseDate(r.date);
-                const parseLocal = s => {
-                    const parts = s.split('-').map(Number);
-                    return new Date(parts[0], parts[1] - 1, parts[2]);
-                };
-                if (dateFrom && rd < parseLocal(dateFrom)) return false;
+                if (!rd) return false;
+                if (dateFrom) {
+                    const from = Utils.Date.parseDateInput(dateFrom);
+                    if (from && rd < from) return false;
+                }
                 if (dateTo) {
-                    const toEnd = parseLocal(dateTo);
-                    toEnd.setHours(23, 59, 59, 999);
-                    if (rd > toEnd) return false;
+                    const to = Utils.Date.parseDateInput(dateTo);
+                    if (to) {
+                        const toEnd = new Date(to);
+                        toEnd.setHours(23, 59, 59, 999);
+                        if (rd > toEnd) return false;
+                    }
                 }
             }
 
@@ -1035,6 +1101,9 @@ const FilterEngine = {
         });
     },
 
+    /**
+     * Apply task filters to data
+     */
     applyTaskFilters(data, filters) {
         const { month, week, dateFrom, dateTo } = filters;
 
@@ -1044,15 +1113,18 @@ const FilterEngine = {
 
             if (dateFrom || dateTo) {
                 const td = Utils.Date.taskDateOnly(t.start);
-                const parseLocal = s => {
-                    const parts = s.split('-').map(Number);
-                    return new Date(parts[0], parts[1] - 1, parts[2]);
-                };
-                if (dateFrom && td < parseLocal(dateFrom)) return false;
+                if (!td) return false;
+                if (dateFrom) {
+                    const from = Utils.Date.parseDateInput(dateFrom);
+                    if (from && td < from) return false;
+                }
                 if (dateTo) {
-                    const toEnd = parseLocal(dateTo);
-                    toEnd.setHours(23, 59, 59, 999);
-                    if (td > toEnd) return false;
+                    const to = Utils.Date.parseDateInput(dateTo);
+                    if (to) {
+                        const toEnd = new Date(to);
+                        toEnd.setHours(23, 59, 59, 999);
+                        if (td > toEnd) return false;
+                    }
                 }
             }
 
@@ -1060,6 +1132,9 @@ const FilterEngine = {
         });
     },
 
+    /**
+     * Get previous task data for comparison
+     */
     getPreviousTaskData(data, filters) {
         const { month, week, dateFrom, dateTo } = filters;
 
@@ -1091,7 +1166,7 @@ const FilterEngine = {
         }
 
         if (week !== 'all') {
-            const weeks = CONFIG.DATES.weeks;
+            const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'];
             const idx = weeks.indexOf(week);
             const prevWeek = idx > 0 ? weeks[idx - 1] : null;
             if (!prevWeek) return [];
@@ -1105,10 +1180,12 @@ const FilterEngine = {
         return data.filter(t => prevSet.has(t.start));
     },
 
+    /**
+     * Get human-readable filter summary
+     */
     getFilterSummary(filters) {
         const parts = [];
         if (filters.month !== 'all') {
-            // Tampilkan tanpa prefix [1], [2], [3]
             parts.push(filters.month.replace(/\[\d+\]\s*/, ''));
         }
         if (filters.week !== 'all') parts.push(filters.week);
@@ -1125,8 +1202,12 @@ const FilterEngine = {
 
 const ChartEngine = {
 
+    /** Chart instances cache */
     _charts: {},
 
+    /**
+     * Destroy chart by key
+     */
     destroy(key) {
         if (this._charts[key]) {
             this._charts[key].destroy();
@@ -1134,199 +1215,236 @@ const ChartEngine = {
         }
     },
 
+    /**
+     * Destroy all charts
+     */
     destroyAll() {
         Object.keys(this._charts).forEach(key => this.destroy(key));
     },
 
+    /**
+     * Create doughnut chart
+     */
     createDoughnut(canvasId, labels, data, colors, cutout = CONFIG.CHART.cutout) {
         this.destroy(canvasId);
         const ctx = document.getElementById(canvasId);
         if (!ctx) return null;
 
-        const chart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels,
-                datasets: [{
-                    data,
-                    backgroundColor: colors,
-                    borderWidth: 2,
-                    borderColor: getSurfaceColor(),
-                    hoverOffset: 6,
-                }],
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: (c) => {
-                                const total = data.reduce((a, b) => a + b, 0);
-                                const pct = total > 0 ? Math.round((c.parsed / total) * 100) : 0;
-                                return `${c.label}: ${c.parsed} (${pct}%)`;
+        try {
+            const chart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels,
+                    datasets: [{
+                        data,
+                        backgroundColor: colors,
+                        borderWidth: 2,
+                        borderColor: getSurfaceColor(),
+                        hoverOffset: 6,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (c) => {
+                                    const total = data.reduce((a, b) => a + b, 0);
+                                    const pct = total > 0 ? Math.round((c.parsed / total) * 100) : 0;
+                                    return `${c.label}: ${c.parsed} (${pct}%)`;
+                                }
                             }
                         }
                     }
-                }
-            },
-            plugins: [this._plugins.doughnutCenter],
-        });
+                },
+                plugins: [this._plugins.doughnutCenter],
+            });
 
-        this._charts[canvasId] = chart;
-        return chart;
+            this._charts[canvasId] = chart;
+            return chart;
+        } catch (e) {
+            console.warn(`Failed to create doughnut chart ${canvasId}:`, e);
+            return null;
+        }
     },
 
+    /**
+     * Create stacked bar chart
+     */
     createStackedBar(canvasId, labels, datasets, isHorizontal = false) {
         this.destroy(canvasId);
         const ctx = document.getElementById(canvasId);
         if (!ctx) return null;
 
-        const datasetConfigs = datasets.map(ds => ({
-            label: ds.label,
-            data: ds.data,
-            backgroundColor: ds.color ? Utils.Color.toRGBA(ds.color, 0.85) : 'rgba(91,115,255,0.85)',
-            borderRadius: CONFIG.CHART.borderRadius,
-            borderSkipped: false,
-        }));
+        try {
+            const datasetConfigs = datasets.map(ds => ({
+                label: ds.label,
+                data: ds.data,
+                backgroundColor: ds.color ? Utils.Color.toRGBA(ds.color, 0.85) : 'rgba(91,115,255,0.85)',
+                borderRadius: CONFIG.CHART.borderRadius,
+                borderSkipped: false,
+            }));
 
-        const chart = new Chart(ctx, {
-            type: 'bar',
-            data: { labels, datasets: datasetConfigs },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                indexAxis: isHorizontal ? 'y' : 'x',
-                plugins: {
-                    legend: {
-                        labels: { color: getTickColor(), boxWidth: 10, font: CONFIG.CHART.font },
+            const chart = new Chart(ctx, {
+                type: 'bar',
+                data: { labels, datasets: datasetConfigs },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: isHorizontal ? 'y' : 'x',
+                    plugins: {
+                        legend: {
+                            labels: { color: getTickColor(), boxWidth: 10, font: { size: 11, family: 'Inter' } },
+                        },
+                        tooltip: { mode: 'index', intersect: false },
                     },
-                    tooltip: { mode: 'index', intersect: false },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            grid: { color: getGridColor() },
+                            ticks: { color: getTickColor(), font: { size: 11, family: 'Inter' } },
+                        },
+                        y: {
+                            stacked: true,
+                            grid: { color: getGridColor() },
+                            ticks: { color: getTickColor(), font: { size: 11, family: 'Inter' } },
+                        },
+                    },
                 },
-                scales: {
-                    x: {
-                        stacked: true,
-                        grid: { color: getGridColor() },
-                        ticks: { color: getTickColor(), font: CONFIG.CHART.font },
-                    },
-                    y: {
-                        stacked: true,
-                        grid: { color: getGridColor() },
-                        ticks: { color: getTickColor(), font: CONFIG.CHART.font },
-                    },
-                },
-            },
-            plugins: isHorizontal ? [this._plugins.horizontalEnd] : [this._plugins.stackTop],
-        });
+                plugins: isHorizontal ? [this._plugins.horizontalEnd] : [this._plugins.stackTop],
+            });
 
-        this._charts[canvasId] = chart;
-        return chart;
+            this._charts[canvasId] = chart;
+            return chart;
+        } catch (e) {
+            console.warn(`Failed to create stacked bar chart ${canvasId}:`, e);
+            return null;
+        }
     },
 
+    /**
+     * Create single bar chart
+     */
     createSingleBar(canvasId, labels, data, colors) {
         this.destroy(canvasId);
         const ctx = document.getElementById(canvasId);
         if (!ctx) return null;
 
-        const palette = ['#5b73ff', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#fb923c', '#f43f5e'];
-        const bgColors = data.map((_, i) => Utils.Color.toRGBA(palette[i % palette.length], 0.85));
+        try {
+            const palette = ['#5b73ff', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#fb923c', '#f43f5e'];
+            const bgColors = data.map((_, i) => Utils.Color.toRGBA(palette[i % palette.length], 0.85));
 
-        const chart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels,
-                datasets: [{
-                    label: t('totalTickets'),
-                    data,
-                    backgroundColor: bgColors,
-                    borderRadius: CONFIG.CHART.borderRadius,
-                    borderSkipped: false,
-                }],
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                indexAxis: 'y',
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { mode: 'index', intersect: false },
+            const chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: t('totalTickets'),
+                        data,
+                        backgroundColor: bgColors,
+                        borderRadius: CONFIG.CHART.borderRadius,
+                        borderSkipped: false,
+                    }],
                 },
-                scales: {
-                    x: {
-                        grid: { color: getGridColor() },
-                        ticks: { color: getTickColor(), font: CONFIG.CHART.font },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { mode: 'index', intersect: false },
                     },
-                    y: {
-                        grid: { color: getGridColor() },
-                        ticks: { color: getTickColor(), font: CONFIG.CHART.font },
+                    scales: {
+                        x: {
+                            grid: { color: getGridColor() },
+                            ticks: { color: getTickColor(), font: { size: 11, family: 'Inter' } },
+                        },
+                        y: {
+                            grid: { color: getGridColor() },
+                            ticks: { color: getTickColor(), font: { size: 11, family: 'Inter' } },
+                        },
                     },
                 },
-            },
-            plugins: [this._plugins.singleBarLabel],
-        });
+                plugins: [this._plugins.singleBarLabel],
+            });
 
-        this._charts[canvasId] = chart;
-        return chart;
+            this._charts[canvasId] = chart;
+            return chart;
+        } catch (e) {
+            console.warn(`Failed to create single bar chart ${canvasId}:`, e);
+            return null;
+        }
     },
 
+    /**
+     * Create line chart
+     */
     createLine(canvasId, labels, datasets) {
         this.destroy(canvasId);
         const ctx = document.getElementById(canvasId);
         if (!ctx) return null;
 
-        const datasetConfigs = datasets.map(ds => ({
-            label: ds.label,
-            data: ds.data,
-            borderColor: ds.color,
-            backgroundColor: Utils.Color.toRGBA(ds.color, 0.08),
-            tension: CONFIG.CHART.tension,
-            fill: true,
-            pointRadius: 5,
-            pointHoverRadius: 8,
-            pointBackgroundColor: ds.color,
-            borderWidth: 2,
-        }));
+        try {
+            const datasetConfigs = datasets.map(ds => ({
+                label: ds.label,
+                data: ds.data,
+                borderColor: ds.color,
+                backgroundColor: Utils.Color.toRGBA(ds.color, 0.08),
+                tension: CONFIG.CHART.tension,
+                fill: true,
+                pointRadius: 5,
+                pointHoverRadius: 8,
+                pointBackgroundColor: ds.color,
+                borderWidth: 2,
+            }));
 
-        const chart = new Chart(ctx, {
-            type: 'line',
-            data: { labels, datasets: datasetConfigs },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: { intersect: false, mode: 'index' },
-                plugins: {
-                    legend: {
-                        labels: { color: getTickColor(), boxWidth: 10, font: CONFIG.CHART.font, padding: 14 },
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets: datasetConfigs },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { intersect: false, mode: 'index' },
+                    plugins: {
+                        legend: {
+                            labels: { color: getTickColor(), boxWidth: 10, font: { size: 11, family: 'Inter' }, padding: 14 },
+                        },
+                        tooltip: {
+                            callbacks: {
+                                footer: (items) => `Total: ${items.reduce((a, i) => a + i.parsed.y, 0)}`,
+                            },
+                        },
                     },
-                    tooltip: {
-                        callbacks: {
-                            footer: (items) => `Total: ${items.reduce((a, i) => a + i.parsed.y, 0)}`,
+                    scales: {
+                        x: {
+                            grid: { color: getGridColor() },
+                            ticks: { color: getTickColor(), font: { size: 11, family: 'Inter' } },
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: getGridColor() },
+                            ticks: { color: getTickColor(), font: { size: 11, family: 'Inter' }, stepSize: 2 },
                         },
                     },
                 },
-                scales: {
-                    x: {
-                        grid: { color: getGridColor() },
-                        ticks: { color: getTickColor(), font: CONFIG.CHART.font },
-                    },
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: getGridColor() },
-                        ticks: { color: getTickColor(), font: CONFIG.CHART.font, stepSize: 2 },
-                    },
-                },
-            },
-            plugins: [this._plugins.lineLabel],
-        });
+                plugins: [this._plugins.lineLabel],
+            });
 
-        this._charts[canvasId] = chart;
-        return chart;
+            this._charts[canvasId] = chart;
+            return chart;
+        } catch (e) {
+            console.warn(`Failed to create line chart ${canvasId}:`, e);
+            return null;
+        }
     },
 
+    /** Chart plugins */
     _plugins: {
 
+        /** Center label for doughnut charts */
         doughnutCenter: {
             id: 'doughnutCenter',
             afterDraw(chart) {
@@ -1373,6 +1491,7 @@ const ChartEngine = {
             }
         },
 
+        /** Top label for stacked bars */
         stackTop: {
             id: 'stackTop',
             afterDatasetsDraw(chart) {
@@ -1422,6 +1541,7 @@ const ChartEngine = {
             }
         },
 
+        /** End label for horizontal bars */
         horizontalEnd: {
             id: 'horizontalEnd',
             afterDatasetsDraw(chart) {
@@ -1471,6 +1591,7 @@ const ChartEngine = {
             }
         },
 
+        /** Label for single bar charts */
         singleBarLabel: {
             id: 'singleBarLabel',
             afterDatasetsDraw(chart) {
@@ -1490,6 +1611,7 @@ const ChartEngine = {
             }
         },
 
+        /** Label for line charts */
         lineLabel: {
             id: 'lineLabel',
             afterDatasetsDraw(chart) {
@@ -1513,6 +1635,9 @@ const ChartEngine = {
         },
     },
 
+    /**
+     * Update chart data
+     */
     update(canvasId, newData) {
         const chart = this._charts[canvasId];
         if (!chart) return false;
@@ -1534,6 +1659,9 @@ const ChartEngine = {
 
 const UIRenderer = {
 
+    /**
+     * Render KPI cards
+     */
     renderKPI(data, prevData, filterSummary) {
         const grid = document.getElementById('kpiGrid');
         if (!grid) return;
@@ -1543,10 +1671,7 @@ const UIRenderer = {
         const prevLabel = this._getPrevLabel();
         const hasPrev = prev !== null;
 
-        // Hitung Average Response Time
-        const avgResp = DataProcessor.calculateAverageResponseTime(data);
-        const prevAvgResp = prevData ? DataProcessor.calculateAverageResponseTime(prevData) : null;
-        const hasPrevResp = prevAvgResp !== null && prevAvgResp.count > 0;
+        // ART (Average Response Time) belum tersedia datanya di sheet — sengaja dikosongkan
 
         const ahtStr = (v) => v < 60 ? `${v.toFixed(1)}m` : `${(v / 60).toFixed(1)}h`;
 
@@ -1594,18 +1719,18 @@ const UIRenderer = {
                 delta: hasPrev ? this._deltaAHT(cur.aht, prev.aht) : null,
             },
             {
+                id: 'avgResponseTime',
+                value: '-',
+                color: '#06b6d4',
+                sub: t('subART'),
+                delta: null,
+            },
+            {
                 id: 'sla',
                 value: `${cur.slaRate}%`,
                 color: '#10b981',
                 sub: t('subSLA'),
                 delta: hasPrev ? this._deltaTag(cur.slaRate, prev.slaRate, false) : null,
-            },
-            {
-                id: 'avgResponseTime',
-                value: avgResp.count > 0 ? `${avgResp.formatted}` : '0s',
-                color: '#8b5cf6',
-                sub: t('subAHT'), // Gunakan subtitle yang sama dengan AHT
-                delta: hasPrevResp ? this._deltaRespTime(avgResp.avgSeconds, prevAvgResp.avgSeconds) : null,
             },
         ];
 
@@ -1622,6 +1747,9 @@ const UIRenderer = {
         `).join('');
     },
 
+    /**
+     * Render escalation panel
+     */
     renderEscalation(data) {
         const panel = document.getElementById('escalationPanel');
         if (!panel) return;
@@ -1705,7 +1833,6 @@ const UIRenderer = {
         if (stats.active > 0) {
             const rows = stats.activeRows.map(r => `
                 <tr>
-                    <td><div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--accent)">${r.id}</div></td>
                     <td>
                         <div class="esc-client">${r.client}</div>
                         ${r.company ? `<div class="esc-client-full">${r.company}</div>` : ''}
@@ -1713,8 +1840,8 @@ const UIRenderer = {
                     <td><div class="esc-problem">${r.problem}</div></td>
                     <td><span class="esc-prod-badge" style="background:${Utils.Color.toRGBA(r.productColor, 0.15)};color:${r.productColor}">${r.product}</span></td>
                     <td><span class="esc-pri-badge" style="background:${Utils.Color.toRGBA(r.priorityColor, 0.2)};color:${r.priorityColor}">${r.priority}</span></td>
-                    <td><div class="esc-date">${r.date}</div><div style="font-size:10px;color:var(--text-muted)">${r.startTime}</div></td>
-                    <td><span style="font-size:11px;padding:2px 7px;border-radius:4px;background:var(--surface-3);color:var(--text-sec)">${r.shift}</span></td>
+                    <td><div class="esc-date">${r.date}</div>${r.startTime ? `<div style="font-size:10px;color:var(--text-muted)">${r.startTime}</div>` : ''}</td>
+                    <td><span style="font-size:11px;padding:2px 7px;border-radius:4px;background:var(--surface-3);color:var(--text-sec)">${r.escalatedTo}</span></td>
                 </tr>
             `).join('');
 
@@ -1725,13 +1852,12 @@ const UIRenderer = {
                         <table class="esc-table">
                             <thead>
                                 <tr>
-                                    <th>ID</th>
-                                    <th>${t('thStaff')}</th>
+                                    <th>${t('thClient')}</th>
                                     <th>${t('thTask')}</th>
                                     <th>${t('thTag')}</th>
                                     <th>${t('thStatus')}</th>
                                     <th>${t('thDate')}</th>
-                                    <th>${t('thDuration')}</th>
+                                    <th>${t('thEscalatedto')}</th>
                                 </tr>
                             </thead>
                             <tbody>${rows}</tbody>
@@ -1744,6 +1870,9 @@ const UIRenderer = {
         panel.innerHTML = html;
     },
 
+    /**
+     * Render all charts
+     */
     renderCharts(data) {
         this._renderPriorityChart(data);
         this._renderTierChart(data);
@@ -1754,6 +1883,7 @@ const UIRenderer = {
         this._renderShiftChart(data);
     },
 
+    /** Render priority distribution chart */
     _renderPriorityChart(data) {
         const chartData = DataProcessor.preparePriorityData(data);
         const chart = ChartEngine.createDoughnut(
@@ -1774,8 +1904,11 @@ const UIRenderer = {
         }
     },
 
+    /** Render tier distribution chart */
     _renderTierChart(data) {
         const chartData = DataProcessor.prepareTierData(data);
+        if (chartData.labels.length === 0) return;
+
         ChartEngine.createStackedBar(
             'chartTier',
             chartData.labels,
@@ -1785,22 +1918,24 @@ const UIRenderer = {
             ]
         );
 
-        // Di _renderTierChart, ganti legend menjadi:
         const legend = document.getElementById('legendTier');
         if (legend) {
             legend.innerHTML = `
-                <div class="legend-item"><div class="legend-dot" style="background:${CONFIG.CHART.colors.issue}"></div>${t('issue')}</div>
                 <div class="legend-item"><div class="legend-dot" style="background:${CONFIG.CHART.colors.non}"></div>${t('nonIssue')}</div>
-                ${chartData.labels.map((tier, i) => {
-                    const color = CONFIG.CHART.colors[tier] || ['#5b73ff', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b'][i % 5];
-                    return `<div class="legend-item"><div class="legend-dot" style="background:${color}"></div>${tier} <strong>${chartData.totals[i]}</strong></div>`;
+                <div class="legend-item"><div class="legend-dot" style="background:${CONFIG.CHART.colors.issue}"></div>${t('issue')}</div>
+                ${chartData.labels.map((label, i) => {
+                    const rawTier = chartData.rawTiers[i];
+                    const color = CONFIG.CHART.colors[rawTier] || ['#5b73ff', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b'][i % 5];
+                    return `<div class="legend-item"><div class="legend-dot" style="background:${color}"></div>${label} <strong>${chartData.totals[i]}</strong></div>`;
                 }).join('')}
             `;
         }
     },
 
+    /** Render product distribution chart */
     _renderProductChart(data) {
         const chartData = DataProcessor.prepareProductData(data);
+        if (chartData.labels.length === 0) return;
         ChartEngine.createStackedBar(
             'chartProduct',
             chartData.labels,
@@ -1812,8 +1947,10 @@ const UIRenderer = {
         );
     },
 
+    /** Render feature distribution chart */
     _renderFeatureChart(data) {
         const chartData = DataProcessor.prepareFeatureData(data);
+        if (chartData.labels.length === 0) return;
         ChartEngine.createStackedBar(
             'chartFeature',
             chartData.labels,
@@ -1824,6 +1961,7 @@ const UIRenderer = {
         );
     },
 
+    /** Render staff workload chart */
     _renderStaffChart(data) {
         const chartData = DataProcessor.prepareStaffData(data);
         if (chartData.labels.length === 0) {
@@ -1834,22 +1972,22 @@ const UIRenderer = {
         ChartEngine.createSingleBar('chartTicketStaff', chartData.labels, chartData.values);
     },
 
+    /** Render trend chart */
     _renderTrendChart(data) {
         const chartData = DataProcessor.prepareTrendData(data);
+        if (chartData.labels.length === 0) return;
         
-        // Format label menjadi dd/mm
         const labels = chartData.labels.map(label => {
-            // label format: "Min 01/01" -> ambil tanggalnya
             const parts = label.split(' ');
             return parts.length > 1 ? parts[1] : label;
         });
         
         ChartEngine.createLine(
             'chartTrend',
-            labels, // Gunakan labels yang sudah diformat
+            labels,
             [
-                { label: t('issue'), data: chartData.issue, color: CONFIG.CHART.colors.issue },
                 { label: t('nonIssue'), data: chartData.nonIssue, color: CONFIG.CHART.colors.non },
+                { label: t('issue'), data: chartData.issue, color: CONFIG.CHART.colors.issue },
             ]
         );
 
@@ -1876,56 +2014,52 @@ const UIRenderer = {
         }
     },
 
+    /** Render shift distribution chart */
     _renderShiftChart(data) {
-        // Get unique shifts from data
-        const shifts = [...new Set(data.map(r => r.shift))].filter(Boolean).sort();
-        
-        // If no data, show empty
+        const canonicalShifts = ['Pagi', 'Siang', 'Malam'];
+        const shifts = canonicalShifts.filter(s => data.some(r => r.shift === s));
+
         if (shifts.length === 0 || data.length === 0) {
             const container = document.getElementById('chartShift')?.parentElement;
             if (container) container.innerHTML = `<div class="task-empty">${t('noData')}</div>`;
             return;
         }
 
-        // Prepare data for chart
-        const issue = shifts.map(s => data.filter(r => r.shift === s && r.type === 'Issue').length);
         const nonIssue = shifts.map(s => data.filter(r => r.shift === s && r.type === 'Non Issue').length);
+        const issue = shifts.map(s => data.filter(r => r.shift === s && r.type === 'Issue').length);
         const totals = shifts.map(s => data.filter(r => r.shift === s).length);
 
-        // Colors for shifts (dynamic)
-        const shiftColors = {};
-        const palette = ['#f59e0b', '#5b73ff', '#8b5cf6', '#10b981', '#f43f5e', '#06b6d4', '#fb923c'];
-        shifts.forEach((shift, i) => {
-            shiftColors[shift] = palette[i % palette.length];
-        });
+        const shiftLabelMap = { Pagi: t('morning'), Siang: t('day'), Malam: t('night') };
+        const labels = shifts.map(s => shiftLabelMap[s] || s);
 
-        // Update chart subtitle with actual shifts
         const subtitleEl = document.getElementById('chartShiftSub');
         if (subtitleEl) {
-            subtitleEl.textContent = shifts.join(' · ');
+            subtitleEl.textContent = labels.join(' · ');
         }
 
         ChartEngine.createStackedBar(
             'chartShift',
-            shifts, // labels from data
+            labels,
             [
                 { label: t('issue'), data: issue, color: CONFIG.CHART.colors.issue },
                 { label: t('nonIssue'), data: nonIssue, color: CONFIG.CHART.colors.non },
             ]
         );
 
-        // Legend with dynamic shifts
         const legend = document.getElementById('legendShift');
         if (legend) {
             legend.innerHTML = shifts.map((shift, i) => `
                 <div class="legend-item">
-                    <div class="legend-dot" style="background:${shiftColors[shift]}"></div>
-                    ${shift} <strong style="color:${shiftColors[shift]}">${totals[i]}</strong>
+                    <div class="legend-dot" style="background:${CONFIG.CHART.colors[shift]}"></div>
+                    ${labels[i]} <strong style="color:${CONFIG.CHART.colors[shift]}">${totals[i]}</strong>
                 </div>
             `).join('');
         }
     },
 
+    /**
+     * Render task section
+     */
     renderTaskSection(tasks, filters) {
         const filtered = FilterEngine.applyTaskFilters(tasks, filters);
         const prevData = FilterEngine.getPreviousTaskData(tasks, filters);
@@ -1934,13 +2068,12 @@ const UIRenderer = {
 
         const metrics = DataProcessor.calculateTaskMetrics(filtered);
         const completionRate = metrics.total > 0 ? Math.round((metrics.done / metrics.total) * 100) : 0;
-        const totalHours = (metrics.totalMinutes / 60).toFixed(1);
 
         const taskStats = [
             { id: 'totalTasks', value: metrics.total, color: '#5b73ff', sub: t('totalTasks') },
             { id: 'done', value: metrics.done, color: '#10b981', sub: `${completionRate}% ${t('completed')}` },
             { id: 'progress', value: metrics.progress, color: '#f59e0b', sub: t('inProgress') },
-            { id: 'totalWorkHours', value: `${totalHours}h`, color: '#8b5cf6', sub: `${metrics.staffCount} ${t('activeStaff')}` },
+            { id: 'totalWorkHours', value: Utils.Duration.formatHMS(metrics.totalMinutes), color: '#8b5cf6', sub: `${metrics.staffCount} ${t('activeStaff')}` },
         ];
 
         const grid = document.getElementById('taskKpiGrid');
@@ -1994,6 +2127,7 @@ const UIRenderer = {
         this.renderTaskTable(filtered);
     },
 
+    /** Prepare task staff data */
     _prepareTaskStaffData(data) {
         const staffs = [...new Set(data.map(t => t.staff))].sort();
         const counts = staffs.map(s => data.filter(t => t.staff === s).length);
@@ -2006,6 +2140,7 @@ const UIRenderer = {
         };
     },
 
+    /** Populate task filters */
     _populateTaskFilters(data) {
         const staffs = [...new Set(data.map(t => t.staff))].sort();
 
@@ -2036,6 +2171,9 @@ const UIRenderer = {
         }
     },
 
+    /**
+     * Render task table with pagination
+     */
     renderTaskTable(data) {
         const search = appState.ui.taskSearch || '';
         const staffFilter = appState.ui.taskFilterStaff || 'all';
@@ -2078,7 +2216,7 @@ const UIRenderer = {
                 <td><div class="task-staff-cell"><div class="task-avatar">${initials}</div><span>${staffShort}</span></div></td>
                 <td><div class="task-name">${t.task}</div></td>
                 <td>${tagHtml}</td>
-                <td><div class="task-duration">${t.duration}</div></td>
+                <td><div class="task-duration">${Utils.Duration.formatHMS(Utils.Duration.parse(t.duration))}</div></td>
                 <td><span class="task-status-badge" style="background:${Utils.Color.toRGBA(statusColor, 0.18)};color:${statusColor}">${t.status}</span></td>
                 <td><div class="task-date">${Utils.Date.formatTaskDate(t.start)}</div></td>
             </tr>`;
@@ -2087,6 +2225,7 @@ const UIRenderer = {
         this._renderPagination(filtered.length, totalPages);
     },
 
+    /** Render pagination controls */
     _renderPagination(totalItems, totalPages) {
         const el = document.getElementById('taskPagination');
         if (!el) return;
@@ -2144,6 +2283,9 @@ const UIRenderer = {
         });
     },
 
+    /**
+     * Update sync status indicator
+     */
     updateSyncStatus(status, timestamp) {
         const dot = document.getElementById('syncDot');
         const label = document.getElementById('syncLabel');
@@ -2171,6 +2313,7 @@ const UIRenderer = {
         }
     },
 
+    /** Generate delta tag for KPI comparison */
     _deltaTag(cur, prev, invertGood = false) {
         if (prev === 0 && cur === 0) return `<span class="kpi-delta neutral">→ 0</span>`;
         if (prev === 0) {
@@ -2188,6 +2331,7 @@ const UIRenderer = {
         return `<span class="kpi-delta ${cls}">↓ −${pct}%</span>`;
     },
 
+    /** Generate delta tag for AHT comparison */
     _deltaAHT(cur, prev) {
         if (prev === 0 && cur === 0) return `<span class="kpi-delta neutral">→ 0%</span>`;
         if (prev === 0) return '';
@@ -2198,6 +2342,7 @@ const UIRenderer = {
         return `<span class="kpi-delta up-good">↓ −${pct}%</span>`;
     },
 
+    /** Get previous period label */
     _getPrevLabel() {
         const { week, dateFrom, dateTo } = appState.filters;
         if (dateFrom || dateTo) return t('vsPrevPeriod');
@@ -2205,157 +2350,56 @@ const UIRenderer = {
         return t('vsPrevHalf');
     },
 
-    /** Populate dynamic filters from data */
+    /**
+     * Populate all dynamic filters from data
+     */
     populateDynamicFilters(tickets, tasks) {
-        console.log('🔄 Populating dynamic filters...');
-        console.log('Tickets count:', tickets.length);
-        console.log('Tasks count:', tasks.length);
-
-        this._populateMonthFilter(tickets);
-        this._populateWeekFilter(tickets);
-        this._populateProductFilter(tickets);
-        this._populateTierFilter(tickets);
-        this._populateShiftFilter(tickets);
-        this._populateStaffFilter(tickets);
+        // Bulan: urut kronologis kalender (Januari → Desember), bukan alfabetis
+        this._populateFilter('filterMonth', tickets, 'month', 'allMonths', (v) => v.replace(/\[\d+\]\s*/, ''), (a, b) => {
+            const na = this._MONTH_ORDER[a.label.trim().toLowerCase()] ?? 999;
+            const nb = this._MONTH_ORDER[b.label.trim().toLowerCase()] ?? 999;
+            if (na !== nb) return na - nb;
+            return a.label.localeCompare(b.label, 'en', { sensitivity: 'base' }); // fallback kalau nama bulan tak dikenali
+        });
+        this._populateFilter('filterWeek', tickets, 'week', 'allWeeks');
+        this._populateFilter('filterProduct', tickets, 'product', 'allProducts');
+        this._populateFilter('filterTier', tickets, 'tier', 'allTiers', (v) => Utils.String.formatTier(v));
+        this._populateShiftFilter();
+        this._populateFilter('filterStaff', tickets, 'staff', 'allStaff');
         this._populateTaskStaffFilter(tasks);
-
-        console.log('✅ Dynamic filters populated');
     },
 
-    /** Populate month filter from ticket data */
-    _populateMonthFilter(tickets) {
-        const select = document.getElementById('filterMonth');
-        if (!select) {
-            console.warn('❌ filterMonth element not found');
-            return;
-        }
-
-        console.log('📊 Total tickets for month filter:', tickets.length);
-
-        // Ambil month dari data, filter yang kosong
-        const months = [...new Set(tickets.map(r => r.month))].filter(Boolean);
-        console.log('📅 Months found:', months);
-
-        // Jika tidak ada month, coba cek data pertama
-        if (months.length === 0) {
-            console.warn('⚠️ No months found!');
-            if (tickets.length > 0) {
-                console.log('Sample ticket:', tickets[0]);
-                console.log('Sample ticket keys:', Object.keys(tickets[0]));
-            }
-            return;
-        }
-
-        // Urutkan bulan berdasarkan format [1], [2], [3]
-        months.sort(function(a, b) {
-            var numA = parseInt(a.match(/\[(\d+)\]/)?.[1] || 0);
-            var numB = parseInt(b.match(/\[(\d+)\]/)?.[1] || 0);
-            return numA - numB;
-        });
-
-        const currentVal = select.value;
-
-        // Reset select, hanya sisakan option "Semua Bulan"
-        select.innerHTML = '<option value="all">' + t('allMonths') + '</option>';
-
-        // Tambahkan setiap bulan sebagai option
-        months.forEach(function(month) {
-            const opt = document.createElement('option');
-            opt.value = month; // Value tetap "[1] January 2026"
-            // Tampilkan tanpa prefix [1]
-            var display = month.replace(/\[\d+\]\s*/, '');
-            opt.textContent = display;
-            select.appendChild(opt);
-            console.log('➕ Added month option:', month, '→ display:', display);
-        });
-
-        // Kembalikan ke nilai sebelumnya jika masih ada
-        if (Array.from(select.options).some(function(o) { return o.value === currentVal; })) {
-            select.value = currentVal;
-        }
-
-        console.log('✅ Month filter populated with', months.length, 'months');
-
-        // Jika months masih kosong, coba hardcode dulu untuk test
-        if (months.length === 0) {
-            console.warn('⚠️ No months found in data, using fallback');
-            // Coba ambil dari data mentah
-            const rawMonths = tickets.map(function(r) { return r.month; });
-            console.log('Raw months:', rawMonths.slice(0, 10));
-            
-            // Jika benar-benar kosong, tambahkan manual
-            if (rawMonths.every(function(m) { return !m; })) {
-                console.error('❌ All months are empty! Check data mapping.');
-                return;
-            }
-        }
+    /** Peta nama bulan (EN & ID) ke nomor urut kalender, untuk sorting kronologis */
+    _MONTH_ORDER: {
+        january: 1, februari: 2, february: 2, march: 3, maret: 3, april: 4,
+        may: 5, mei: 5, june: 6, juni: 6, july: 7, juli: 7, august: 8, agustus: 8,
+        september: 9, october: 10, oktober: 10, november: 11, december: 12, desember: 12,
     },
 
-    /** Populate week filter from ticket data */
-    _populateWeekFilter(tickets) {
-        const select = document.getElementById('filterWeek');
-        if (!select) {
-            console.warn('❌ filterWeek element not found');
-            return;
-        }
-
-        console.log('📊 Total tickets for week filter:', tickets.length);
-
-        // Ambil week dari data, filter yang kosong
-        const weeks = [...new Set(tickets.map(r => r.week))].filter(Boolean);
-        console.log('📅 Weeks found:', weeks);
-
-        if (weeks.length === 0) {
-            console.warn('⚠️ No weeks found!');
-            if (tickets.length > 0) {
-                console.log('Sample ticket:', tickets[0]);
-            }
-            return;
-        }
-
-        // Urutkan week (Week 1, Week 2, dst)
-        weeks.sort(function(a, b) {
-            var numA = parseInt(a.match(/\d+/)?.[0] || 0);
-            var numB = parseInt(b.match(/\d+/)?.[0] || 0);
-            return numA - numB;
-        });
-
-        const currentVal = select.value;
-
-        // Reset select, hanya sisakan option "Semua Minggu"
-        select.innerHTML = '<option value="all">' + t('allWeeks') + '</option>';
-
-        // Tambahkan setiap minggu sebagai option
-        weeks.forEach(function(week) {
-            const opt = document.createElement('option');
-            opt.value = week;
-            opt.textContent = week;
-            select.appendChild(opt);
-            console.log('➕ Added week option:', week);
-        });
-
-        // Kembalikan ke nilai sebelumnya jika masih ada
-        if (Array.from(select.options).some(function(o) { return o.value === currentVal; })) {
-            select.value = currentVal;
-        }
-
-        console.log('✅ Week filter populated with', weeks.length, 'weeks');
-    },
-
-    /** Populate product filter from ticket data */
-    _populateProductFilter(tickets) {
-        const select = document.getElementById('filterProduct');
+    /** Generic filter population. sortFn opsional: (a, b) comparator custom; default alfabetis. */
+    _populateFilter(selectId, data, key, allLabelKey, formatFn, sortFn) {
+        const select = document.getElementById(selectId);
         if (!select) return;
 
-        const products = [...new Set(tickets.map(r => r.product))].filter(Boolean).sort();
         const currentVal = select.value;
+        const rawValues = [...new Set(data.map(r => r[key]))].filter(Boolean);
 
-        select.innerHTML = '<option value="all">' + t('allProducts') + '</option>';
+        // Default: urutkan berdasarkan label yang ditampilkan (abjad), bukan raw value —
+        // supaya prefix tersembunyi di sheet (mis. "[01] January") tidak
+        // mengubah urutan alfabetis yang dilihat user. Trim + base sensitivity
+        // supaya variasi spasi/huruf besar-kecil di data sheet tidak merusak urutan.
+        const defaultSort = (a, b) => a.label.localeCompare(b.label, 'en', { sensitivity: 'base' });
 
-        products.forEach(product => {
+        const options = rawValues
+            .map(val => ({ val, label: (formatFn ? formatFn(val) : val).trim() }))
+            .sort(sortFn || defaultSort);
+
+        select.innerHTML = `<option value="all">${t(allLabelKey)}</option>`;
+
+        options.forEach(({ val, label }) => {
             const opt = document.createElement('option');
-            opt.value = product;
-            opt.textContent = product;
+            opt.value = val;
+            opt.textContent = label;
             select.appendChild(opt);
         });
 
@@ -2364,47 +2408,23 @@ const UIRenderer = {
         }
     },
 
-    /** Populate tier filter from ticket data (dari ClientCategory) */
-    _populateTierFilter(tickets) {
-        const select = document.getElementById('filterTier');
-        if (!select) return;
-
-        const tiers = [...new Set(tickets.map(r => r.tier))].filter(Boolean).sort();
-        const currentVal = select.value;
-
-        console.log('📊 Tiers found from data:', tiers);
-
-        select.innerHTML = '<option value="all">' + t('allTiers') + '</option>';
-
-        tiers.forEach(tier => {
-            const opt = document.createElement('option');
-            opt.value = tier;
-            opt.textContent = tier;
-            select.appendChild(opt);
-            console.log('➕ Added tier option:', tier);
-        });
-
-        if (Array.from(select.options).some(o => o.value === currentVal)) {
-            select.value = currentVal;
-        }
-
-        console.log('✅ Tier filter populated with', tiers.length, 'tiers');
-    },
-
-    /** Populate shift filter from ticket data */
-    _populateShiftFilter(tickets) {
+    /** Populate shift filter with the 3 canonical shifts only (Pagi/Siang/Malam) */
+    _populateShiftFilter() {
         const select = document.getElementById('filterShift');
         if (!select) return;
 
-        const shifts = [...new Set(tickets.map(r => r.shift))].filter(Boolean).sort();
         const currentVal = select.value;
+        const shifts = [
+            { value: 'Pagi', label: t('morning') },
+            { value: 'Siang', label: t('day') },
+            { value: 'Malam', label: t('night') },
+        ];
 
-        select.innerHTML = '<option value="all">' + t('allShifts') + '</option>';
-
-        shifts.forEach(shift => {
+        select.innerHTML = `<option value="all">${t('allShifts')}</option>`;
+        shifts.forEach(s => {
             const opt = document.createElement('option');
-            opt.value = shift;
-            opt.textContent = shift;
+            opt.value = s.value;
+            opt.textContent = s.label;
             select.appendChild(opt);
         });
 
@@ -2413,29 +2433,7 @@ const UIRenderer = {
         }
     },
 
-    /** Populate staff filter from ticket data (dari Create By) */
-    _populateStaffFilter(tickets) {
-        const select = document.getElementById('filterStaff');
-        if (!select) return;
-
-        const staffs = [...new Set(tickets.map(r => r.staff))].filter(Boolean).sort();
-        const currentVal = select.value;
-
-        select.innerHTML = '<option value="all">' + t('allStaff') + '</option>';
-
-        staffs.forEach(staff => {
-            const opt = document.createElement('option');
-            opt.value = staff;
-            opt.textContent = staff;
-            select.appendChild(opt);
-        });
-
-        if (Array.from(select.options).some(o => o.value === currentVal)) {
-            select.value = currentVal;
-        }
-    },
-
-    /** Populate task staff filter from task data */
+    /** Populate task staff filter */
     _populateTaskStaffFilter(tasks) {
         const select = document.getElementById('taskFilterStaffSelect');
         if (!select) return;
@@ -2443,7 +2441,7 @@ const UIRenderer = {
         const staffs = [...new Set(tasks.map(t => t.staff))].filter(Boolean).sort();
         const currentVal = select.value;
 
-        select.innerHTML = '<option value="all">' + t('taskAllStaff') + '</option>';
+        select.innerHTML = `<option value="all">${t('taskAllStaff')}</option>`;
 
         staffs.forEach(staff => {
             const opt = document.createElement('option');
@@ -2455,18 +2453,6 @@ const UIRenderer = {
         if (Array.from(select.options).some(o => o.value === currentVal)) {
             select.value = currentVal;
         }
-    },
-
-    _deltaRespTime(curSeconds, prevSeconds) {
-        if (prevSeconds === 0 && curSeconds === 0) return `<span class="kpi-delta neutral">→ 0s</span>`;
-        if (prevSeconds === 0) return `<span class="kpi-delta up-good">↑ new</span>`;
-        
-        const diff = curSeconds - prevSeconds;
-        const pct = Math.abs(Math.round((diff / prevSeconds) * 100));
-        
-        if (diff === 0) return `<span class="kpi-delta neutral">→ 0%</span>`;
-        if (diff < 0) return `<span class="kpi-delta up-good">↓ −${pct}%</span>`;
-        return `<span class="kpi-delta down-bad">↑ +${pct}%</span>`;
     },
 };
 
@@ -2476,7 +2462,9 @@ const UIRenderer = {
 
 const EventHandlers = {
 
+    /** Initialize all event listeners */
     init() {
+        // Filter change events
         const filterIds = ['filterMonth', 'filterWeek', 'filterProduct', 'filterTier', 'filterShift', 'filterStaff'];
         filterIds.forEach(id => {
             const el = document.getElementById(id);
@@ -2488,9 +2476,11 @@ const EventHandlers = {
             if (el) el.addEventListener('change', () => this.onFilterChange());
         });
 
+        // Reset filters
         const resetBtn = document.getElementById('btnResetFilters');
         if (resetBtn) resetBtn.addEventListener('click', () => this.onResetFilters());
 
+        // Menu tabs
         document.querySelectorAll('.menu-tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 const menu = tab.dataset.menu;
@@ -2498,41 +2488,45 @@ const EventHandlers = {
             });
         });
 
+        // Language toggle
         document.getElementById('btnLang')?.addEventListener('click', () => {
             const currentLang = appState.ui.language;
             const newLang = currentLang === 'id' ? 'en' : 'id';
             this.onLanguageChange(newLang);
         });
 
+        // Theme toggle
         document.getElementById('btnTheme')?.addEventListener('click', () => {
             toggleTheme();
             this.refreshUI();
         });
 
+        // Refresh
         document.getElementById('btnRefresh')?.addEventListener('click', () => this.onRefresh());
         document.getElementById('syncBadge')?.addEventListener('click', () => this.onRefresh());
 
+        // Task search with debounce
         const searchInput = document.getElementById('taskSearchInput');
         if (searchInput) {
             const debounced = Utils.debounce(() => this.onTaskSearch(), 300);
             searchInput.addEventListener('input', debounced);
         }
 
+        // Task filters
         ['taskFilterStaffSelect', 'taskFilterStatusSelect'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.addEventListener('change', () => this.onTaskFilterChange());
         });
     },
 
+    /** Handle filter change */
     onFilterChange() {
-        this._readFilters();
         this.validateFilters();
-        // Baca ulang filter setelah validate (karena validate bisa mengubah nilai)
-        this._readFilters();
         this._applyFilters();
         this.refreshUI();
     },
 
+    /** Reset all filters to default */
     onResetFilters() {
         const defaults = {
             filterMonth: 'all',
@@ -2555,18 +2549,18 @@ const EventHandlers = {
             }
         });
 
-        this._readFilters();
         this.validateFilters();
-        this._readFilters(); // Baca ulang setelah validate
         this._applyFilters();
         this.refreshUI();
     },
 
+    /** Handle menu change */
     onMenuChange(menu) {
         appState.ui.currentMenu = menu;
 
         document.querySelectorAll('.menu-tab').forEach(tab => {
             tab.classList.toggle('active', tab.dataset.menu === menu);
+            tab.setAttribute('aria-selected', tab.dataset.menu === menu);
         });
 
         document.querySelectorAll('.menu-panel').forEach(panel => {
@@ -2579,6 +2573,7 @@ const EventHandlers = {
         if (dimSep) dimSep.style.display = menu === 'ticket' ? '' : 'none';
     },
 
+    /** Handle language change */
     onLanguageChange(lang) {
         appState.ui.language = lang;
         const btnLang = document.getElementById('btnLang');
@@ -2589,10 +2584,12 @@ const EventHandlers = {
         this.refreshUI();
     },
 
+    /** Handle manual refresh */
     onRefresh() {
         this._refreshData();
     },
 
+    /** Handle task search */
     onTaskSearch() {
         const input = document.getElementById('taskSearchInput');
         appState.ui.taskSearch = input ? input.value.toLowerCase() : '';
@@ -2600,6 +2597,7 @@ const EventHandlers = {
         UIRenderer.renderTaskTable(appState.filteredTasks);
     },
 
+    /** Handle task filter change */
     onTaskFilterChange() {
         const staffSelect = document.getElementById('taskFilterStaffSelect');
         const statusSelect = document.getElementById('taskFilterStatusSelect');
@@ -2609,6 +2607,7 @@ const EventHandlers = {
         UIRenderer.renderTaskTable(appState.filteredTasks);
     },
 
+    /** Read filter values from DOM */
     _readFilters() {
         appState.filters.month = document.getElementById('filterMonth')?.value || 'all';
         appState.filters.week = document.getElementById('filterWeek')?.value || 'all';
@@ -2618,26 +2617,19 @@ const EventHandlers = {
         appState.filters.tier = document.getElementById('filterTier')?.value || 'all';
         appState.filters.shift = document.getElementById('filterShift')?.value || 'all';
         appState.filters.staff = document.getElementById('filterStaff')?.value || 'all';
-
-        // Debug: cek filter values
-        console.log('Filters read:', appState.filters);
     },
 
+    /** Apply filters to data */
     _applyFilters() {
         const filters = appState.filters;
-
-        console.log('Applying filters:', filters);
-        console.log('Total tickets before filter:', appState.tickets.length);
-
         appState.filteredTickets = FilterEngine.applyTicketFilters(appState.tickets, filters);
         appState.filteredTasks = FilterEngine.applyTaskFilters(appState.tasks, filters);
-
-        console.log('Filtered tickets:', appState.filteredTickets.length);
 
         const totalPages = Utils.Array.totalPages(appState.filteredTasks, CONFIG.PAGINATION.pageSize);
         if (appState.ui.taskPage > totalPages) appState.ui.taskPage = totalPages || 1;
     },
 
+    /** Refresh data from API */
     async _refreshData() {
         UIRenderer.updateSyncStatus('syncing', null);
 
@@ -2655,6 +2647,7 @@ const EventHandlers = {
         this.refreshUI();
     },
 
+    /** Refresh the entire UI */
     refreshUI() {
         const tickets = appState.filteredTickets;
         const tasks = appState.filteredTasks;
@@ -2663,157 +2656,102 @@ const EventHandlers = {
         UIRenderer.populateDynamicFilters(appState.tickets, appState.tasks);
 
         const prevTicketData = DataProcessor.getPreviousPeriodData(appState.tickets, filters);
-
         const filterSummary = FilterEngine.getFilterSummary(filters);
+
         UIRenderer.renderKPI(tickets, prevTicketData, filterSummary);
         UIRenderer.renderEscalation(tickets);
         UIRenderer.renderCharts(tickets);
-
         UIRenderer.renderTaskSection(appState.tasks, filters);
         
-        this.validateFilters(); // <-- TAMBAHKAN INI
+        this.validateFilters();
     },
 
+    /**
+     * Validate and enforce filter mutual exclusivity
+     */
     validateFilters() {
-        const month = document.getElementById('filterMonth')?.value || 'all';
-        const week = document.getElementById('filterWeek')?.value || 'all';
-        const dateFrom = document.getElementById('filterDateFrom')?.value || '';
-        const dateTo = document.getElementById('filterDateTo')?.value || '';
-        
         const monthSelect = document.getElementById('filterMonth');
         const weekSelect = document.getElementById('filterWeek');
         const dateFromInput = document.getElementById('filterDateFrom');
         const dateToInput = document.getElementById('filterDateTo');
-        
-        // Case 1: Month atau Week dipilih (bukan 'all')
+        if (!monthSelect || !weekSelect || !dateFromInput || !dateToInput) return;
+
+        const month = monthSelect.value || 'all';
+        const week = weekSelect.value || 'all';
         const isPeriodSelected = (month !== 'all' || week !== 'all');
-        
+
         if (isPeriodSelected) {
-            // Lock date range
+            // Month/Week yang mengendalikan rentang tanggal → auto-fill & lock date input
+            const range = getDateRangeFromFilters(appState.tickets, month, week);
+            dateFromInput.value = range.from || '';
+            dateToInput.value = range.to || '';
+            appState.ui.dateAutoFilled = true;
+
             dateFromInput.disabled = true;
             dateToInput.disabled = true;
             dateFromInput.style.opacity = '0.5';
             dateToInput.style.opacity = '0.5';
             dateFromInput.style.cursor = 'not-allowed';
             dateToInput.style.cursor = 'not-allowed';
-            
-            // Auto fill date range berdasarkan month/week
-            const range = getDateRangeFromFilters(appState.tickets, month, week);
-            if (range.from && range.to) {
-                dateFromInput.value = range.from;
-                dateToInput.value = range.to;
-            }
-            
-            // Unlock month & week
+
             monthSelect.disabled = false;
             weekSelect.disabled = false;
             monthSelect.style.opacity = '1';
             weekSelect.style.opacity = '1';
             monthSelect.style.cursor = 'pointer';
             weekSelect.style.cursor = 'pointer';
-            
+
         } else {
-            // Unlock date range
+            // Tidak ada period dipilih → bersihkan auto-fill & bebaskan date input
+            if (appState.ui.dateAutoFilled) {
+                dateFromInput.value = '';
+                dateToInput.value = '';
+                appState.ui.dateAutoFilled = false;
+            }
+
             dateFromInput.disabled = false;
             dateToInput.disabled = false;
             dateFromInput.style.opacity = '1';
             dateToInput.style.opacity = '1';
             dateFromInput.style.cursor = 'pointer';
             dateToInput.style.cursor = 'pointer';
+
+            const dateFrom = dateFromInput.value || '';
+            const dateTo = dateToInput.value || '';
+            const isDateRangeSelected = (dateFrom !== '' || dateTo !== '');
+
+            if (isDateRangeSelected) {
+                // Date range manual yang mengendalikan → lock month & week
+                monthSelect.value = 'all';
+                weekSelect.value = 'all';
+                monthSelect.disabled = true;
+                weekSelect.disabled = true;
+                monthSelect.style.opacity = '0.5';
+                weekSelect.style.opacity = '0.5';
+                monthSelect.style.cursor = 'not-allowed';
+                weekSelect.style.cursor = 'not-allowed';
+            } else {
+                // Tidak ada filter periode sama sekali → semua bebas
+                monthSelect.disabled = false;
+                weekSelect.disabled = false;
+                monthSelect.style.opacity = '1';
+                weekSelect.style.opacity = '1';
+                monthSelect.style.cursor = 'pointer';
+                weekSelect.style.cursor = 'pointer';
+            }
         }
-        
-        // Case 2: Date Range dipilih (hanya jika month & week = 'all')
-        const isDateRangeSelected = (dateFrom !== '' || dateTo !== '');
-        const isPeriodAll = (month === 'all' && week === 'all');
-        
-        if (isDateRangeSelected && isPeriodAll) {
-            // Lock month & week
-            monthSelect.disabled = true;
-            weekSelect.disabled = true;
-            monthSelect.style.opacity = '0.5';
-            weekSelect.style.opacity = '0.5';
-            monthSelect.style.cursor = 'not-allowed';
-            weekSelect.style.cursor = 'not-allowed';
-            
-            // Pastikan month & week tetap 'all'
-            monthSelect.value = 'all';
-            weekSelect.value = 'all';
-            
-        } else if (!isDateRangeSelected && !isPeriodSelected) {
-            // Unlock month & week jika tidak ada filter yang dipilih
-            monthSelect.disabled = false;
-            weekSelect.disabled = false;
-            monthSelect.style.opacity = '1';
-            weekSelect.style.opacity = '1';
-            monthSelect.style.cursor = 'pointer';
-            weekSelect.style.cursor = 'pointer';
-        }
-        
-        // BACA ULANG filter yang sudah diubah
+
         this._readFilters();
     },
 };
 
 /* ================================================================
-   APPLICATION INITIALIZATION
+   HELPER FUNCTIONS
    ================================================================ */
 
-const App = {
-
-    async init() {
-        const success = await DataLoader.load();
-
-        console.log('📊 Data loaded, success:', success);
-        console.log('📊 Tickets:', appState.tickets.length);
-        console.log('📊 Tasks:', appState.tasks.length);
-
-        // Debug: cek sample data
-        if (appState.tickets.length > 0) {
-            console.log('📊 Sample ticket:', appState.tickets[0]);
-            console.log('📊 Sample ticket month:', appState.tickets[0].month);
-            console.log('📊 Sample ticket week:', appState.tickets[0].week);
-        }
-
-        if (success) {
-            UIRenderer.updateSyncStatus('live', appState.meta.lastSync);
-        } else if (window.location.protocol === 'file:') {
-            UIRenderer.updateSyncStatus('fileproto', null);
-        } else {
-            UIRenderer.updateSyncStatus('error', null);
-        }
-
-        document.documentElement.setAttribute('data-theme', appState.ui.theme);
-        document.getElementById('btnTheme').textContent = appState.ui.theme === 'dark' ? '🌙' : '☀️';
-
-        EventHandlers._readFilters();
-        EventHandlers._applyFilters();
-
-        EventHandlers.init();
-        EventHandlers.refreshUI();
-
-        UIRenderer.populateDynamicFilters(appState.tickets, appState.tasks);
-
-        setInterval(() => {
-            EventHandlers.onRefresh();
-        }, CONFIG.APP.refreshInterval);
-
-        console.log(`${CONFIG.APP.name} v${CONFIG.APP.version} initialized`);
-        console.log(`Data source: ${appState.meta.dataSource}`);
-        console.log(`Tickets: ${appState.tickets.length}, Tasks: ${appState.tasks.length}`);
-    },
-};
-
-/* ================================================================
-   BOOT
-   ================================================================ */
-
-document.addEventListener('DOMContentLoaded', () => {
-    App.init();
-});
-
-// Tambahkan di DataLoader atau buat fungsi baru di luar
-
-// Pindahkan fungsi ini ke bagian UTILITY FUNCTIONS atau di atas EventHandlers
+/**
+ * Get date range from month/week filters
+ */
 function getDateRangeFromFilters(tickets, month, week) {
     let filtered = tickets;
     
@@ -2828,7 +2766,7 @@ function getDateRangeFromFilters(tickets, month, week) {
         return { from: '', to: '' };
     }
     
-    const dates = filtered.map(r => Utils.Date.parseDate(r.date)).filter(d => !isNaN(d));
+    const dates = filtered.map(r => Utils.Date.parseDate(r.date)).filter(d => d && !isNaN(d));
     if (dates.length === 0) {
         return { from: '', to: '' };
     }
@@ -2850,3 +2788,69 @@ function getDateRangeFromFilters(tickets, month, week) {
         to: formatDate(toDate)
     };
 }
+
+/* ================================================================
+   APPLICATION INITIALIZATION
+   ================================================================ */
+
+const App = {
+
+    /** Initialize the application */
+    async init() {
+        const success = await DataLoader.load();
+
+        if (success) {
+            UIRenderer.updateSyncStatus('live', appState.meta.lastSync);
+        } else if (window.location.protocol === 'file:') {
+            UIRenderer.updateSyncStatus('fileproto', null);
+        } else {
+            UIRenderer.updateSyncStatus('error', null);
+        }
+
+        document.documentElement.setAttribute('data-theme', appState.ui.theme);
+        document.getElementById('btnTheme').textContent = appState.ui.theme === 'dark' ? '🌙' : '☀️';
+
+        UIRenderer.populateDynamicFilters(appState.tickets, appState.tasks);
+        this._setDefaultMonthFilter();
+
+        EventHandlers._readFilters();
+        EventHandlers._applyFilters();
+        EventHandlers.init();
+        EventHandlers.refreshUI();
+
+        // Auto-refresh
+        setInterval(() => {
+            EventHandlers.onRefresh();
+        }, CONFIG.APP.refreshInterval);
+
+        console.log(`${CONFIG.APP.name} v${CONFIG.APP.version} initialized`);
+        console.log(`Data source: ${appState.meta.dataSource}`);
+        console.log(`Tickets: ${appState.tickets.length}, Tasks: ${appState.tasks.length}`);
+    },
+
+    /** Set default month filter to the current calendar month, if available in data */
+    _setDefaultMonthFilter() {
+        const monthSelect = document.getElementById('filterMonth');
+        if (!monthSelect) return;
+        const now = new Date();
+        const candidates = [
+            now.toLocaleDateString('en-US', { month: 'long' }),
+            now.toLocaleDateString('id-ID', { month: 'long' }),
+        ].map(s => s.trim().toLowerCase());
+        const match = Array.from(monthSelect.options).find(opt => {
+            if (opt.value === 'all') return false;
+            const clean = opt.value.replace(/\[\d+\]\s*/, '').trim().toLowerCase();
+            return candidates.includes(clean);
+        });
+        if (match) monthSelect.value = match.value;
+        // Week sengaja tidak disentuh (tetap 'all') — hanya bulan yang di-default.
+    },
+};
+
+/* ================================================================
+   BOOT
+   ================================================================ */
+
+document.addEventListener('DOMContentLoaded', () => {
+    App.init();
+});

@@ -30,13 +30,13 @@
             <span class="header-title" id="appTitle">Helpdesk Monitor</span>
         </div>
         <div class="header-right">
-            <button class="badge-live" id="syncBadge" title="Click to refresh">
+            <button class="badge-live" id="syncBadge" title="Click to refresh" aria-label="Refresh data">
                 <span class="dot" id="syncDot"></span>
                 <span id="syncLabel">Live</span>
             </button>
-            <button class="header-btn" id="btnRefresh" title="Refresh data">&#x21bb;</button>
-            <button class="header-btn" id="btnLang" title="Toggle language">🌐 EN</button>
-            <button class="header-btn" id="btnTheme">☀️</button>
+            <button class="header-btn" id="btnRefresh" title="Refresh data" aria-label="Refresh">&#x21bb;</button>
+            <button class="header-btn" id="btnLang" title="Toggle language" aria-label="Toggle language">🌐 EN</button>
+            <button class="header-btn" id="btnTheme" aria-label="Toggle theme">☀️</button>
         </div>
     </header>
 
@@ -44,13 +44,13 @@
     <!-- MENU TABS -->
     <!-- ============================================================ -->
     <nav class="menu-tabs" role="tablist">
-        <button class="menu-tab active" id="menuTabTicket" data-menu="ticket" role="tab">
+        <button class="menu-tab active" id="menuTabTicket" data-menu="ticket" role="tab" aria-selected="true">
             <svg class="menu-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M3 7a2 2 0 012-2h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4V7z" />
             </svg>
             <span id="lblMenuTicket">Ticket</span>
         </button>
-        <button class="menu-tab" id="menuTabTask" data-menu="task" role="tab">
+        <button class="menu-tab" id="menuTabTask" data-menu="task" role="tab" aria-selected="false">
             <svg class="menu-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M9 11l3 3L22 4" />
                 <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
@@ -66,49 +66,49 @@
         <div class="filter-group">
             <span class="filter-label" id="lblPeriod">Period</span>
             <div class="filter-group-row">
-                <select id="filterMonth">
+                <select id="filterMonth" aria-label="Filter by month">
                     <option value="all" id="optAllMonths">All Months</option>
                 </select>
-                <select id="filterWeek">
+                <select id="filterWeek" aria-label="Filter by week">
                     <option value="all" id="optAllWeeks">All Weeks</option>
                 </select>
             </div>
         </div>
 
-        <div class="filter-separator"></div>
+        <div class="filter-separator" role="separator"></div>
 
         <div class="filter-group">
             <span class="filter-label" id="lblDateRange">Date Range</span>
             <div class="filter-group-row">
-                <input type="date" class="date-input" id="filterDateFrom" />
+                <input type="date" class="date-input" id="filterDateFrom" aria-label="Date from" />
                 <span class="date-range-label" id="lblDateTo">to</span>
-                <input type="date" class="date-input" id="filterDateTo" />
+                <input type="date" class="date-input" id="filterDateTo" aria-label="Date to" />
             </div>
         </div>
 
-        <div class="filter-separator"></div>
+        <div class="filter-separator" role="separator"></div>
 
         <div class="filter-group" id="filterDimensionGroup">
             <span class="filter-label" id="lblDimension">Dimension</span>
             <div class="filter-group-row">
-                <select id="filterProduct">
+                <select id="filterProduct" aria-label="Filter by product">
                     <option value="all" id="optAllProducts">All Products</option>
                 </select>
-                <select id="filterTier">
+                <select id="filterTier" aria-label="Filter by tier">
                     <option value="all" id="optAllTiers">All Tiers</option>
                 </select>
-                <select id="filterShift">
+                <select id="filterShift" aria-label="Filter by shift">
                     <option value="all" id="optAllShifts">All Shifts</option>
                 </select>
-                <select id="filterStaff">
+                <select id="filterStaff" aria-label="Filter by staff">
                     <option value="all" id="optAllStaffTicket">All Staff</option>
                 </select>
             </div>
         </div>
 
-        <div class="filter-separator" id="filterSeparatorDim"></div>
+        <div class="filter-separator" id="filterSeparatorDim" role="separator"></div>
 
-        <button class="filter-reset" id="btnResetFilters">Reset</button>
+        <button class="filter-reset" id="btnResetFilters" aria-label="Reset all filters">Reset</button>
     </section>
 
     <!-- ============================================================ -->
@@ -116,7 +116,7 @@
     <!-- ============================================================ -->
     <main class="main">
         <!-- ==================== TICKET PANEL ==================== -->
-        <section class="menu-panel active" id="panelTicket" role="tabpanel">
+        <section class="menu-panel active" id="panelTicket" role="tabpanel" aria-labelledby="lblOverview">
 
             <!-- KPI Overview -->
             <div class="section-header">
@@ -141,7 +141,7 @@
                         <div class="chart-title" id="chartPriTitle">Priority Distribution</div>
                         <div class="chart-subtitle" id="chartPriSub">By ticket urgency level</div>
                     </div>
-                    <div class="chart-wrapper"><canvas id="chartPriority"></canvas></div>
+                    <div class="chart-wrapper"><canvas id="chartPriority" aria-label="Priority distribution chart"></canvas></div>
                     <div class="chart-legend" id="legendPriority"></div>
                 </div>
 
@@ -150,7 +150,7 @@
                         <div class="chart-title" id="chartTierTitle">Client Tier · Issue vs Non-Issue</div>
                         <div class="chart-subtitle" id="chartTierSub">Distribution by client segment</div>
                     </div>
-                    <div class="chart-wrapper"><canvas id="chartTier"></canvas></div>
+                    <div class="chart-wrapper"><canvas id="chartTier" aria-label="Client tier chart"></canvas></div>
                     <div class="chart-legend" id="legendTier"></div>
                 </div>
 
@@ -159,23 +159,23 @@
                         <div class="chart-title" id="chartProdTitle">Product · Issue vs Non-Issue</div>
                         <div class="chart-subtitle" id="chartProdSub">Comparison by product</div>
                     </div>
-                    <div class="chart-wrapper-md"><canvas id="chartProduct"></canvas></div>
+                    <div class="chart-wrapper-md"><canvas id="chartProduct" aria-label="Product chart"></canvas></div>
                 </div>
 
                 <div class="chart-card">
                     <div class="chart-header">
-                        <div class="chart-title" id="chartFeatTitle">Feature · Issue vs Non-Issue</div>
-                        <div class="chart-subtitle" id="chartFeatSub">Distribution by feature</div>
+                        <div class="chart-title" id="chartStaffTitle">Tickets per Staff</div>
+                        <div class="chart-subtitle" id="chartStaffSub">Number of tickets handled per staff</div>
                     </div>
-                    <div class="chart-wrapper-md"><canvas id="chartFeature"></canvas></div>
+                    <div class="chart-wrapper-md"><canvas id="chartTicketStaff" aria-label="Staff tickets chart"></canvas></div>
                 </div>
 
                 <div class="chart-card chart-wide">
                     <div class="chart-header">
-                        <div class="chart-title" id="chartStaffTitle">Tickets per Staff</div>
-                        <div class="chart-subtitle" id="chartStaffSub">Number of tickets handled per staff</div>
+                        <div class="chart-title" id="chartFeatTitle">Feature · Issue vs Non-Issue</div>
+                        <div class="chart-subtitle" id="chartFeatSub">Distribution by feature</div>
                     </div>
-                    <div class="chart-wrapper-md"><canvas id="chartTicketStaff"></canvas></div>
+                    <div class="chart-wrapper-md"><canvas id="chartFeature" aria-label="Feature chart"></canvas></div>
                 </div>
             </div>
 
@@ -188,7 +188,7 @@
                         <div class="chart-title" id="chartTrendTitle">7-Day Ticket Trend</div>
                         <div class="chart-subtitle" id="chartTrendSub">Daily volume — Issue vs Non-Issue</div>
                     </div>
-                    <div class="chart-wrapper-tall"><canvas id="chartTrend"></canvas></div>
+                    <div class="chart-wrapper-tall"><canvas id="chartTrend" aria-label="Trend chart"></canvas></div>
                     <div class="trend-comparison" id="trendComparison"></div>
                 </div>
 
@@ -197,14 +197,14 @@
                         <div class="chart-title" id="chartShiftTitle">Shift Distribution</div>
                         <div class="chart-subtitle" id="chartShiftSub">Morning · Day · Night</div>
                     </div>
-                    <div class="chart-wrapper-md"><canvas id="chartShift"></canvas></div>
+                    <div class="chart-wrapper-md"><canvas id="chartShift" aria-label="Shift distribution chart"></canvas></div>
                     <div class="chart-legend" id="legendShift"></div>
                 </div>
             </div>
         </section>
 
         <!-- ==================== TASK PANEL ==================== -->
-        <section class="menu-panel" id="panelTask" role="tabpanel">
+        <section class="menu-panel" id="panelTask" role="tabpanel" aria-labelledby="lblTaskOverview">
 
             <!-- Task KPI -->
             <div class="section-header">
@@ -220,7 +220,7 @@
                         <div class="chart-title" id="chartTaskStatusTitle">Task Status</div>
                         <div class="chart-subtitle" id="chartTaskStatusSub">Distribution by status</div>
                     </div>
-                    <div class="chart-wrapper"><canvas id="chartTaskStatus"></canvas></div>
+                    <div class="chart-wrapper"><canvas id="chartTaskStatus" aria-label="Task status chart"></canvas></div>
                     <div class="chart-legend" id="legendTaskStatus"></div>
                 </div>
 
@@ -229,7 +229,7 @@
                         <div class="chart-title" id="chartTaskStaffTitle">Tasks per Staff</div>
                         <div class="chart-subtitle" id="chartTaskStaffSub">Number of tasks handled</div>
                     </div>
-                    <div class="chart-wrapper-md"><canvas id="chartTaskStaff"></canvas></div>
+                    <div class="chart-wrapper-md"><canvas id="chartTaskStaff" aria-label="Tasks per staff chart"></canvas></div>
                 </div>
             </div>
 
@@ -240,18 +240,18 @@
                     <div class="chart-subtitle" id="chartTaskTableSub">All helpdesk team tasks</div>
                 </div>
                 <div class="task-filters">
-                    <input type="text" class="task-search" id="taskSearchInput" placeholder="Search task / staff..." />
-                    <select id="taskFilterStaffSelect">
+                    <input type="text" class="task-search" id="taskSearchInput" placeholder="Search task / staff..." aria-label="Search tasks" />
+                    <select id="taskFilterStaffSelect" aria-label="Filter tasks by staff">
                         <option value="all" id="optTaskAllStaff">All Staff</option>
                     </select>
-                    <select id="taskFilterStatusSelect">
+                    <select id="taskFilterStatusSelect" aria-label="Filter tasks by status">
                         <option value="all" id="optTaskAllStatus">All Status</option>
                         <option value="Done">Done</option>
                         <option value="Progress">Progress</option>
                     </select>
                 </div>
                 <div class="task-table-wrapper">
-                    <table class="task-table">
+                    <table class="task-table" role="table">
                         <thead>
                             <tr>
                                 <th id="thTaskStaff">Staff</th>
