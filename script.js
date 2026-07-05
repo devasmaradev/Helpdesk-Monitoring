@@ -152,6 +152,7 @@ const LOCALE = {
         completed: 'selesai',
         activeStaff: 'staff aktif',
         avgResponseTime: 'ART',
+        loadingLabel: 'Memuat data...',
     },
     en: {
         appTitle: 'Helpdesk Monitor',
@@ -257,7 +258,8 @@ const LOCALE = {
         completed: 'completed',
         activeStaff: 'active staff',
         avgResponseTime: 'ART',
-    }
+        loadingLabel: 'Loading data...',
+    },
 };
 
 /* ================================================================
@@ -418,6 +420,17 @@ const Utils = {
         capitalize: (str) => {
             if (!str) return '';
             return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+        },
+
+        /** Escape karakter HTML berbahaya sebelum di-inject ke innerHTML */
+        escapeHtml: (str) => {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
         },
 
         /** Format "Tier1" -> "Tier 1" for display only */
@@ -850,9 +863,9 @@ const DataProcessor = {
                 const company = compMatch ? compMatch[1] : '';
 
                 return {
-                    client: clientShort,
-                    company,
-                    problem: r.problem || '-',
+                    client: Utils.String.escapeHtml(clientShort),
+                    company: Utils.String.escapeHtml(company),
+                    problem: Utils.String.escapeHtml(r.problem || '-'),
                     product: prodShort,
                     productColor: prodColor,
                     priority: r.priority,
@@ -860,7 +873,7 @@ const DataProcessor = {
                     date: Utils.String.sanitizePlaceholderDate(r.date),
                     startTime: Utils.String.sanitizePlaceholderDate(r.startTime),
                     shift: r.shift,
-                    escalatedTo: r.escalatedTo || '-',
+                    escalatedTo: Utils.String.escapeHtml(r.escalatedTo || '-'),
                 };
             }) : [];
 
@@ -883,7 +896,13 @@ const DataProcessor = {
      * Get previous period data for comparison
      */
     getPreviousPeriodData(data, filters) {
-        const { month, week, dateFrom, dateTo } = filters;
+        const { month, week, dateFrom, dateTo, product, tier, shift, staff } = filters;
+        const applyDim = (rows) => rows.filter(r =>
+            (product === 'all' || r.product === product) &&
+            (tier === 'all' || r.tier === tier) &&
+            (shift === 'all' || r.shift === shift) &&
+            (staff === 'all' || r.staff === staff)
+        );
 
         if (dateFrom || dateTo) {
             const parseLocal = s => {
@@ -906,10 +925,10 @@ const DataProcessor = {
             const prevTo = new Date(from.getTime() - 1);
             const prevFrom = new Date(from.getTime() - duration);
 
-            return data.filter(r => {
+            return applyDim(data.filter(r => {
                 const rd = Utils.Date.parseDate(r.date);
                 return rd && rd >= prevFrom && rd <= prevTo;
-            });
+            }));
         }
 
         if (week !== 'all') {
@@ -917,14 +936,14 @@ const DataProcessor = {
             const idx = weeks.indexOf(week);
             const prevWeek = idx > 0 ? weeks[idx - 1] : null;
             if (!prevWeek) return [];
-            return data.filter(r => r.week === prevWeek && (month === 'all' || r.month === month));
+            return applyDim(data.filter(r => r.week === prevWeek && (month === 'all' || r.month === month)));
         }
 
         const dates = [...new Set(data.map(r => r.date))].sort((a, b) => Utils.Date.parseDate(a) - Utils.Date.parseDate(b));
         if (dates.length < 2) return [];
         const half = Math.ceil(dates.length / 2);
         const prevSet = new Set(dates.slice(0, half));
-        return data.filter(r => prevSet.has(r.date));
+        return applyDim(data.filter(r => prevSet.has(r.date)));
     },
 
     /**
@@ -2205,16 +2224,16 @@ const UIRenderer = {
 
         tbody.innerHTML = pageItems.map(t => {
             const statusColor = t.status === 'Done' ? '#10b981' : '#f59e0b';
-            const initials = Utils.String.getInitials(t.staff);
+            const initials = Utils.String.escapeHtml(Utils.String.getInitials(t.staff));
             const tags = (t.note || '').split(' ').filter(x => x.startsWith('#'));
             const tagHtml = tags.length ?
-                tags.map(tag => `<span class="task-tag">${tag}</span>`).join(' ') :
-                (t.note ? `<span style="font-size:11px;color:var(--text-muted)">${t.note}</span>` : '-');
-            const staffShort = t.staff.split(' ').slice(0, 2).join(' ');
+                tags.map(tag => `<span class="task-tag">${Utils.String.escapeHtml(tag)}</span>`).join(' ') :
+                (t.note ? `<span style="font-size:11px;color:var(--text-muted)">${Utils.String.escapeHtml(t.note)}</span>` : '-');
+            const staffShort = Utils.String.escapeHtml(t.staff.split(' ').slice(0, 2).join(' '));
 
             return `<tr>
                 <td><div class="task-staff-cell"><div class="task-avatar">${initials}</div><span>${staffShort}</span></div></td>
-                <td><div class="task-name">${t.task}</div></td>
+                <td><div class="task-name">${Utils.String.escapeHtml(t.task)}</div></td>
                 <td>${tagHtml}</td>
                 <td><div class="task-duration">${Utils.Duration.formatHMS(Utils.Duration.parse(t.duration))}</div></td>
                 <td><span class="task-status-badge" style="background:${Utils.Color.toRGBA(statusColor, 0.18)};color:${statusColor}">${t.status}</span></td>
@@ -2354,8 +2373,13 @@ const UIRenderer = {
      * Populate all dynamic filters from data
      */
     populateDynamicFilters(tickets, tasks) {
+        // Gabungan Ticket + Task, supaya bulan yang cuma punya data Task (atau
+        // sebaliknya) tetap muncul sebagai opsi — dan default bulan berjalan
+        // bisa ke-set walau salah satu sumber data belum punya baris di bulan itu.
+        const combinedForMonth = [...tickets, ...tasks];
+
         // Bulan: urut kronologis kalender (Januari → Desember), bukan alfabetis
-        this._populateFilter('filterMonth', tickets, 'month', 'allMonths', (v) => v.replace(/\[\d+\]\s*/, ''), (a, b) => {
+        this._populateFilter('filterMonth', combinedForMonth, 'month', 'allMonths', (v) => v.replace(/\[\d+\]\s*/, ''), (a, b) => {
             const na = this._MONTH_ORDER[a.label.trim().toLowerCase()] ?? 999;
             const nb = this._MONTH_ORDER[b.label.trim().toLowerCase()] ?? 999;
             if (na !== nb) return na - nb;
@@ -2581,7 +2605,55 @@ const EventHandlers = {
             btnLang.textContent = lang === 'id' ? '🌐 ID' : '🌐 EN';
             btnLang.classList.toggle('on', lang === 'id');
         }
+        document.documentElement.setAttribute('lang', lang);
+        this.applyStaticTranslations();
         this.refreshUI();
+    },
+
+    /** Terjemahkan elemen statis di HTML yang tidak di-generate ulang oleh render* */
+    applyStaticTranslations() {
+        const map = {
+            appTitle: 'appTitle',
+            lblMenuTicket: 'menuTicket',
+            lblMenuTask: 'menuTask',
+            lblPeriod: 'period',
+            lblDateRange: 'dateRange',
+            lblDimension: 'dimension',
+            lblDateTo: 'to',
+            optAllMonths: 'allMonths',
+            optAllWeeks: 'allWeeks',
+            optAllProducts: 'allProducts',
+            optAllTiers: 'allTiers',
+            optAllShifts: 'allShifts',
+            optAllStaffTicket: 'allStaff',
+            btnResetFilters: 'reset',
+            lblOverview: 'overview',
+            lblEscalation: 'escalation',
+            lblDistribution: 'distribution',
+            lblTrend: 'trend',
+            chartPriTitle: 'priTitle', chartPriSub: 'priSub',
+            chartTierTitle: 'tierTitle', chartTierSub: 'tierSub',
+            chartProdTitle: 'prodTitle', chartProdSub: 'prodSub',
+            chartStaffTitle: 'staffTitle', chartStaffSub: 'staffSub',
+            chartFeatTitle: 'featTitle', chartFeatSub: 'featSub',
+            chartTrendTitle: 'trendTitle', chartTrendSub: 'trendSub',
+            chartShiftTitle: 'shiftTitle',
+            lblTaskOverview: 'taskOverview',
+            chartTaskStatusTitle: 'taskStatusTitle', chartTaskStatusSub: 'taskStatusSub',
+            chartTaskStaffTitle: 'taskStaffTitle', chartTaskStaffSub: 'taskStaffSub',
+            chartTaskTableTitle: 'taskTableTitle', chartTaskTableSub: 'taskTableSub',
+            optTaskAllStaff: 'taskAllStaff',
+            optTaskAllStatus: 'taskAllStatus',
+            thTaskStaff: 'thClient', // lihat catatan di bawah soal key yang belum ada
+            footerText: 'footer',
+        };
+        Object.entries(map).forEach(([id, key]) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = t(key);
+        });
+
+        const searchInput = document.getElementById('taskSearchInput');
+        if (searchInput) searchInput.placeholder = t('taskSearchPlaceholder');
     },
 
     /** Handle manual refresh */
@@ -2790,6 +2862,91 @@ function getDateRangeFromFilters(tickets, month, week) {
 }
 
 /* ================================================================
+   LOADING OVERLAY
+   ================================================================ */
+
+const LoadingOverlay = {
+    _timer: null,
+    _rushTimer: null,
+    _current: 0,
+    _target: 0,
+    _finished: false,
+
+    /** Mulai animasi loading — dipanggil sebelum proses fetch data dimulai */
+    start() {
+        const overlay = document.getElementById('appLoadingOverlay');
+        if (!overlay) return;
+
+        this._current = 0;
+        this._target = 0;
+        this._finished = false;
+
+        overlay.style.display = 'flex';
+        overlay.classList.remove('is-hidden');
+
+        const labelEl = document.getElementById('appLoadingLabel');
+        if (labelEl) labelEl.textContent = t('loadingLabel');
+        this._render();
+
+        // Progress disimulasikan naik pelan sampai 90%. Sisa 10% baru
+        // dipenuhi saat finish() dipanggil (setelah data benar-benar tampil).
+        clearInterval(this._timer);
+        this._timer = setInterval(() => {
+            if (this._target < 90) {
+                this._target = Math.min(90, this._target + (Math.random() * 4 + 1));
+            }
+            if (this._current < this._target) {
+                this._current += 1;
+                this._render();
+            }
+        }, 100);
+    },
+
+    /** Update tampilan angka & progress bar */
+    _render() {
+        const countEl = document.getElementById('appLoadingCount');
+        const barEl = document.getElementById('appLoadingBarFill');
+        const val = Math.min(100, Math.round(this._current));
+        if (countEl) countEl.textContent = val;
+        if (barEl) barEl.style.width = `${val}%`;
+    },
+
+    /**
+     * Tandai loading selesai — WAJIB dipanggil setelah data benar-benar
+     * sudah dirender ke DOM (bukan sekadar setelah fetch API selesai),
+     * supaya overlay hanya hilang ketika konten sudah benar-benar muncul.
+     */
+    finish() {
+        if (this._finished) return;
+        this._finished = true;
+
+        const overlay = document.getElementById('appLoadingOverlay');
+        if (!overlay) {
+            clearInterval(this._timer);
+            return;
+        }
+
+        clearInterval(this._rushTimer);
+        this._rushTimer = setInterval(() => {
+            this._current += 3;
+            if (this._current >= 100) {
+                this._current = 100;
+                this._render();
+                clearInterval(this._rushTimer);
+                clearInterval(this._timer);
+
+                setTimeout(() => {
+                    overlay.classList.add('is-hidden');
+                    setTimeout(() => { overlay.style.display = 'none'; }, 400);
+                }, 200);
+                return;
+            }
+            this._render();
+        }, 20);
+    },
+};
+
+/* ================================================================
    APPLICATION INITIALIZATION
    ================================================================ */
 
@@ -2797,6 +2954,8 @@ const App = {
 
     /** Initialize the application */
     async init() {
+        LoadingOverlay.start();
+
         const success = await DataLoader.load();
 
         if (success) {
@@ -2808,8 +2967,10 @@ const App = {
         }
 
         document.documentElement.setAttribute('data-theme', appState.ui.theme);
+        document.documentElement.setAttribute('lang', appState.ui.language);
         document.getElementById('btnTheme').textContent = appState.ui.theme === 'dark' ? '🌙' : '☀️';
 
+        EventHandlers.applyStaticTranslations();
         UIRenderer.populateDynamicFilters(appState.tickets, appState.tasks);
         this._setDefaultMonthFilter();
 
@@ -2817,6 +2978,10 @@ const App = {
         EventHandlers._applyFilters();
         EventHandlers.init();
         EventHandlers.refreshUI();
+
+        // Overlay baru disembunyikan di sini — setelah semua KPI, chart,
+        // escalation panel, dan task table selesai dirender ke layar.
+        LoadingOverlay.finish();
 
         // Auto-refresh
         setInterval(() => {
