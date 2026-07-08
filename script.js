@@ -40,6 +40,13 @@ const CONFIG = {
         tickets: 'https://script.google.com/macros/s/AKfycbwOiyJoD3rFgzo78MQxj6cNod6vyB5lwAEx0HVjSKr3NNGAMBJ5pE1d31ECE0tYEJrExg/exec?action=tickets',
         tasks: 'https://script.google.com/macros/s/AKfycbwOiyJoD3rFgzo78MQxj6cNod6vyB5lwAEx0HVjSKr3NNGAMBJ5pE1d31ECE0tYEJrExg/exec?action=tasks',
     },
+    AUTH: {
+        // Ganti username/password sesuai kebutuhan. Ini hanya gate dasar,
+        // bukan keamanan sesungguhnya karena bisa dibaca lewat view-source.
+        username: 'admin',
+        password: 'helpdesk2026',
+        sessionKey: 'hd_auth_session',
+    },
     PRIORITIES: ['Critical', 'High', 'Medium', 'Low'],
 };
 
@@ -84,8 +91,8 @@ const LOCALE = {
         subAll: 'Semua tiket masuk',
         subPercent: '% dari total',
         subForwarded: 'Diteruskan ke tim lain',
-        subAHT: 'Rata-rata waktu merespon',
-        subART: 'Rata-rata waktu dari mulai ditangani hingga selesai',
+        subAHT: 'Rata-rata waktu menangani',
+        subART: 'Rata-rata waktu merespon',
         subSLA: 'Tiket yang memenuhi SLA',
         escTotal: 'Total Eskalasi',
         escActive: 'Masih Aktif',
@@ -123,6 +130,7 @@ const LOCALE = {
         taskAllStatus: 'Semua Status',
         taskSearchPlaceholder: 'Cari task / staff...',
         thClient: 'Client',
+        thStaff: 'Staff',
         thTask: 'Task',
         thTag: 'Tag',
         thEscalatedto: 'Eskalasi ke',
@@ -131,7 +139,7 @@ const LOCALE = {
         menuTicket: 'Ticket',
         menuTask: 'Task',
         days: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
-        footer: 'Helpdesk Monitoring Dashboard · Data: Google Sheets · Jan 2026',
+        footer: 'Helpdesk Monitoring Dashboard · Data: Google Sheets',
         unassigned: 'Belum Ditugaskan',
         total: 'total',
         noData: 'Tidak ada data',
@@ -153,6 +161,11 @@ const LOCALE = {
         activeStaff: 'staff aktif',
         avgResponseTime: 'ART',
         loadingLabel: 'Memuat data...',
+        loginSubtitle: 'Masuk untuk melanjutkan',
+        loginUsernameLabel: 'Username',
+        loginPasswordLabel: 'Password',
+        loginBtnSubmit: 'Login',
+        loginErrorInvalid: 'Username atau password salah.',
     },
     en: {
         appTitle: 'Helpdesk Monitor',
@@ -190,8 +203,8 @@ const LOCALE = {
         subAll: 'All incoming tickets',
         subPercent: '% of total',
         subForwarded: 'Forwarded to another team',
-        subAHT: 'Avg response time',
-        subART: 'Avg time from start to resolution',
+        subAHT: 'Avg handling time',
+        subART: 'Avg response time',
         subSLA: 'Tickets within SLA',
         escTotal: 'Total Escalations',
         escActive: 'Still Active',
@@ -229,6 +242,7 @@ const LOCALE = {
         taskAllStatus: 'All Status',
         taskSearchPlaceholder: 'Search task / staff...',
         thClient: 'Client',
+        thStaff: 'Staff',
         thTask: 'Task',
         thTag: 'Tag',
         thEscalatedto: 'Escalated to',
@@ -237,7 +251,7 @@ const LOCALE = {
         menuTicket: 'Ticket',
         menuTask: 'Task',
         days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-        footer: 'Helpdesk Monitoring Dashboard · Data: Google Sheets · Jan 2026',
+        footer: 'Helpdesk Monitoring Dashboard · Data: Google Sheets',
         unassigned: 'Unassigned',
         total: 'total',
         noData: 'No data',
@@ -259,6 +273,11 @@ const LOCALE = {
         activeStaff: 'active staff',
         avgResponseTime: 'ART',
         loadingLabel: 'Loading data...',
+        loginSubtitle: 'Sign in to continue',
+        loginUsernameLabel: 'Username',
+        loginPasswordLabel: 'Password',
+        loginBtnSubmit: 'Login',
+        loginErrorInvalid: 'Invalid username or password.',
     },
 };
 
@@ -484,10 +503,15 @@ const Utils = {
     Duration: {
         parse: (str) => {
             if (!str) return 0;
-            // Handle full ISO datetime strings from the sheet (time-only cells serialize with an epoch date)
-            const isoMatch = str.match(/T(\d{1,2}):(\d{2}):(\d{2})/);
-            const timePart = isoMatch ? `${isoMatch[1]}:${isoMatch[2]}:${isoMatch[3]}` : str;
-            const parts = timePart.split(':').map(Number);
+            // Handle full ISO datetime strings from the sheet (time-only cells serialize with an epoch date in UTC,
+            // so convert to Asia/Jakarta wall-clock time instead of reading the raw UTC hour directly)
+            const isIso = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(str);
+            if (isIso) {
+                const p = Utils.Date.toJakartaParts(str);
+                if (!p) return 0;
+                return p.hour * 60 + p.minute + (p.second || 0) / 60;
+            }
+            const parts = str.split(':').map(Number);
             if (parts.some(isNaN)) return 0;
             return parts[0] * 60 + parts[1] + (parts[2] || 0) / 60;
         },
@@ -495,9 +519,13 @@ const Utils = {
         /** Parse a time-like string (plain "HH:MM:SS" or ISO datetime) to total seconds. Returns null if invalid. */
         parseTimeToSeconds: (str) => {
             if (!str) return null;
-            const isoMatch = str.match(/T(\d{1,2}):(\d{2}):(\d{2})/);
-            const timePart = isoMatch ? `${isoMatch[1]}:${isoMatch[2]}:${isoMatch[3]}` : str;
-            const parts = timePart.split(':').map(Number);
+            const isIso = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(str);
+            if (isIso) {
+                const p = Utils.Date.toJakartaParts(str);
+                if (!p) return null;
+                return p.hour * 3600 + p.minute * 60 + (p.second || 0);
+            }
+            const parts = str.split(':').map(Number);
             if (parts.length < 2 || parts.some(isNaN)) return null;
             return parts[0] * 3600 + parts[1] * 60 + (parts[2] || 0);
         },
@@ -2614,6 +2642,11 @@ const EventHandlers = {
     applyStaticTranslations() {
         const map = {
             appTitle: 'appTitle',
+            loginTitle: 'appTitle',
+            loginSubtitle: 'loginSubtitle',
+            loginUsernameLabel: 'loginUsernameLabel',
+            loginPasswordLabel: 'loginPasswordLabel',
+            loginBtnSubmit: 'loginBtnSubmit',
             lblMenuTicket: 'menuTicket',
             lblMenuTask: 'menuTask',
             lblPeriod: 'period',
@@ -2644,7 +2677,7 @@ const EventHandlers = {
             chartTaskTableTitle: 'taskTableTitle', chartTaskTableSub: 'taskTableSub',
             optTaskAllStaff: 'taskAllStaff',
             optTaskAllStatus: 'taskAllStatus',
-            thTaskStaff: 'thClient', // lihat catatan di bawah soal key yang belum ada
+            thTaskStaff: 'thStaff',
             footerText: 'footer',
         };
         Object.entries(map).forEach(([id, key]) => {
@@ -2947,6 +2980,68 @@ const LoadingOverlay = {
 };
 
 /* ================================================================
+   AUTHENTICATION
+   ================================================================ */
+
+const Auth = {
+
+    /** Check if current session is authenticated */
+    isAuthenticated() {
+        return sessionStorage.getItem(CONFIG.AUTH.sessionKey) === '1';
+    },
+
+    /** Attempt login with given credentials */
+    login(username, password) {
+        if (username === CONFIG.AUTH.username && password === CONFIG.AUTH.password) {
+            sessionStorage.setItem(CONFIG.AUTH.sessionKey, '1');
+            return true;
+        }
+        return false;
+    },
+
+    /** Clear session and reload to show login screen again */
+    logout() {
+        sessionStorage.removeItem(CONFIG.AUTH.sessionKey);
+        location.reload();
+    },
+
+    /** Hide the login overlay */
+    hideLoginScreen() {
+        const el = document.getElementById('loginScreen');
+        if (el) el.classList.add('is-hidden');
+    },
+
+    /** Show the login overlay */
+    showLoginScreen() {
+        const el = document.getElementById('loginScreen');
+        if (el) el.classList.remove('is-hidden');
+    },
+
+    /** Wire up login form submit handler */
+    init() {
+        const form = document.getElementById('loginForm');
+        const errorEl = document.getElementById('loginError');
+        if (!form) return;
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            if (this.login(username, password)) {
+                if (errorEl) errorEl.textContent = '';
+                this.hideLoginScreen();
+                App.init();
+            } else {
+                if (errorEl) errorEl.textContent = t('loginErrorInvalid');
+            }
+        });
+
+        document.getElementById('btnLogout')?.addEventListener('click', () => this.logout());
+    },
+};
+
+/* ================================================================
    APPLICATION INITIALIZATION
    ================================================================ */
 
@@ -3017,5 +3112,13 @@ const App = {
    ================================================================ */
 
 document.addEventListener('DOMContentLoaded', () => {
-    App.init();
+    Auth.init();
+    EventHandlers.applyStaticTranslations();
+
+    if (Auth.isAuthenticated()) {
+        Auth.hideLoginScreen();
+        App.init();
+    } else {
+        Auth.showLoginScreen();
+    }
 });

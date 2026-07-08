@@ -16,6 +16,33 @@
 <body>
 
     <!-- ============================================================ -->
+    <!-- LOGIN SCREEN -->
+    <!-- ============================================================ -->
+    <div class="login-screen" id="loginScreen">
+        <form class="login-box" id="loginForm" autocomplete="off">
+            <div class="login-logo" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none">
+                    <rect x="1" y="8" width="3" height="7" rx="1" fill="white" opacity=".4" />
+                    <rect x="6" y="4" width="3" height="11" rx="1" fill="white" opacity=".75" />
+                    <rect x="11" y="1" width="3" height="14" rx="1" fill="white" />
+                </svg>
+            </div>
+            <div class="login-title" id="loginTitle">Helpdesk Monitor</div>
+            <div class="login-subtitle" id="loginSubtitle">Sign in to continue</div>
+            <div class="login-field">
+                <label for="loginUsername" id="loginUsernameLabel">Username</label>
+                <input type="text" id="loginUsername" autocomplete="username" required />
+            </div>
+            <div class="login-field">
+                <label for="loginPassword" id="loginPasswordLabel">Password</label>
+                <input type="password" id="loginPassword" autocomplete="current-password" required />
+            </div>
+            <div class="login-error" id="loginError"></div>
+            <button type="submit" class="login-btn" id="loginBtnSubmit">Login</button>
+        </form>
+    </div>
+
+    <!-- ============================================================ -->
     <!-- LOADING OVERLAY -->
     <!-- ============================================================ -->
     <div class="app-loading" id="appLoadingOverlay" role="status" aria-live="polite">
@@ -51,6 +78,7 @@
             <button class="header-btn" id="btnRefresh" title="Refresh data" aria-label="Refresh">&#x21bb;</button>
             <button class="header-btn" id="btnLang" title="Toggle language" aria-label="Toggle language">🌐 EN</button>
             <button class="header-btn" id="btnTheme" aria-label="Toggle theme">☀️</button>
+            <button class="header-btn" id="btnLogout" title="Logout" aria-label="Logout">⏻</button>
         </div>
     </header>
 
