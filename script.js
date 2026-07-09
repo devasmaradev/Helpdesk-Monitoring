@@ -89,7 +89,7 @@ const LOCALE = {
         aht: 'AHT',
         sla: 'SLA Rate',
         subAll: 'Semua tiket masuk',
-        subPercent: '% dari total',
+        subPercent: 'dari total',
         subForwarded: 'Diteruskan ke tim lain',
         subAHT: 'Rata-rata waktu menangani',
         subART: 'Rata-rata waktu merespon',
@@ -154,7 +154,7 @@ const LOCALE = {
         vsPrevWeek: 'vs minggu sblm',
         vsPrevHalf: 'vs paruh sblm',
         activeEscalation: 'Active Escalation — {count} tiket belum selesai',
-        totalWorkHours: 'Total Jam Kerja',
+        totalWorkHours: 'Total Task Durasi',
         totalTasks: 'Total Task',
         inProgress: 'Sedang dikerjakan',
         completed: 'selesai',
@@ -201,7 +201,7 @@ const LOCALE = {
         aht: 'AHT',
         sla: 'SLA Rate',
         subAll: 'All incoming tickets',
-        subPercent: '% of total',
+        subPercent: 'of total',
         subForwarded: 'Forwarded to another team',
         subAHT: 'Avg handling time',
         subART: 'Avg response time',
@@ -266,7 +266,7 @@ const LOCALE = {
         vsPrevWeek: 'vs prev week',
         vsPrevHalf: 'vs prev half',
         activeEscalation: 'Active Escalation — {count} unresolved ticket{plural}',
-        totalWorkHours: 'Total Work Hours',
+        totalWorkHours: 'Total Task Duration',
         totalTasks: 'Total Tasks',
         inProgress: 'In progress',
         completed: 'completed',
@@ -542,6 +542,18 @@ const Utils = {
             const m = Math.floor((totalSeconds % 3600) / 60);
             const s = totalSeconds % 60;
             return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        },
+
+        /** Format total minutes into "hh.mm.ss" */
+        formatAHT: (totalMinutes) => {
+            const totalSeconds = Math.max(0, Math.round((totalMinutes || 0) * 60));
+            const h = Math.floor(totalSeconds / 3600);
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            const s = totalSeconds % 60;
+            const hh = String(h).padStart(2, '0');
+            const mm = String(m).padStart(2, '0');
+            const ss = String(s).padStart(2, '0');
+            return `${hh}.${mm}.${ss}`;
         },
 
         sum: (items, key) => {
@@ -828,9 +840,11 @@ const DataProcessor = {
         const nonIssue = data.filter(r => r.type === 'Non Issue').length;
         const activeEsc = data.filter(r => r.esc === 'Yes' && r.status !== 'Closed').length;
         const onSLA = data.filter(r => r.onSLA === 'Yes').length;
-        const slaRate = total > 0 ? Math.round((onSLA / total) * 100) : 0;
+        const slaRate = total > 0 ? (onSLA / total) * 100 : 0;
 
-        const htEntries = data.filter(r => r.ht);
+        // Kecualikan Handling Time negatif (data anomali, Solved Time < Start Time)
+        // dari perhitungan AHT, supaya tidak menarik rata-rata secara tidak wajar.
+        const htEntries = data.filter(r => r.ht && Utils.Duration.parse(r.ht) >= 0);
         const totalMinutes = htEntries.reduce((acc, r) => acc + Utils.Duration.parse(r.ht), 0);
         const aht = htEntries.length > 0 ? totalMinutes / htEntries.length : 0;
 
@@ -1720,7 +1734,7 @@ const UIRenderer = {
 
         // ART (Average Response Time) belum tersedia datanya di sheet — sengaja dikosongkan
 
-        const ahtStr = (v) => v < 60 ? `${v.toFixed(1)}m` : `${(v / 60).toFixed(1)}h`;
+        const ahtStr = (v) => Utils.Duration.formatAHT(v);
 
         const kpis = [
             {
@@ -1774,7 +1788,7 @@ const UIRenderer = {
             },
             {
                 id: 'sla',
-                value: `${cur.slaRate}%`,
+                value: `${cur.slaRate.toFixed(1)}%`,
                 color: '#10b981',
                 sub: t('subSLA'),
                 delta: hasPrev ? this._deltaTag(cur.slaRate, prev.slaRate, false) : null,
