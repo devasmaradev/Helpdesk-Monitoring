@@ -78,7 +78,7 @@
             <button class="header-btn" id="btnRefresh" title="Refresh data" aria-label="Refresh">&#x21bb;</button>
             <button class="header-btn" id="btnLang" title="Toggle language" aria-label="Toggle language">🌐 EN</button>
             <button class="header-btn" id="btnTheme" aria-label="Toggle theme">☀️</button>
-            <button class="header-btn" id="btnLogout" title="Logout" aria-label="Logout">⏻</button>
+            <button class="header-btn btn-logout" id="btnLogout" title="Logout" aria-label="Logout">Logout</button>
         </div>
     </header>
 
@@ -98,6 +98,13 @@
                 <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
             </svg>
             <span id="lblMenuTask">Task</span>
+        </button>
+        <button class="menu-tab" id="menuTabMtm" data-menu="mtm" role="tab" aria-selected="false">
+            <svg class="menu-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <path d="M3 10h18M8 2v4M16 2v4M8 15l2 2 4-4" />
+            </svg>
+            <span id="lblMenuMTM">Month-to-Month</span>
         </button>
     </nav>
 
@@ -126,6 +133,7 @@
                 <span class="date-range-label" id="lblDateTo">to</span>
                 <input type="date" class="date-input" id="filterDateTo" aria-label="Date to" />
             </div>
+            <span class="filter-date-error" id="filterDateError"></span>
         </div>
 
         <div class="filter-separator" role="separator"></div>
@@ -144,6 +152,15 @@
                 </select>
                 <select id="filterStaff" aria-label="Filter by staff">
                     <option value="all" id="optAllStaffTicket">All Staff</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="filter-group" id="filterTaskDimensionGroup" style="display:none">
+            <span class="filter-label" id="lblTaskDimension">Dimension</span>
+            <div class="filter-group-row">
+                <select id="filterTaskStaff" aria-label="Filter task by staff">
+                    <option value="all" id="optAllStaffTask">All Staff</option>
                 </select>
             </div>
         </div>
@@ -312,13 +329,174 @@
 
         </section>
 
+        <!-- ==================== MONTH-TO-MONTH PANEL ==================== -->
+        <section class="menu-panel" id="panelMtm" role="tabpanel" aria-labelledby="lblMTMOverview">
+
+            <div class="mtm-filter-bar">
+                <div class="filter-group">
+                    <span class="filter-label" id="lblMTMPeriod">Period</span>
+                    <div class="filter-group-row">
+                        <select id="filterMTMMonthFrom" aria-label="MTM month from"></select>
+                        <span class="date-range-label" id="lblMTMDateTo">to</span>
+                        <select id="filterMTMMonthTo" aria-label="MTM month to"></select>
+                    </div>
+                </div>
+                <button class="filter-reset" id="btnResetMTMFilters" aria-label="Reset month comparison filters">Reset</button>
+            </div>
+
+            <div class="section-header">
+                <span id="lblMTMOverview">Month-to-Month Comparison</span>
+                <span class="section-badge" id="mtmBadge">-</span>
+            </div>
+
+            <div id="mtmEmptyState" class="mtm-empty">
+                <span id="mtmEmptyText">Select a date range to compare months.</span>
+            </div>
+
+            <div class="chart-card" style="margin-bottom:24px">
+                    <div class="chart-header">
+                        <div class="chart-title" id="mtmTableTitle">Monthly Metric Comparison</div>
+                        <div class="chart-subtitle" id="mtmTableSub">Side-by-side monthly metrics</div>
+                    </div>
+                    <div class="mtm-table-wrapper">
+                        <table class="mtm-table" id="mtmTable"></table>
+                    </div>
+                </div>
+
+                <div class="chart-grid">
+                    <div class="chart-card chart-wide">
+                        <div class="chart-header">
+                            <div class="chart-title" id="mtmVolumeTitle">Monthly Ticket Volume</div>
+                            <div class="chart-subtitle" id="mtmVolumeSub">Issue vs Non-Issue per month</div>
+                        </div>
+                        <div class="chart-wrapper-md"><canvas id="chartMTMVolume" aria-label="Monthly volume chart"></canvas></div>
+                        <div class="chart-legend" id="legendMTMVolume"></div>
+                    </div>
+
+                    <div class="chart-card chart-wide">
+                        <div class="chart-header">
+                            <div class="chart-title" id="mtmClosedTitle">Monthly Closed</div>
+                            <div class="chart-subtitle" id="mtmClosedSub">Number of closed tickets per month</div>
+                        </div>
+                        <div class="chart-wrapper-md"><canvas id="chartMTMClosed" aria-label="Monthly closed chart"></canvas></div>
+                    </div>
+
+                    <div class="chart-card chart-wide">
+                        <div class="chart-header">
+                            <div class="chart-title" id="mtmIssueTitle">Monthly Issue</div>
+                            <div class="chart-subtitle" id="mtmIssueSub">Number of issue tickets per month</div>
+                        </div>
+                        <div class="chart-wrapper-md"><canvas id="chartMTMIssue" aria-label="Monthly issue chart"></canvas></div>
+                    </div>
+
+                    <div class="chart-card chart-wide">
+                        <div class="chart-header">
+                            <div class="chart-title" id="mtmNonIssueTitle">Monthly Non Issue</div>
+                            <div class="chart-subtitle" id="mtmNonIssueSub">Number of non-issue tickets per month</div>
+                        </div>
+                        <div class="chart-wrapper-md"><canvas id="chartMTMNonIssue" aria-label="Monthly non-issue chart"></canvas></div>
+                    </div>
+
+                    <div class="chart-card chart-wide">
+                        <div class="chart-header">
+                            <div class="chart-title" id="mtmActiveEscTitle">Monthly Active Escalation</div>
+                            <div class="chart-subtitle" id="mtmActiveEscSub">Number of active escalations per month</div>
+                        </div>
+                        <div class="chart-wrapper-md"><canvas id="chartMTMActiveEsc" aria-label="Monthly active escalation chart"></canvas></div>
+                    </div>
+
+                    <div class="chart-card chart-wide">
+                        <div class="chart-header">
+                            <div class="chart-title" id="mtmAHTTitle">Monthly AHT</div>
+                            <div class="chart-subtitle" id="mtmAHTSub">Average handling time per month (minutes)</div>
+                        </div>
+                        <div class="chart-wrapper-md"><canvas id="chartMTMAHT" aria-label="AHT trend chart"></canvas></div>
+                    </div>
+
+                    <div class="chart-card chart-wide">
+                        <div class="chart-header">
+                            <div class="chart-title" id="mtmARTTitle">Monthly ART</div>
+                            <div class="chart-subtitle" id="mtmARTSub">Average response time per month</div>
+                        </div>
+                        <div class="chart-wrapper-md"><canvas id="chartMTMART" aria-label="Monthly ART chart"></canvas></div>
+                    </div>
+
+                    <div class="chart-card chart-wide">
+                        <div class="chart-header">
+                            <div class="chart-title" id="mtmSLATitle">Monthly SLA Rate</div>
+                            <div class="chart-subtitle" id="mtmSLASub">SLA compliance rate per month</div>
+                        </div>
+                        <div class="chart-wrapper-md"><canvas id="chartMTMSLA" aria-label="SLA trend chart"></canvas></div>
+                    </div>
+                </div>
+
+                <div class="chart-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div class="chart-title" id="mtmPriorityTitle">Monthly Priority Distribution</div>
+                            <div class="chart-subtitle" id="mtmPrioritySub">Priority distribution per month</div>
+                        </div>
+                        <div class="chart-wrapper-md"><canvas id="chartMTMPriority" aria-label="Monthly priority chart"></canvas></div>
+                        <div class="chart-legend" id="legendMTMPriority"></div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div class="chart-title" id="chartMTMTierTitle">Client Tier · Issue vs Non-Issue</div>
+                            <div class="chart-subtitle" id="chartMTMTierSub">Distribution by client segment</div>
+                        </div>
+                        <div class="chart-wrapper-md"><canvas id="chartMTMTierCompare" aria-label="Monthly client tier comparison chart"></canvas></div>
+                        <div class="chart-legend" id="legendMTMTierCompare"></div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div class="chart-title" id="chartMTMProdTitle">Product · Issue vs Non-Issue</div>
+                            <div class="chart-subtitle" id="chartMTMProdSub">Comparison by product</div>
+                        </div>
+                        <div class="chart-wrapper-md"><canvas id="chartMTMProductCompare" aria-label="Monthly product comparison chart"></canvas></div>
+                        <div class="chart-legend" id="legendMTMProductCompare"></div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div class="chart-title" id="chartMTMStaffTitle">Tickets per Staff</div>
+                            <div class="chart-subtitle" id="chartMTMStaffSub">Number of tickets handled per staff</div>
+                        </div>
+                        <div class="chart-wrapper-md"><canvas id="chartMTMStaffCompare" aria-label="Monthly staff comparison chart"></canvas></div>
+                        <div class="chart-legend" id="legendMTMStaffCompare"></div>
+                    </div>
+
+                    <div class="chart-card chart-wide">
+                        <div class="chart-header">
+                            <div class="chart-title" id="chartMTMFeatTitle">Feature · Issue vs Non-Issue</div>
+                            <div class="chart-subtitle" id="chartMTMFeatSub">Distribution by feature</div>
+                        </div>
+                        <div class="chart-wrapper-md"><canvas id="chartMTMFeatureCompare" aria-label="Monthly feature comparison chart"></canvas></div>
+                        <div class="chart-legend" id="legendMTMFeatureCompare"></div>
+                    </div>
+
+                    <div class="chart-card chart-wide">
+                        <div class="chart-header">
+                            <div class="chart-title" id="chartMTMShiftTitle">Shift Distribution</div>
+                            <div class="chart-subtitle" id="chartMTMShiftSub">Morning · Day · Night</div>
+                        </div>
+                        <div class="chart-wrapper-md"><canvas id="chartMTMShiftCompare" aria-label="Monthly shift comparison chart"></canvas></div>
+                        <div class="chart-legend" id="legendMTMShiftCompare"></div>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
     </main>
 
     <!-- ============================================================ -->
     <!-- FOOTER -->
     <!-- ============================================================ -->
     <footer class="footer" id="footerText">
-        Helpdesk Monitoring Dashboard &nbsp;&middot;&nbsp; Data: Google Sheets
+        Helpdesk Monitoring Dashboard &nbsp;&middot;&nbsp; Data: Google Sheets &nbsp;&middot;&nbsp; Made with ☕ by Helpdesk Developer Team
     </footer>
 
     <!-- ============================================================ -->
