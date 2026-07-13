@@ -1151,6 +1151,77 @@ body {
 }
 
 /* =====================================================
+   TOP CLIENT TABLE
+   ===================================================== */
+.top-client-table-wrapper {
+    overflow-x: auto;
+    border: 1px solid var(--border-sub);
+    border-radius: 8px;
+}
+
+.top-client-table {
+    width: 100%;
+    font-size: 12px;
+    border-collapse: collapse;
+}
+
+.top-client-table thead tr {
+    background: var(--surface-3);
+}
+
+.top-client-table th {
+    padding: 9px 12px;
+    font-size: 10px;
+    font-weight: 700;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    border-bottom: 1px solid var(--border-sub);
+}
+
+.top-client-table td {
+    padding: 9px 12px;
+    vertical-align: middle;
+    color: var(--text-sec);
+    border-bottom: 1px solid var(--border-sub);
+}
+
+.top-client-table tr:last-child td {
+    border-bottom: none;
+}
+
+.top-client-table tbody tr {
+    transition: background 0.15s ease;
+}
+
+.top-client-table tbody tr:hover {
+    background: var(--surface-2);
+}
+
+.top-client-table .tc-col-num {
+    width: 36px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.top-client-table td.tc-col-name {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.top-client-table .tc-col-total {
+    text-align: right;
+}
+
+.top-client-table td.tc-col-total {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    color: var(--text);
+}
+
+/* =====================================================
    FOOTER
    ===================================================== */
 .footer {

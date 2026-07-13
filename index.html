@@ -78,6 +78,7 @@
             <button class="header-btn" id="btnRefresh" title="Refresh data" aria-label="Refresh">&#x21bb;</button>
             <button class="header-btn" id="btnLang" title="Toggle language" aria-label="Toggle language">🌐 EN</button>
             <button class="header-btn" id="btnTheme" aria-label="Toggle theme">☀️</button>
+            <button class="header-btn" id="btnFullscreen" title="Toggle fullscreen" aria-label="Toggle fullscreen">⛶</button>
             <button class="header-btn btn-logout" id="btnLogout" title="Logout" aria-label="Logout">Logout</button>
         </div>
     </header>
@@ -229,26 +230,27 @@
                     <div class="chart-wrapper-md"><canvas id="chartTicketStaff" aria-label="Staff tickets chart"></canvas></div>
                 </div>
 
-                <div class="chart-card chart-wide">
-                    <div class="chart-header">
-                        <div class="chart-title" id="chartFeatTitle">Feature · Issue vs Non-Issue</div>
-                        <div class="chart-subtitle" id="chartFeatSub">Distribution by feature</div>
-                    </div>
-                    <div class="chart-wrapper-md"><canvas id="chartFeature" aria-label="Feature chart"></canvas></div>
                 </div>
-            </div>
 
             <div class="section-header">
                 <span id="lblTrend">Trend &amp; Pattern</span>
             </div>
             <div class="chart-grid">
-                <div class="chart-card chart-wide">
+                <div class="chart-card">
                     <div class="chart-header">
                         <div class="chart-title" id="chartTrendTitle">7-Day Ticket Trend</div>
-                        <div class="chart-subtitle" id="chartTrendSub">Daily volume — Issue vs Non-Issue</div>
+                        <div class="chart-subtitle" id="chartTrendSub">Daily volume — Issue vs Non-Issue (all data)</div>
                     </div>
                     <div class="chart-wrapper-tall"><canvas id="chartTrend" aria-label="Trend chart"></canvas></div>
                     <div class="trend-comparison" id="trendComparison"></div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title" id="chartTrend6MTitle">6-Month Ticket Trend</div>
+                        <div class="chart-subtitle" id="chartTrend6MSub">Monthly volume — Issue vs Non-Issue (all data)</div>
+                    </div>
+                    <div class="chart-wrapper-tall"><canvas id="chartTrend6M" aria-label="6-month trend chart"></canvas></div>
                 </div>
 
                 <div class="chart-card chart-wide">
@@ -325,6 +327,27 @@
                     </table>
                 </div>
                 <div class="pagination" id="taskPagination"></div>
+            </div>
+
+            <!-- Top Client Issue -->
+            <div class="chart-card" style="margin-top:12px">
+                <div class="chart-header">
+                    <div class="chart-title" id="chartTopClientTitle">Top Client Issue</div>
+                    <div class="chart-subtitle" id="chartTopClientSub">Ticket count by client (Issue type)</div>
+                </div>
+                <div class="top-client-table-wrapper">
+                    <table class="top-client-table" id="topClientTable">
+                        <thead>
+                            <tr>
+                                <th class="tc-col-num">#</th>
+                                <th id="thTopClientName">Contact Client Name</th>
+                                <th id="thTopClientTotal" class="tc-col-total">Total Ticket</th>
+                            </tr>
+                        </thead>
+                        <tbody id="topClientTableBody"></tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="topClientPagination"></div>
             </div>
 
         </section>
