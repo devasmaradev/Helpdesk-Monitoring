@@ -37,8 +37,8 @@ const CONFIG = {
         pageSize: 10,
     },
     API: {
-        tickets: 'https://script.google.com/macros/s/AKfycbwOiyJoD3rFgzo78MQxj6cNod6vyB5lwAEx0HVjSKr3NNGAMBJ5pE1d31ECE0tYEJrExg/exec?action=tickets',
-        tasks: 'https://script.google.com/macros/s/AKfycbwOiyJoD3rFgzo78MQxj6cNod6vyB5lwAEx0HVjSKr3NNGAMBJ5pE1d31ECE0tYEJrExg/exec?action=tasks',
+        tickets: 'https://script.google.com/macros/s/AKfycbwOiyJoD3rFgzo78MQxj6cNod6vyB5lwAEx0HVjSKr3NNGAMBJ5pE1d31ECE0tYEJrExga/exec?action=tickets',
+        tasks: 'https://script.google.com/macros/s/AKfycbwOiyJoD3rFgzo78MQxj6cNod6vyB5lwAEx0HVjSKr3NNGAMBJ5pE1d31ECE0tYEJrExga/exec?action=tasks',
     },
     AUTH: {
         username: 'admin',
