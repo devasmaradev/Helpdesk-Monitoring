@@ -148,11 +148,11 @@
                 <select id="filterTier" aria-label="Filter by tier">
                     <option value="all" id="optAllTiers">All Tiers</option>
                 </select>
-                <select id="filterShift" aria-label="Filter by shift">
-                    <option value="all" id="optAllShifts">All Shifts</option>
-                </select>
                 <select id="filterStaff" aria-label="Filter by staff">
                     <option value="all" id="optAllStaffTicket">All Staff</option>
+                </select>
+                <select id="filterShift" aria-label="Filter by shift">
+                    <option value="all" id="optAllShifts">All Shifts</option>
                 </select>
             </div>
         </div>
@@ -262,6 +262,27 @@
                     <div class="chart-legend" id="legendShift"></div>
                 </div>
             </div>
+
+            <!-- Top Client Issue -->
+            <div class="chart-card" style="margin-top:12px">
+                <div class="chart-header">
+                    <div class="chart-title" id="chartTopClientTitle">Top Client Issue</div>
+                    <div class="chart-subtitle" id="chartTopClientSub">Ticket count by client (Issue type)</div>
+                </div>
+                <div class="top-client-table-wrapper">
+                    <table class="top-client-table" id="topClientTable">
+                        <thead>
+                            <tr>
+                                <th class="tc-col-num">#</th>
+                                <th id="thTopClientName">Contact Client Name</th>
+                                <th id="thTopClientTotal" class="tc-col-total">Total Ticket</th>
+                            </tr>
+                        </thead>
+                        <tbody id="topClientTableBody"></tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="topClientPagination"></div>
+            </div>
         </section>
 
         <!-- ==================== TASK PANEL ==================== -->
@@ -329,28 +350,7 @@
                 <div class="pagination" id="taskPagination"></div>
             </div>
 
-            <!-- Top Client Issue -->
-            <div class="chart-card" style="margin-top:12px">
-                <div class="chart-header">
-                    <div class="chart-title" id="chartTopClientTitle">Top Client Issue</div>
-                    <div class="chart-subtitle" id="chartTopClientSub">Ticket count by client (Issue type)</div>
-                </div>
-                <div class="top-client-table-wrapper">
-                    <table class="top-client-table" id="topClientTable">
-                        <thead>
-                            <tr>
-                                <th class="tc-col-num">#</th>
-                                <th id="thTopClientName">Contact Client Name</th>
-                                <th id="thTopClientTotal" class="tc-col-total">Total Ticket</th>
-                            </tr>
-                        </thead>
-                        <tbody id="topClientTableBody"></tbody>
-                    </table>
-                </div>
-                <div class="pagination" id="topClientPagination"></div>
-            </div>
-
-        </section>
+            </section>
 
         <!-- ==================== MONTH-TO-MONTH PANEL ==================== -->
         <section class="menu-panel" id="panelMtm" role="tabpanel" aria-labelledby="lblMTMOverview">
@@ -465,15 +465,6 @@
 
                     <div class="chart-card">
                         <div class="chart-header">
-                            <div class="chart-title" id="chartMTMTierTitle">Client Tier · Issue vs Non-Issue</div>
-                            <div class="chart-subtitle" id="chartMTMTierSub">Distribution by client segment</div>
-                        </div>
-                        <div class="chart-wrapper-md"><canvas id="chartMTMTierCompare" aria-label="Monthly client tier comparison chart"></canvas></div>
-                        <div class="chart-legend" id="legendMTMTierCompare"></div>
-                    </div>
-
-                    <div class="chart-card">
-                        <div class="chart-header">
                             <div class="chart-title" id="chartMTMProdTitle">Product · Issue vs Non-Issue</div>
                             <div class="chart-subtitle" id="chartMTMProdSub">Comparison by product</div>
                         </div>
@@ -490,13 +481,13 @@
                         <div class="chart-legend" id="legendMTMStaffCompare"></div>
                     </div>
 
-                    <div class="chart-card chart-wide">
+                    <div class="chart-card">
                         <div class="chart-header">
-                            <div class="chart-title" id="chartMTMFeatTitle">Feature · Issue vs Non-Issue</div>
-                            <div class="chart-subtitle" id="chartMTMFeatSub">Distribution by feature</div>
+                            <div class="chart-title" id="chartMTMTaskStaffTitle">Tasks per Staff</div>
+                            <div class="chart-subtitle" id="chartMTMTaskStaffSub">Number of tasks handled per staff per month</div>
                         </div>
-                        <div class="chart-wrapper-md"><canvas id="chartMTMFeatureCompare" aria-label="Monthly feature comparison chart"></canvas></div>
-                        <div class="chart-legend" id="legendMTMFeatureCompare"></div>
+                        <div class="chart-wrapper-md"><canvas id="chartMTMTaskStaffCompare" aria-label="Monthly task staff comparison chart"></canvas></div>
+                        <div class="chart-legend" id="legendMTMTaskStaffCompare"></div>
                     </div>
 
                     <div class="chart-card chart-wide">
@@ -521,6 +512,19 @@
     <footer class="footer" id="footerText">
         Helpdesk Monitoring Dashboard &nbsp;&middot;&nbsp; Data: Google Sheets &nbsp;&middot;&nbsp; Made with ☕ by Helpdesk Developer Team
     </footer>
+
+    <!-- ============================================================ -->
+    <!-- TOP CLIENT PROBLEM DETAIL MODAL -->
+    <!-- ============================================================ -->
+    <div class="modal-overlay" id="topClientModalOverlay">
+        <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="topClientModalTitle">
+            <div class="modal-header">
+                <div class="modal-title" id="topClientModalTitle">-</div>
+                <button class="modal-close" id="topClientModalClose" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body" id="topClientModalBody"></div>
+        </div>
+    </div>
 
     <!-- ============================================================ -->
     <!-- SCRIPTS -->

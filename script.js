@@ -176,6 +176,8 @@ const LOCALE = {
         mtmProdSub: 'Perbandingan per produk per bulan',
         mtmStaffTitle: 'Tiket per Staff Bulanan',
         mtmStaffSub: 'Jumlah tiket per staff per bulan',
+        mtmTaskStaffTitle: 'Task per Staff Bulanan',
+        mtmTaskStaffSub: 'Jumlah task per staff per bulan',
         mtmFeatTitle: 'Fitur Bulanan · Issue vs Non-Issue',
         mtmFeatSub: 'Distribusi fitur per bulan',
         mtmShiftTitle: 'Distribusi Shift Bulanan',
@@ -330,6 +332,8 @@ const LOCALE = {
         mtmProdSub: 'Comparison by product per month',
         mtmStaffTitle: 'Monthly Tickets per Staff',
         mtmStaffSub: 'Number of tickets handled per staff per month',
+        mtmTaskStaffTitle: 'Monthly Tasks per Staff',
+        mtmTaskStaffSub: 'Number of tasks handled per staff per month',
         mtmFeatTitle: 'Monthly Feature · Issue vs Non-Issue',
         mtmFeatSub: 'Distribution by feature per month',
         mtmShiftTitle: 'Monthly Shift Distribution',
@@ -1167,7 +1171,7 @@ var DataProcessor = {
 
     prepareTopClientIssueData: function(data) {
         var issues = data.filter(function(r) { return r.type === 'Issue' && r.client; });
-        var counts = {};
+        var groups = {};
         issues.forEach(function(r) {
             var clientName = (r.client || '').trim();
             if (!clientName) return;
@@ -1177,9 +1181,19 @@ var DataProcessor = {
 
             var name = problemPrefix ? clientName + ' - ' + problemPrefix : clientName;
 
-            counts[name] = (counts[name] || 0) + 1;
+            if (!groups[name]) {
+                groups[name] = { name: name, count: 0, problems: [] };
+            }
+            groups[name].count++;
+            groups[name].problems.push({
+                problem: r.problem,
+                date: r.date,
+                priority: r.priority,
+                product: r.product,
+                staff: r.staff,
+            });
         });
-        var arr = Object.keys(counts).map(function(k) { return { name: k, count: counts[k] }; });
+        var arr = Object.keys(groups).map(function(k) { return groups[k]; });
         arr.sort(function(a, b) { return b.count - a.count; });
         return arr;
     },
@@ -1188,7 +1202,7 @@ var DataProcessor = {
         return Utils.Array.distinct(data.map(function(r) { return r.staff; }).filter(Boolean)).sort();
     },
 
-    prepareMonthlyComparison: function(tickets, monthFrom, monthTo, responseTimes) {
+    prepareMonthlyComparison: function(tickets, monthFrom, monthTo, responseTimes, tasks) {
         if (!monthFrom || !monthTo) return null;
 
         var sorted = Utils.Array.distinct(tickets.map(function(r) { return r.month; }))
@@ -1215,10 +1229,12 @@ var DataProcessor = {
         if (selectedMonths.length === 0) return null;
 
         var inRange = tickets.filter(function(r) { return selectedMonths.indexOf(r.month) !== -1; });
+        var taskData = tasks || [];
 
         var rtData = responseTimes || [];
         var buckets = selectedMonths.map(function(m) {
             var rows = tickets.filter(function(r) { return r.month === m; });
+            var taskRows = taskData.filter(function(tk) { return tk.month === m; });
             var kpi = DataProcessor.calculateKPIs(rows);
             var artResult = DataProcessor.calculateART(rtData.filter(function(r) { return r.month === m; }), 'all', appState.meta.responseTimeStaffCols);
             kpi.artMinutes = artResult.avgMinutes;
@@ -1227,6 +1243,7 @@ var DataProcessor = {
                 key: m,
                 label: m.replace(/\[\d+\]\s*/, '').trim(),
                 rows: rows,
+                taskRows: taskRows,
                 kpi: kpi,
                 priority: DataProcessor.preparePriorityData(rows),
             };
@@ -1272,6 +1289,21 @@ var DataProcessor = {
             return {
                 label: s.split(' ').slice(0, 2).join(' '),
                 data: buckets.map(function(b) { return b.rows.filter(function(r) { return (r.staff || unassignedLabel) === s; }).length; }),
+                color: palette[i % palette.length],
+            };
+        });
+        return { labels: buckets.map(function(b) { return b.label; }), datasets: datasets };
+    },
+
+    prepareMonthlyTaskStaffComparison: function(buckets) {
+        var unassignedLabel = t('unassigned');
+        var allRows = buckets.reduce(function(acc, b) { return acc.concat(b.taskRows || []); }, []);
+        var staffs = Utils.Array.distinct(allRows.map(function(tk) { return tk.staff || unassignedLabel; })).sort();
+        var palette = ['#5b73ff', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#fb923c', '#f43f5e'];
+        var datasets = staffs.map(function(s, i) {
+            return {
+                label: s.split(' ').slice(0, 2).join(' '),
+                data: buckets.map(function(b) { return (b.taskRows || []).filter(function(tk) { return (tk.staff || unassignedLabel) === s; }).length; }),
                 color: palette[i % palette.length],
             };
         });
@@ -2509,7 +2541,6 @@ var UIRenderer = {
 
         UIRenderer._populateTaskFilters(filtered);
         UIRenderer.renderTaskTable(filtered);
-        UIRenderer._renderTopClientTable(appState.filteredTickets);
     },
 
     _prepareTaskStaffData: function(data) {
@@ -2554,6 +2585,12 @@ var UIRenderer = {
                 '</tr>';
         }).join('');
 
+        Array.prototype.forEach.call(tbody.querySelectorAll('tr'), function(row, i) {
+            row.addEventListener('click', function() {
+                UIRenderer._showTopClientModal(pageItems[i]);
+            });
+        });
+
         UIRenderer._renderTopClientPagination(list, list.length, totalPages);
     },
 
@@ -2589,6 +2626,37 @@ var UIRenderer = {
                 }
             });
         });
+    },
+
+    _showTopClientModal: function(item) {
+        var overlay = document.getElementById('topClientModalOverlay');
+        var title = document.getElementById('topClientModalTitle');
+        var body = document.getElementById('topClientModalBody');
+        if (!overlay || !title || !body || !item) return;
+
+        title.textContent = item.name;
+
+        if (!item.problems || item.problems.length === 0) {
+            body.innerHTML = '<div class="task-empty">' + t('noData') + '</div>';
+        } else {
+            body.innerHTML = item.problems.map(function(p) {
+                var priColor = CONFIG.CHART.colors[p.priority] || CONFIG.CHART.colors.Low;
+                return '<div class="modal-problem-item">' +
+                    '<div class="modal-problem-top">' +
+                    '<span class="esc-pri-badge" style="background:' + Utils.Color.toRGBA(priColor, 0.2) + ';color:' + priColor + '">' + Utils.String.escapeHtml(p.priority || '-') + '</span>' +
+                    '<span class="modal-problem-date">' + Utils.String.escapeHtml(p.date || '-') + '</span>' +
+                    '</div>' +
+                    '<div class="modal-problem-text">' + Utils.String.escapeHtml(p.problem || '-') + '</div>' +
+                    '</div>';
+            }).join('');
+        }
+
+        overlay.classList.add('is-open');
+    },
+
+    _hideTopClientModal: function() {
+        var overlay = document.getElementById('topClientModalOverlay');
+        if (overlay) overlay.classList.remove('is-open');
     },
 
     _populateTaskFilters: function(data) {
@@ -2733,7 +2801,7 @@ var UIRenderer = {
         var emptyState = document.getElementById('mtmEmptyState');
         var content = document.getElementById('mtmContent');
 
-        var data = DataProcessor.prepareMonthlyComparison(appState.tickets, filters.monthFrom, filters.monthTo, appState.responseTimes);
+        var data = DataProcessor.prepareMonthlyComparison(appState.tickets, filters.monthFrom, filters.monthTo, appState.responseTimes, appState.tasks);
 
         if (!data || data.buckets.length === 0) {
             if (emptyState) emptyState.style.display = 'block';
@@ -2748,9 +2816,9 @@ var UIRenderer = {
             ChartEngine.destroy('chartMTMAHT');
             ChartEngine.destroy('chartMTMSLA');
             ChartEngine.destroy('chartMTMPriority');
-            ChartEngine.destroy('chartMTMTierCompare');
             ChartEngine.destroy('chartMTMProductCompare');
             ChartEngine.destroy('chartMTMStaffCompare');
+            ChartEngine.destroy('chartMTMTaskStaffCompare');
             ChartEngine.destroy('chartMTMShiftCompare');
             return;
         }
@@ -2875,15 +2943,6 @@ var UIRenderer = {
             { label: t('sla'), data: slaValues, color: '#10b981' },
         ]);
 
-        var tierData = DataProcessor.prepareMonthlyTierComparison(buckets);
-        ChartEngine.createStackedBar('chartMTMTierCompare', tierData.labels, tierData.datasets);
-        var legendTierCompare = document.getElementById('legendMTMTierCompare');
-        if (legendTierCompare) {
-            legendTierCompare.innerHTML = tierData.datasets.map(function(ds) {
-                return '<div class="legend-item"><div class="legend-dot" style="background:' + ds.color + '"></div>' + ds.label + '</div>';
-            }).join('');
-        }
-
         var productData = DataProcessor.prepareMonthlyProductComparison(buckets);
         ChartEngine.createStackedBar('chartMTMProductCompare', productData.labels, productData.datasets);
         var legendProductCompare = document.getElementById('legendMTMProductCompare');
@@ -2898,6 +2957,15 @@ var UIRenderer = {
         var legendStaffCompare = document.getElementById('legendMTMStaffCompare');
         if (legendStaffCompare) {
             legendStaffCompare.innerHTML = staffCompareData.datasets.map(function(ds) {
+                return '<div class="legend-item"><div class="legend-dot" style="background:' + ds.color + '"></div>' + ds.label + '</div>';
+            }).join('');
+        }
+
+        var taskStaffCompareData = DataProcessor.prepareMonthlyTaskStaffComparison(buckets);
+        ChartEngine.createStackedBar('chartMTMTaskStaffCompare', taskStaffCompareData.labels, taskStaffCompareData.datasets);
+        var legendTaskStaffCompare = document.getElementById('legendMTMTaskStaffCompare');
+        if (legendTaskStaffCompare) {
+            legendTaskStaffCompare.innerHTML = taskStaffCompareData.datasets.map(function(ds) {
                 return '<div class="legend-item"><div class="legend-dot" style="background:' + ds.color + '"></div>' + ds.label + '</div>';
             }).join('');
         }
@@ -3168,6 +3236,14 @@ var EventHandlers = {
 
         var resetMTMBtn = document.getElementById('btnResetMTMFilters');
         if (resetMTMBtn) resetMTMBtn.addEventListener('click', function() { self.onResetMTMFilters(); });
+
+        document.getElementById('topClientModalClose')?.addEventListener('click', function() { UIRenderer._hideTopClientModal(); });
+        document.getElementById('topClientModalOverlay')?.addEventListener('click', function(e) {
+            if (e.target === this) UIRenderer._hideTopClientModal();
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') UIRenderer._hideTopClientModal();
+        });
     },
 
     _validateDateRange: function() {
@@ -3263,6 +3339,7 @@ var EventHandlers = {
         }
         this.validateFilters();
         this._applyFilters();
+        appState.ui.topClientPage = 1;
         this.refreshUI();
     },
 
@@ -3293,6 +3370,7 @@ var EventHandlers = {
         this._validateDateRange();
         this.validateFilters();
         this._applyFilters();
+        appState.ui.topClientPage = 1;
         this.refreshUI();
     },
 
@@ -3385,9 +3463,9 @@ var EventHandlers = {
             lblMTMOverview: 'mtmOverview',
             lblMTMDateTo: 'to',
             lblMTMPeriod: 'period',
-            chartMTMTierTitle: 'mtmTierTitle', chartMTMTierSub: 'mtmTierSub',
             chartMTMProdTitle: 'mtmProdTitle', chartMTMProdSub: 'mtmProdSub',
             chartMTMStaffTitle: 'mtmStaffTitle', chartMTMStaffSub: 'mtmStaffSub',
+            chartMTMTaskStaffTitle: 'mtmTaskStaffTitle', chartMTMTaskStaffSub: 'mtmTaskStaffSub',
             chartMTMShiftTitle: 'mtmShiftTitle',
             btnResetMTMFilters: 'reset',
             mtmEmptyText: 'mtmEmptyText',
@@ -3513,6 +3591,7 @@ var EventHandlers = {
         UIRenderer.renderKPI(tickets, prevTicketData, filterSummary, null, null, { cur: artCur, prev: artPrev });
         UIRenderer.renderEscalation(tickets);
         UIRenderer.renderCharts(tickets);
+        UIRenderer._renderTopClientTable(tickets);
         UIRenderer.renderTaskSection(appState.tasks, filters);
 
         this.validateFilters();
