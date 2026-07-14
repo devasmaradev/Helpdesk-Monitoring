@@ -1726,3 +1726,94 @@ body {
     line-height: 1.5;
     color: var(--text-sec);
 }
+
+/* =====================================================
+   AUTO SCROLL PANEL
+   ===================================================== */
+.autoscroll-panel {
+    position: fixed;
+    top: 50%;
+    right: 14px;
+    transform: translateY(-50%);
+    z-index: 900;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
+    opacity: 0.9;
+}
+
+.autoscroll-panel.is-visible {
+    display: flex;
+}
+
+.autoscroll-speeds {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+}
+
+.as-speed-bar {
+    height: 5px;
+    padding: 0;
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.as-speed-bar:hover {
+    border-color: var(--accent);
+}
+
+.as-speed-bar.active {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.as-speed-bar.as1 { width: 28px; }
+.as-speed-bar.as2 { width: 22px; }
+.as-speed-bar.as3 { width: 17px; }
+.as-speed-bar.as4 { width: 12px; }
+.as-speed-bar.as5 { width: 7px; }
+
+.as-playstop-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-top: 2px;
+    font-size: 10px;
+    color: var(--accent);
+    cursor: pointer;
+    background: var(--accent-dim);
+    border: 1px solid rgba(91, 115, 255, 0.3);
+    border-radius: 6px;
+    transition: all 0.15s ease;
+}
+
+.as-playstop-btn:hover {
+    color: #fff;
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.as-playstop-btn.is-playing {
+    color: var(--red);
+    background: var(--red-dim);
+    border-color: rgba(244, 63, 94, 0.3);
+}
+
+.as-playstop-btn.is-playing:hover {
+    color: #fff;
+    background: var(--red);
+    border-color: var(--red);
+}

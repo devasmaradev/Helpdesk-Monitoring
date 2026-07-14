@@ -2,7 +2,7 @@
    CONFIGURATION
    ================================================================ */
 
-const CONFIG = {
+var CONFIG = {
     APP: {
         name: 'Helpdesk Monitor',
         version: '2.0.0',
@@ -53,7 +53,7 @@ const CONFIG = {
    LOCALIZATION
    ================================================================ */
 
-const LOCALE = {
+var LOCALE = {
     id: {
         appTitle: 'Helpdesk Monitor',
         appSubtitle: 'Januari 2026',
@@ -165,7 +165,7 @@ const LOCALE = {
         mtmActiveEscTitle: 'Active Escalation Bulanan',
         mtmActiveEscSub: 'Jumlah eskalasi aktif per bulan',
         mtmARTTitle: 'ART Bulanan',
-        mtmARTSub: 'Rata-rata waktu merespon per bulan',
+        mtmARTSub: 'Rata-rata waktu merespon per bulan (menit)',
         mtmAHTTitle: 'AHT Bulanan',
         mtmAHTSub: 'Rata-rata waktu menangani per bulan (menit)',
         mtmSLATitle: 'SLA Rate Bulanan',
@@ -321,7 +321,7 @@ const LOCALE = {
         mtmActiveEscTitle: 'Monthly Active Escalation',
         mtmActiveEscSub: 'Number of active escalations per month',
         mtmARTTitle: 'Monthly ART',
-        mtmARTSub: 'Average response time per month',
+        mtmARTSub: 'Average response time per month (minutes)',
         mtmAHTTitle: 'Monthly AHT',
         mtmAHTSub: 'Average handling time per month (minutes)',
         mtmSLATitle: 'Monthly SLA Rate',
@@ -372,7 +372,7 @@ const LOCALE = {
    APPLICATION STATE
    ================================================================ */
 
-const appState = {
+var appState = {
     tickets: [],
     tasks: [],
     responseTimes: [],
@@ -418,7 +418,7 @@ const appState = {
    UTILITY FUNCTIONS
    ================================================================ */
 
-const Utils = {
+var Utils = {
 
     Date: {
         parseDate: function(str) {
@@ -1797,7 +1797,7 @@ var ChartEngine = {
         }
     },
 
-    createLine: function(canvasId, labels, datasets) {
+    createLine: function(canvasId, labels, datasets, tooltipFormatter) {
         this.destroy(canvasId);
         var ctx = document.getElementById(canvasId);
         if (!ctx) return null;
@@ -1815,8 +1815,28 @@ var ChartEngine = {
                     pointHoverRadius: 8,
                     pointBackgroundColor: ds.color,
                     borderWidth: 2,
+                    formatter: typeof tooltipFormatter === 'function' ? tooltipFormatter : null,
                 };
             });
+
+            var tooltipCallbacks = {
+                footer: function(items) {
+                    var total = items.reduce(function(a, i) { return a + i.parsed.y; }, 0);
+                    return 'Total: ' + total;
+                },
+            };
+
+            if (typeof tooltipFormatter === 'function') {
+                tooltipCallbacks.label = function(item) {
+                    var val = item.parsed.y;
+                    if (val === null || val === undefined) return item.dataset.label + ': -';
+                    return item.dataset.label + ': ' + tooltipFormatter(val);
+                };
+                tooltipCallbacks.footer = function(items) {
+                    var total = items.reduce(function(a, i) { return a + (i.parsed.y || 0); }, 0);
+                    return 'Total: ' + tooltipFormatter(total);
+                };
+            }
 
             var chart = new Chart(ctx, {
                 type: 'line',
@@ -1830,12 +1850,7 @@ var ChartEngine = {
                             labels: { color: getTickColor(), boxWidth: 10, font: { size: 11, family: 'Inter' }, padding: 14 },
                         },
                         tooltip: {
-                            callbacks: {
-                                footer: function(items) {
-                                    var total = items.reduce(function(a, i) { return a + i.parsed.y; }, 0);
-                                    return 'Total: ' + total;
-                                },
-                            },
+                            callbacks: tooltipCallbacks,
                         },
                     },
                     scales: {
@@ -2040,12 +2055,13 @@ var ChartEngine = {
                     meta.data.forEach(function(pt, i) {
                         var val = ds.data[i];
                         if (val == null) return;
+                        var text = ds.formatter ? ds.formatter(val) : val;
                         ctx.save();
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'bottom';
                         ctx.fillStyle = ds.borderColor;
                         ctx.font = 'bold 10px Inter';
-                        ctx.fillText(val, pt.x, pt.y - 6);
+                        ctx.fillText(text, pt.x, pt.y - 6);
                         ctx.restore();
                     });
                 });
@@ -2795,6 +2811,13 @@ var UIRenderer = {
         });
     },
 
+    scrollToTop: function() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    },
+
     renderMTM: function() {
         var filters = appState.mtmFilters;
         var badge = document.getElementById('mtmBadge');
@@ -2908,10 +2931,10 @@ var UIRenderer = {
             { label: t('activeEsc'), data: activeEscValues, color: '#fb923c' },
         ]);
 
-        var artValues = buckets.map(function(b) { return b.kpi.artCount > 0 ? Utils.Math.round(b.kpi.artMinutes, 1) : null; });
+        var artValues = buckets.map(function(b) { return b.kpi.artCount > 0 ? b.kpi.artMinutes : null; });
         ChartEngine.createLine('chartMTMART', labels, [
             { label: t('avgResponseTime'), data: artValues, color: '#06b6d4' },
-        ]);
+        ], Utils.Duration.formatHMS);
 
         var priDatasets = CONFIG.PRIORITIES.map(function(p) {
             return {
@@ -2933,15 +2956,17 @@ var UIRenderer = {
             }).join('');
         }
 
-        var ahtValues = buckets.map(function(b) { return Utils.Math.round(b.kpi.aht, 1); });
+        var ahtValues = buckets.map(function(b) { return b.kpi.aht; });
         ChartEngine.createLine('chartMTMAHT', labels, [
             { label: t('aht'), data: ahtValues, color: '#8b5cf6' },
-        ]);
+        ], Utils.Duration.formatHMS);
 
         var slaValues = buckets.map(function(b) { return Utils.Math.round(b.kpi.slaRate, 1); });
         ChartEngine.createLine('chartMTMSLA', labels, [
             { label: t('sla'), data: slaValues, color: '#10b981' },
-        ]);
+        ], function(val) {
+            return val + '%';
+        });
 
         var productData = DataProcessor.prepareMonthlyProductComparison(buckets);
         ChartEngine.createStackedBar('chartMTMProductCompare', productData.labels, productData.datasets);
@@ -3399,6 +3424,8 @@ var EventHandlers = {
         if (menu === 'mtm') {
             UIRenderer.renderMTM();
         }
+
+        UIRenderer.scrollToTop();
     },
 
     onLanguageChange: function(lang) {
@@ -3571,6 +3598,8 @@ var EventHandlers = {
             self._applyFilters();
             self.refreshUI();
             if (appState.ui.currentMenu === 'mtm') UIRenderer.renderMTM();
+
+            UIRenderer.scrollToTop();
         });
     },
 
@@ -3595,6 +3624,8 @@ var EventHandlers = {
         UIRenderer.renderTaskSection(appState.tasks, filters);
 
         this.validateFilters();
+
+        UIRenderer.scrollToTop();
     },
 
     _applyWeekDependency: function(monthSelect, weekSelect) {
@@ -3924,12 +3955,131 @@ var App = {
 };
 
 /* ================================================================
+   AUTO SCROLL
+   ================================================================ */
+
+var AutoScroll = {
+    active: false,
+    speed: 3,
+    direction: 'down',
+    rafId: null,
+    lastTime: null,
+    speedMap: { 1: 0.35, 2: 0.28, 3: 0.21, 4: 0.14, 5: 0.07 },
+    fastReturnSpeed: 1.4,
+
+    init: function() {
+        var self = this;
+
+        document.querySelectorAll('.as-speed-bar').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var level = parseInt(btn.dataset.speed, 10);
+                self.setSpeed(level);
+                self.start();
+            });
+        });
+
+        var playStopBtn = document.getElementById('autoScrollPlayStopBtn');
+        if (playStopBtn) playStopBtn.addEventListener('click', function() { self.toggle(); });
+
+        document.addEventListener('fullscreenchange', function() { self._onFullscreenChange(); });
+    },
+
+    _onFullscreenChange: function() {
+        var panel = document.getElementById('autoScrollPanel');
+        if (!panel) return;
+        var isFullscreen = !!document.fullscreenElement;
+        panel.classList.toggle('is-visible', isFullscreen);
+        if (!isFullscreen) this.stop();
+    },
+
+    setSpeed: function(level) {
+        this.speed = level;
+        document.querySelectorAll('.as-speed-bar').forEach(function(btn) {
+            btn.classList.toggle('active', parseInt(btn.dataset.speed, 10) === level);
+        });
+    },
+
+    toggle: function() {
+        if (this.active) {
+            this.stop();
+        } else {
+            this.start();
+        }
+    },
+
+    _updatePlayStopBtn: function() {
+        var btn = document.getElementById('autoScrollPlayStopBtn');
+        if (!btn) return;
+        if (this.active) {
+            btn.innerHTML = '&#9724;';
+            btn.classList.add('is-playing');
+            btn.title = 'Stop auto scroll';
+            btn.setAttribute('aria-label', 'Stop auto scroll');
+        } else {
+            btn.innerHTML = '&#9654;';
+            btn.classList.remove('is-playing');
+            btn.title = 'Play auto scroll';
+            btn.setAttribute('aria-label', 'Play auto scroll');
+        }
+    },
+
+    start: function() {
+        var self = this;
+        this.active = true;
+        this.direction = 'down';
+        this.lastTime = null;
+
+        this._updatePlayStopBtn();
+
+        if (this.rafId) cancelAnimationFrame(this.rafId);
+        this.rafId = requestAnimationFrame(function(ts) { self._tick(ts); });
+    },
+
+    stop: function() {
+        this.active = false;
+        if (this.rafId) cancelAnimationFrame(this.rafId);
+        this.rafId = null;
+        this.lastTime = null;
+
+        this._updatePlayStopBtn();
+    },
+
+    _tick: function(timestamp) {
+        if (!this.active) return;
+        var self = this;
+
+        if (!this.lastTime) this.lastTime = timestamp;
+        var delta = timestamp - this.lastTime;
+        this.lastTime = timestamp;
+
+        var maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+
+        if (this.direction === 'down') {
+            var pxPerMs = this.speedMap[this.speed] || 0.21;
+            window.scrollBy(0, pxPerMs * delta);
+            if (window.scrollY >= maxScroll - 2) {
+                this.direction = 'up-fast';
+            }
+        } else {
+            window.scrollBy(0, -(this.fastReturnSpeed * delta));
+            if (window.scrollY <= 2) {
+                window.scrollTo(0, 0);
+                this.direction = 'down';
+            }
+        }
+
+        this.rafId = requestAnimationFrame(function(ts) { self._tick(ts); });
+    },
+};
+
+/* ================================================================
    BOOT
    ================================================================ */
 
 document.addEventListener('DOMContentLoaded', function() {
     Auth.init();
     EventHandlers.applyStaticTranslations();
+    AutoScroll.init();
 
     if (Auth.isAuthenticated()) {
         Auth.hideLoginScreen();

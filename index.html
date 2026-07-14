@@ -76,9 +76,9 @@
                 <span id="syncLabel">Live</span>
             </button>
             <button class="header-btn" id="btnRefresh" title="Refresh data" aria-label="Refresh">&#x21bb;</button>
-            <button class="header-btn" id="btnLang" title="Toggle language" aria-label="Toggle language">🌐 EN</button>
-            <button class="header-btn" id="btnTheme" aria-label="Toggle theme">☀️</button>
-            <button class="header-btn" id="btnFullscreen" title="Toggle fullscreen" aria-label="Toggle fullscreen">⛶</button>
+            <button class="header-btn" id="btnLang" title="Toggle language" aria-label="Toggle language">&#x1f310; EN</button>
+            <button class="header-btn" id="btnTheme" aria-label="Toggle theme">&#x2600;&#xfe0f;</button>
+            <button class="header-btn" id="btnFullscreen" title="Toggle fullscreen" aria-label="Toggle fullscreen">&#x26f6;</button>
             <button class="header-btn btn-logout" id="btnLogout" title="Logout" aria-label="Logout">Logout</button>
         </div>
     </header>
@@ -439,7 +439,7 @@
                     <div class="chart-card chart-wide">
                         <div class="chart-header">
                             <div class="chart-title" id="mtmARTTitle">Monthly ART</div>
-                            <div class="chart-subtitle" id="mtmARTSub">Average response time per month</div>
+                            <div class="chart-subtitle" id="mtmARTSub">Average response time per month (minutes)</div>
                         </div>
                         <div class="chart-wrapper-md"><canvas id="chartMTMART" aria-label="Monthly ART chart"></canvas></div>
                     </div>
@@ -524,6 +524,20 @@
             </div>
             <div class="modal-body" id="topClientModalBody"></div>
         </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- AUTO SCROLL CONTROL (hanya tampil saat fullscreen) -->
+    <!-- ============================================================ -->
+    <div class="autoscroll-panel" id="autoScrollPanel">
+        <div class="autoscroll-speeds" id="autoScrollSpeeds">
+            <button class="as-speed-bar as1" data-speed="1" title="Speed 1 (fastest)" aria-label="Speed 1"></button>
+            <button class="as-speed-bar as2" data-speed="2" title="Speed 2" aria-label="Speed 2"></button>
+            <button class="as-speed-bar as3 active" data-speed="3" title="Speed 3" aria-label="Speed 3"></button>
+            <button class="as-speed-bar as4" data-speed="4" title="Speed 4" aria-label="Speed 4"></button>
+            <button class="as-speed-bar as5" data-speed="5" title="Speed 5 (slowest)" aria-label="Speed 5"></button>
+        </div>
+        <button class="as-playstop-btn" id="autoScrollPlayStopBtn" title="Play auto scroll" aria-label="Play auto scroll">&#9654;</button>
     </div>
 
     <!-- ============================================================ -->
