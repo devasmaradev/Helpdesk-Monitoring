@@ -176,8 +176,9 @@
 
         <div class="filter-separator" id="filterSeparatorDim" role="separator"></div>
 
+        <button class="filter-reset" id="btnResetFilters" aria-label="Reset all filters">Reset</button>
+
         <div class="filter-actions">
-            <button class="filter-reset" id="btnResetFilters" aria-label="Reset all filters">Reset</button>
             <div class="download-dropdown">
                 <button class="filter-download" id="btnDownloadTicket" aria-haspopup="true" aria-expanded="false">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -252,7 +253,15 @@
                     <div class="chart-wrapper-md"><canvas id="chartTicketStaff" aria-label="Staff tickets chart"></canvas></div>
                 </div>
 
+                <div class="chart-card chart-wide">
+                    <div class="chart-header">
+                        <div class="chart-title" id="chartShiftTitle">Shift Distribution</div>
+                        <div class="chart-subtitle" id="chartShiftSub">Morning · Day · Night</div>
+                    </div>
+                    <div class="chart-wrapper-tall"><canvas id="chartShift" aria-label="Shift distribution chart"></canvas></div>
+                    <div class="chart-legend" id="legendShift"></div>
                 </div>
+            </div>
 
             <div class="section-header">
                 <span id="lblTrend">Trend &amp; Pattern</span>
@@ -274,15 +283,6 @@
                     </div>
                     <div class="chart-wrapper-tall"><canvas id="chartTrend6M" aria-label="6-month trend chart"></canvas></div>
                     <div class="trend-comparison" id="trend6MComparison"></div>
-                </div>
-
-                <div class="chart-card chart-wide">
-                    <div class="chart-header">
-                        <div class="chart-title" id="chartShiftTitle">Shift Distribution</div>
-                        <div class="chart-subtitle" id="chartShiftSub">Morning · Day · Night</div>
-                    </div>
-                    <div class="chart-wrapper-tall"><canvas id="chartShift" aria-label="Shift distribution chart"></canvas></div>
-                    <div class="chart-legend" id="legendShift"></div>
                 </div>
             </div>
 

@@ -430,6 +430,7 @@ body {
 }
 
 .filter-reset {
+    height: 30px;
     padding: 5px 12px;
     font-family: 'Inter', sans-serif;
     font-size: 12px;
@@ -461,6 +462,7 @@ body {
 .filter-download {
     display: flex;
     align-items: center;
+    height: 30px;
     gap: 6px;
     padding: 5px 12px;
     font-family: 'Inter', sans-serif;
@@ -1918,10 +1920,10 @@ body {
 .incident-btn {
     display: flex;
     align-items: center;
+    height: 30px;
     gap: 7px;
     margin-left: auto;
-    margin-bottom: 6px;
-    padding: 7px 14px;
+    padding: 5px 12px;
     font-family: 'Inter', sans-serif;
     font-size: 12px;
     font-weight: 700;
@@ -1937,6 +1939,10 @@ body {
 .incident-btn:hover {
     background: var(--red);
     color: #fff;
+}
+
+.incident-btn:hover .incident-btn-dot {
+    background: #fff;
 }
 
 .incident-btn-dot {
