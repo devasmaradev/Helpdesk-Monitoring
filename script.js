@@ -37,9 +37,10 @@ var CONFIG = {
         pageSize: 10,
     },
     API: {
-        tickets: 'https://script.google.com/macros/s/AKfycbwOiyJoD3rFgzo78MQxj6cNod6vyB5lwAEx0HVjSKr3NNGAMBJ5pE1d31ECE0tYEJrExg/exec?action=tickets',
-        tasks: 'https://script.google.com/macros/s/AKfycbwOiyJoD3rFgzo78MQxj6cNod6vyB5lwAEx0HVjSKr3NNGAMBJ5pE1d31ECE0tYEJrExg/exec?action=tasks',
-        responseTime: 'https://script.google.com/macros/s/AKfycbwOiyJoD3rFgzo78MQxj6cNod6vyB5lwAEx0HVjSKr3NNGAMBJ5pE1d31ECE0tYEJrExg/exec?action=responsetime',
+        tickets: 'https://script.google.com/macros/s/AKfycbyY9VnK8_ST99Ri_UDfrXmI2ILuFugNt1XR74AuJixxN4HnYIssXqA3-6VtlH-IHiTJKQ/exec?action=tickets',
+        tasks: 'https://script.google.com/macros/s/AKfycbyY9VnK8_ST99Ri_UDfrXmI2ILuFugNt1XR74AuJixxN4HnYIssXqA3-6VtlH-IHiTJKQ/exec?action=tasks',
+        responseTime: 'https://script.google.com/macros/s/AKfycbyY9VnK8_ST99Ri_UDfrXmI2ILuFugNt1XR74AuJixxN4HnYIssXqA3-6VtlH-IHiTJKQ/exec?action=responsetime',
+        incidentSave: 'https://script.google.com/macros/s/AKfycbyY9VnK8_ST99Ri_UDfrXmI2ILuFugNt1XR74AuJixxN4HnYIssXqA3-6VtlH-IHiTJKQ/exec?action=incident',
     },
     AUTH: {
         username: 'admin',
@@ -88,6 +89,8 @@ var LOCALE = {
         activeEsc: 'Active Escalation',
         aht: 'AHT',
         sla: 'SLA Rate',
+        fcrRate: 'FCR Rate',
+        download: 'Unduh',
         subAll: 'Semua tiket masuk',
         subPercent: 'dari total',
         subForwarded: 'Diteruskan ke tim lain',
@@ -209,6 +212,21 @@ var LOCALE = {
         loginPasswordLabel: 'Password',
         loginBtnSubmit: 'Login',
         loginErrorInvalid: 'Username atau password salah.',
+        incidentBtnStart: 'Record Incident',
+        incidentBtnStop: 'Stop Recording',
+        incidentModalTitle: 'Catat Incident',
+        lblIncidentStart: 'Mulai',
+        lblIncidentEnd: 'Selesai',
+        lblIncidentDuration: 'Durasi',
+        lblIncidentProduct: 'Product',
+        lblIncidentProblem: 'Problem',
+        lblIncidentRootCause: 'Root Cause',
+        incidentSelectProduct: 'Pilih product',
+        incidentFormRequired: 'Semua field wajib diisi.',
+        incidentSaveFailed: 'Gagal menyimpan incident. Coba lagi.',
+        incidentCancelBtn: 'Cancel',
+        incidentSaveBtn: 'Save',
+        incidentSaving: 'Menyimpan...',
     },
     en: {
         appTitle: 'Helpdesk Monitor',
@@ -244,6 +262,8 @@ var LOCALE = {
         activeEsc: 'Active Escalation',
         aht: 'AHT',
         sla: 'SLA Rate',
+        fcrRate: 'FCR Rate',
+        download: 'Download',
         subAll: 'All incoming tickets',
         subPercent: 'of total',
         subForwarded: 'Forwarded to another team',
@@ -365,6 +385,21 @@ var LOCALE = {
         loginPasswordLabel: 'Password',
         loginBtnSubmit: 'Login',
         loginErrorInvalid: 'Invalid username or password.',
+        incidentBtnStart: 'Record Incident',
+        incidentBtnStop: 'Stop Recording',
+        incidentModalTitle: 'Record Incident',
+        lblIncidentStart: 'Start',
+        lblIncidentEnd: 'End',
+        lblIncidentDuration: 'Duration',
+        lblIncidentProduct: 'Product',
+        lblIncidentProblem: 'Problem',
+        lblIncidentRootCause: 'Root Cause',
+        incidentSelectProduct: 'Select product',
+        incidentFormRequired: 'All fields are required.',
+        incidentSaveFailed: 'Failed to save incident. Please try again.',
+        incidentCancelBtn: 'Cancel',
+        incidentSaveBtn: 'Save',
+        incidentSaving: 'Saving...',
     },
 };
 
@@ -647,6 +682,36 @@ var Utils = {
             var g = parseInt(hex.slice(3, 5), 16);
             var b = parseInt(hex.slice(5, 7), 16);
             return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+        },
+    },
+
+    CSV: {
+        escapeField: function(val) {
+            if (val === null || val === undefined) return '';
+            val = String(val);
+            if (/[",\n\r]/.test(val)) {
+                val = '"' + val.replace(/"/g, '""') + '"';
+            }
+            return val;
+        },
+        rowsToCSV: function(rows) {
+            return rows.map(function(row) {
+                return (row || []).map(Utils.CSV.escapeField).join(',');
+            }).join('\r\n');
+        },
+    },
+
+    File: {
+        download: function(content, filename, mime) {
+            var blob = new Blob([content], { type: mime });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
         },
     },
 
@@ -947,6 +1012,12 @@ var DataProcessor = {
         return { total: total, closed: closed, issue: issue, nonIssue: nonIssue, activeEsc: activeEsc, slaRate: slaRate, aht: aht };
     },
 
+    calculateFCRRate: function(data) {
+        var total = data.length;
+        var withEscalatedTo = data.filter(function(r) { return r.escalatedTo && r.escalatedTo.trim() !== ''; }).length;
+        return total > 0 ? (withEscalatedTo / total) * 100 : 0;
+    },
+
     calculateEscalationStats: function(data) {
         var esc = data.filter(function(r) { return r.esc === 'Yes'; });
         var total = esc.length;
@@ -1239,6 +1310,8 @@ var DataProcessor = {
             var artResult = DataProcessor.calculateART(rtData.filter(function(r) { return r.month === m; }), 'all', appState.meta.responseTimeStaffCols);
             kpi.artMinutes = artResult.avgMinutes;
             kpi.artCount = artResult.count;
+            kpi.totalTasks = taskRows.length;
+            kpi.fcrRate = DataProcessor.calculateFCRRate(rows);
             return {
                 key: m,
                 label: m.replace(/\[\d+\]\s*/, '').trim(),
@@ -2443,6 +2516,25 @@ var UIRenderer = {
                 { label: t('issue'), data: chartData.issue, color: CONFIG.CHART.colors.issue },
             ]
         );
+
+        var comp = document.getElementById('trend6MComparison');
+        if (comp) {
+            var half = Math.floor(chartData.issue.length / 2);
+
+            var cmp = function(arr, label) {
+                var prev = arr.slice(0, half).reduce(function(a, b) { return a + b; }, 0);
+                var cur = arr.slice(half).reduce(function(a, b) { return a + b; }, 0);
+                if (!prev && !cur) return '<div class="trend-badge flat">→ ' + label + ' ' + t('stable') + '</div>';
+                var delta = cur - prev;
+                var pct = prev > 0 ? Math.abs(Math.round((delta / prev) * 100)) : 100;
+                if (delta > 0) return '<div class="trend-badge up">↑ ' + label + ' +' + pct + '%</div>';
+                if (delta < 0) return '<div class="trend-badge down">↓ ' + label + ' −' + pct + '%</div>';
+                return '<div class="trend-badge flat">→ ' + label + ' ' + t('stable') + '</div>';
+            };
+
+            comp.innerHTML = cmp(chartData.issue, t('issue')) + cmp(chartData.nonIssue, t('nonIssue')) +
+                '<span class="trend-context">' + t('trendContext') + '</span>';
+        }
     },
 
     _renderShiftChart: function(data, canvasId, legendId, subtitleId) {
@@ -2471,12 +2563,12 @@ var UIRenderer = {
             subtitleEl.textContent = labels.join(' · ');
         }
 
-        ChartEngine.createStackedBar(
+        ChartEngine.createLine(
             canvasId,
             labels,
             [
-                { label: t('issue'), data: issue, color: CONFIG.CHART.colors.issue },
                 { label: t('nonIssue'), data: nonIssue, color: CONFIG.CHART.colors.non },
+                { label: t('issue'), data: issue, color: CONFIG.CHART.colors.issue },
             ]
         );
 
@@ -2864,8 +2956,10 @@ var UIRenderer = {
             { id: 'issue', get: function(k) { return k.issue; }, fmt: function(v) { return String(v); }, invert: true },
             { id: 'nonIssue', get: function(k) { return k.nonIssue; }, fmt: function(v) { return String(v); }, invert: false },
             { id: 'activeEsc', get: function(k) { return k.activeEsc; }, fmt: function(v) { return String(v); }, invert: true },
+            { id: 'totalTasks', get: function(k) { return k.totalTasks; }, fmt: function(v) { return String(v); }, invert: false },
             { id: 'aht', get: function(k) { return k.aht; }, fmt: function(v) { return Utils.Duration.formatAHT(v); }, invert: true },
             { id: 'avgResponseTime', get: function(k) { return k.artCount > 0 ? k.artMinutes : null; }, fmt: function(v) { return v === null ? '-' : Utils.Duration.formatAHT(v); }, invert: true },
+            { id: 'fcrRate', get: function(k) { return k.fcrRate; }, fmt: function(v) { return v.toFixed(1) + '%'; }, invert: false },
             { id: 'sla', get: function(k) { return k.slaRate; }, fmt: function(v) { return v.toFixed(1) + '%'; }, invert: false },
         ];
 
@@ -3198,6 +3292,354 @@ var UIRenderer = {
 };
 
 /* ================================================================
+   EXPORT ENGINE
+   ================================================================ */
+
+var ExportEngine = {
+
+    _timestamp: function() {
+        var d = new Date();
+        var pad = function(n) { return String(n).padStart(2, '0'); };
+        return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '_' + pad(d.getHours()) + pad(d.getMinutes());
+    },
+
+    _sanitizeSheetName: function(name, usedNames) {
+        var clean = String(name).replace(/[:\\/\?\*\[\]]/g, ' ').replace(/\s+/g, ' ').trim();
+        if (clean.length > 31) clean = clean.slice(0, 31);
+        if (!clean) clean = 'Sheet';
+        var base = clean;
+        var counter = 1;
+        while (usedNames[clean]) {
+            var suffix = '_' + counter;
+            clean = base.slice(0, 31 - suffix.length) + suffix;
+            counter++;
+        }
+        usedNames[clean] = true;
+        return clean;
+    },
+
+    getFilterInfoText: function(kind) {
+        if (kind === 'mtm') {
+            var mf = appState.mtmFilters;
+            var mtmPeriod = (mf.monthFrom && mf.monthTo) ?
+                (mf.monthFrom.replace(/\[\d+\]\s*/, '') + ' - ' + mf.monthTo.replace(/\[\d+\]\s*/, '')) :
+                t('allData');
+            return t('period') + ': ' + mtmPeriod;
+        }
+
+        var filters = appState.filters;
+        var periodParts = [];
+        if (filters.month !== 'all') periodParts.push(filters.month.replace(/\[\d+\]\s*/, ''));
+        if (filters.week !== 'all') periodParts.push(filters.week);
+        var periodText = periodParts.length ? periodParts.join(' / ') : t('allMonths');
+
+        var dateRangeText = (filters.dateFrom || filters.dateTo) ?
+            ((filters.dateFrom || '…') + ' ' + t('to') + ' ' + (filters.dateTo || '…')) : '-';
+
+        var dimensionParts = [];
+        if (kind === 'task') {
+            if (filters.taskStaff !== 'all') dimensionParts.push(t('thStaff') + '=' + filters.taskStaff);
+        } else {
+            if (filters.product !== 'all') dimensionParts.push(t('prodTitle') + '=' + filters.product);
+            if (filters.tier !== 'all') dimensionParts.push(t('tierTitle') + '=' + Utils.String.formatTier(filters.tier));
+            if (filters.staff !== 'all') dimensionParts.push(t('thStaff') + '=' + filters.staff);
+            if (filters.shift !== 'all') dimensionParts.push(t('shiftTitle') + '=' + filters.shift);
+        }
+        var dimensionText = dimensionParts.length ? dimensionParts.join(', ') : t('allData');
+
+        return t('period') + ': ' + periodText + ' | ' + t('dateRange') + ': ' + dateRangeText + ' | ' + t('dimension') + ': ' + dimensionText;
+    },
+
+    buildTicketSections: function() {
+        var tickets = appState.filteredTickets;
+        var kpi = DataProcessor.calculateKPIs(tickets);
+        var artCur = DataProcessor.calculateART(appState.filteredResponseTimes, appState.filters.staff, appState.meta.responseTimeStaffCols);
+        var sections = [];
+
+        sections.push({
+            name: t('overview'),
+            header: [t('mtmMetricHeader'), 'Value'],
+            rows: [
+                [t('totalTickets'), kpi.total],
+                [t('closed'), kpi.closed],
+                [t('issue'), kpi.issue],
+                [t('nonIssue'), kpi.nonIssue],
+                [t('activeEsc'), kpi.activeEsc],
+                [t('aht'), Utils.Duration.formatAHT(kpi.aht)],
+                [t('avgResponseTime'), artCur.count > 0 ? Utils.Duration.formatAHT(artCur.avgMinutes) : '-'],
+                [t('sla'), kpi.slaRate.toFixed(1) + '%'],
+            ],
+        });
+
+        var esc = DataProcessor.calculateEscalationStats(tickets);
+        sections.push({
+            name: t('escalation'),
+            header: [t('mtmMetricHeader'), 'Value'],
+            rows: [
+                [t('escTotal'), esc.total],
+                [t('escActive'), esc.active],
+                [t('escClosed'), esc.closed],
+                [t('escRate'), esc.rate.toFixed(1) + '%'],
+            ],
+        });
+
+        if (esc.byProduct.length) {
+            sections.push({
+                name: t('escByProduct'),
+                header: [t('prodTitle'), t('totalTickets'), t('escActive')],
+                rows: esc.byProduct.map(function(x) { return [x.label, x.total, x.active]; }),
+            });
+        }
+        if (esc.byTier.length) {
+            sections.push({
+                name: t('escByTier'),
+                header: [t('tierTitle'), t('totalTickets'), t('escActive')],
+                rows: esc.byTier.map(function(x) { return [x.label, x.total, x.active]; }),
+            });
+        }
+        if (esc.byType.length) {
+            sections.push({
+                name: t('escByType'),
+                header: ['Type', t('totalTickets'), t('escActive')],
+                rows: esc.byType.map(function(x) { return [x.name, x.total, x.active]; }),
+            });
+        }
+        if (esc.activeRows.length) {
+            sections.push({
+                name: t('activeEsc'),
+                header: [t('thClient'), t('thTask'), t('thTag'), t('thStatus'), t('thDate'), t('thEscalatedto')],
+                rows: esc.activeRows.map(function(r) { return [r.client, r.problem, r.product, r.priority, r.date, r.escalatedTo]; }),
+            });
+        }
+
+        var pri = DataProcessor.preparePriorityData(tickets);
+        sections.push({
+            name: t('priTitle'),
+            header: [t('priTitle'), t('totalTickets')],
+            rows: pri.labels.map(function(l, i) { return [l, pri.values[i]]; }),
+        });
+
+        var tier = DataProcessor.prepareTierData(tickets);
+        sections.push({
+            name: t('tierTitle'),
+            header: [t('tierTitle'), t('issue'), t('nonIssue'), t('total')],
+            rows: tier.labels.map(function(l, i) { return [l, tier.issue[i], tier.nonIssue[i], tier.totals[i]]; }),
+        });
+
+        var prod = DataProcessor.prepareProductData(tickets);
+        sections.push({
+            name: t('prodTitle'),
+            header: [t('prodTitle'), t('issue'), t('nonIssue')],
+            rows: prod.labels.map(function(l, i) { return [l, prod.issue[i], prod.nonIssue[i]]; }),
+        });
+
+        var staff = DataProcessor.prepareStaffData(tickets);
+        sections.push({
+            name: t('staffTitle'),
+            header: [t('staffTitle'), t('totalTickets')],
+            rows: staff.labels.map(function(l, i) { return [l, staff.values[i]]; }),
+        });
+
+        var trend7 = DataProcessor.prepareTrendData(appState.tickets);
+        sections.push({
+            name: t('trendTitle'),
+            header: [t('trendTitle'), t('issue'), t('nonIssue')],
+            rows: trend7.labels.map(function(l, i) { return [l, trend7.issue[i], trend7.nonIssue[i]]; }),
+        });
+
+        var trend6m = DataProcessor.prepare6MonthTrendData(appState.tickets);
+        sections.push({
+            name: t('trend6MTitle'),
+            header: [t('trend6MTitle'), t('issue'), t('nonIssue')],
+            rows: trend6m.labels.map(function(l, i) { return [l, trend6m.issue[i], trend6m.nonIssue[i]]; }),
+        });
+
+        var shift = DataProcessor.prepareShiftData(tickets);
+        sections.push({
+            name: t('shiftTitle'),
+            header: [t('shiftTitle'), t('issue'), t('nonIssue'), t('total')],
+            rows: shift.labels.map(function(l, i) { return [l, shift.issue[i], shift.nonIssue[i], shift.totals[i]]; }),
+        });
+
+        var topClient = DataProcessor.prepareTopClientIssueData(tickets);
+        sections.push({
+            name: t('topClientTitle'),
+            header: ['#', t('topClientNameHeader'), t('topClientTotalHeader')],
+            rows: topClient.map(function(item, i) { return [i + 1, item.name, item.count]; }),
+        });
+
+        return sections;
+    },
+
+    buildTaskSections: function() {
+        var tasks = FilterEngine.applyTaskFilters(appState.tasks, appState.filters);
+        var metrics = DataProcessor.calculateTaskMetrics(tasks);
+        var sections = [];
+
+        sections.push({
+            name: t('taskOverview'),
+            header: [t('mtmMetricHeader'), 'Value'],
+            rows: [
+                [t('totalTasks'), metrics.total],
+                ['Done', metrics.done],
+                ['Progress', metrics.progress],
+                [t('totalWorkHours'), Utils.Duration.formatHMS(metrics.totalMinutes)],
+            ],
+        });
+
+        var statusLabels = [];
+        var statusData = [];
+        if (metrics.done > 0) { statusLabels.push('Done'); statusData.push(metrics.done); }
+        if (metrics.progress > 0) { statusLabels.push('Progress'); statusData.push(metrics.progress); }
+        sections.push({
+            name: t('taskStatusTitle'),
+            header: [t('taskStatusTitle'), t('totalTasks')],
+            rows: statusLabels.map(function(l, i) { return [l, statusData[i]]; }),
+        });
+
+        var staffData = UIRenderer._prepareTaskStaffData(tasks);
+        sections.push({
+            name: t('taskStaffTitle'),
+            header: [t('thStaff'), t('totalTasks')],
+            rows: staffData.labels.map(function(l, i) { return [l, staffData.values[i]]; }),
+        });
+
+        var taskRows = tasks.slice()
+            .sort(function(a, b) { return Utils.Date.parseTaskDate(b.start) - Utils.Date.parseTaskDate(a.start); })
+            .map(function(tk) {
+                return [tk.staff, tk.task, tk.note || '-', Utils.Duration.formatHMS(Utils.Duration.parse(tk.duration)), tk.status, Utils.Date.formatTaskDate(tk.start)];
+            });
+        sections.push({
+            name: t('taskTableTitle'),
+            header: [t('thStaff'), t('thTask'), t('thTag'), 'Duration', t('thStatus'), t('thDate')],
+            rows: taskRows,
+        });
+
+        return sections;
+    },
+
+    buildMTMSections: function() {
+        var filters = appState.mtmFilters;
+        var data = DataProcessor.prepareMonthlyComparison(appState.tickets, filters.monthFrom, filters.monthTo, appState.responseTimes, appState.tasks);
+        if (!data || !data.buckets.length) return [];
+
+        var buckets = data.buckets;
+        var sections = [];
+
+        var metricDefs = [
+            { id: 'totalTickets', get: function(k) { return k.total; } },
+            { id: 'closed', get: function(k) { return k.closed; } },
+            { id: 'issue', get: function(k) { return k.issue; } },
+            { id: 'nonIssue', get: function(k) { return k.nonIssue; } },
+            { id: 'activeEsc', get: function(k) { return k.activeEsc; } },
+            { id: 'totalTasks', get: function(k) { return k.totalTasks; } },
+            { id: 'aht', get: function(k) { return Utils.Duration.formatAHT(k.aht); } },
+            { id: 'avgResponseTime', get: function(k) { return k.artCount > 0 ? Utils.Duration.formatAHT(k.artMinutes) : '-'; } },
+            { id: 'fcrRate', get: function(k) { return k.fcrRate.toFixed(1) + '%'; } },
+            { id: 'sla', get: function(k) { return k.slaRate.toFixed(1) + '%'; } },
+        ];
+        sections.push({
+            name: t('mtmTableTitle'),
+            header: [t('mtmMetricHeader')].concat(buckets.map(function(b) { return b.label; })),
+            rows: metricDefs.map(function(m) {
+                return [t(m.id)].concat(buckets.map(function(b) { return m.get(b.kpi); }));
+            }),
+        });
+
+        sections.push({
+            name: t('mtmPriorityTitle'),
+            header: [t('mtmPriorityTitle')].concat(buckets.map(function(b) { return b.label; })),
+            rows: CONFIG.PRIORITIES.map(function(p) {
+                return [p].concat(buckets.map(function(b) {
+                    var idx = b.priority.labels.indexOf(p);
+                    return idx !== -1 ? b.priority.values[idx] : 0;
+                }));
+            }),
+        });
+
+        var productData = DataProcessor.prepareMonthlyProductComparison(buckets);
+        sections.push({
+            name: t('mtmProdTitle'),
+            header: [t('mtmProdTitle')].concat(productData.labels),
+            rows: productData.datasets.map(function(ds) { return [ds.label].concat(ds.data); }),
+        });
+
+        var staffCompareData = DataProcessor.prepareMonthlyStaffComparison(buckets);
+        sections.push({
+            name: t('mtmStaffTitle'),
+            header: [t('mtmStaffTitle')].concat(staffCompareData.labels),
+            rows: staffCompareData.datasets.map(function(ds) { return [ds.label].concat(ds.data); }),
+        });
+
+        var taskStaffCompareData = DataProcessor.prepareMonthlyTaskStaffComparison(buckets);
+        sections.push({
+            name: t('mtmTaskStaffTitle'),
+            header: [t('mtmTaskStaffTitle')].concat(taskStaffCompareData.labels),
+            rows: taskStaffCompareData.datasets.map(function(ds) { return [ds.label].concat(ds.data); }),
+        });
+
+        var shiftCompareData = DataProcessor.prepareMonthlyShiftComparison(buckets);
+        sections.push({
+            name: t('mtmShiftTitle'),
+            header: [t('mtmShiftTitle')].concat(shiftCompareData.labels),
+            rows: shiftCompareData.datasets.map(function(ds) { return [ds.label].concat(ds.data); }),
+        });
+
+        return sections;
+    },
+
+    exportExcel: function(sections, filterText, filenamePrefix) {
+        if (typeof XLSX === 'undefined') {
+            console.error('XLSX library not loaded');
+            return;
+        }
+        var wb = XLSX.utils.book_new();
+        var usedNames = {};
+        sections.forEach(function(sec) {
+            var rows = [[filterText], []].concat([sec.header]).concat(sec.rows);
+            var ws = XLSX.utils.aoa_to_sheet(rows);
+            var sheetName = ExportEngine._sanitizeSheetName(sec.name, usedNames);
+            XLSX.utils.book_append_sheet(wb, ws, sheetName);
+        });
+        XLSX.writeFile(wb, filenamePrefix + '_' + ExportEngine._timestamp() + '.xlsx');
+    },
+
+    exportCSV: function(sections, filterText, filenamePrefix) {
+        var lines = [[filterText], []];
+        sections.forEach(function(sec) {
+            lines.push(['=== ' + sec.name + ' ===']);
+            lines.push(sec.header);
+            sec.rows.forEach(function(r) { lines.push(r); });
+            lines.push([]);
+        });
+        var csv = Utils.CSV.rowsToCSV(lines);
+        Utils.File.download('\uFEFF' + csv, filenamePrefix + '_' + ExportEngine._timestamp() + '.csv', 'text/csv;charset=utf-8;');
+    },
+
+    downloadTicket: function(format) {
+        var sections = ExportEngine.buildTicketSections();
+        var filterText = ExportEngine.getFilterInfoText('ticket');
+        if (format === 'xlsx') ExportEngine.exportExcel(sections, filterText, 'Ticket_Report');
+        else ExportEngine.exportCSV(sections, filterText, 'Ticket_Report');
+    },
+
+    downloadTask: function(format) {
+        var sections = ExportEngine.buildTaskSections();
+        var filterText = ExportEngine.getFilterInfoText('task');
+        if (format === 'xlsx') ExportEngine.exportExcel(sections, filterText, 'Task_Report');
+        else ExportEngine.exportCSV(sections, filterText, 'Task_Report');
+    },
+
+    downloadMTM: function(format) {
+        var sections = ExportEngine.buildMTMSections();
+        if (!sections.length) return;
+        var filterText = ExportEngine.getFilterInfoText('mtm');
+        if (format === 'xlsx') ExportEngine.exportExcel(sections, filterText, 'MTM_Report');
+        else ExportEngine.exportCSV(sections, filterText, 'MTM_Report');
+    },
+};
+
+/* ================================================================
    EVENT HANDLERS
    ================================================================ */
 
@@ -3261,6 +3703,46 @@ var EventHandlers = {
 
         var resetMTMBtn = document.getElementById('btnResetMTMFilters');
         if (resetMTMBtn) resetMTMBtn.addEventListener('click', function() { self.onResetMTMFilters(); });
+
+        var btnDownloadTicket = document.getElementById('btnDownloadTicket');
+        if (btnDownloadTicket) {
+            btnDownloadTicket.addEventListener('click', function(e) {
+                e.stopPropagation();
+                document.getElementById('downloadMenuTicket').classList.toggle('is-open');
+            });
+        }
+        document.querySelectorAll('#downloadMenuTicket .download-menu-item').forEach(function(item) {
+            item.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var format = item.dataset.format;
+                document.getElementById('downloadMenuTicket').classList.remove('is-open');
+                if (appState.ui.currentMenu === 'task') {
+                    ExportEngine.downloadTask(format);
+                } else {
+                    ExportEngine.downloadTicket(format);
+                }
+            });
+        });
+
+        var btnDownloadMTM = document.getElementById('btnDownloadMTM');
+        if (btnDownloadMTM) {
+            btnDownloadMTM.addEventListener('click', function(e) {
+                e.stopPropagation();
+                document.getElementById('downloadMenuMTM').classList.toggle('is-open');
+            });
+        }
+        document.querySelectorAll('#downloadMenuMTM .download-menu-item').forEach(function(item) {
+            item.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var format = item.dataset.format;
+                document.getElementById('downloadMenuMTM').classList.remove('is-open');
+                ExportEngine.downloadMTM(format);
+            });
+        });
+
+        document.addEventListener('click', function() {
+            document.querySelectorAll('.download-menu.is-open').forEach(function(m) { m.classList.remove('is-open'); });
+        });
 
         document.getElementById('topClientModalClose')?.addEventListener('click', function() { UIRenderer._hideTopClientModal(); });
         document.getElementById('topClientModalOverlay')?.addEventListener('click', function(e) {
@@ -3495,6 +3977,8 @@ var EventHandlers = {
             chartMTMTaskStaffTitle: 'mtmTaskStaffTitle', chartMTMTaskStaffSub: 'mtmTaskStaffSub',
             chartMTMShiftTitle: 'mtmShiftTitle',
             btnResetMTMFilters: 'reset',
+            lblDownload: 'download',
+            lblDownloadMTM: 'download',
             mtmEmptyText: 'mtmEmptyText',
             mtmTableTitle: 'mtmTableTitle',
             mtmTableSub: 'mtmTableSub',
@@ -3517,6 +4001,15 @@ var EventHandlers = {
             mtmPriorityTitle: 'mtmPriorityTitle',
             mtmPrioritySub: 'mtmPrioritySub',
             footerText: 'footer',
+            incidentModalTitle: 'incidentModalTitle',
+            lblIncidentStart: 'lblIncidentStart',
+            lblIncidentEnd: 'lblIncidentEnd',
+            lblIncidentDuration: 'lblIncidentDuration',
+            lblIncidentProduct: 'lblIncidentProduct',
+            lblIncidentProblem: 'lblIncidentProblem',
+            lblIncidentRootCause: 'lblIncidentRootCause',
+            incidentCancelBtn: 'incidentCancelBtn',
+            incidentSaveBtn: 'incidentSaveBtn',
         };
         Object.keys(map).forEach(function(id) {
             var el = document.getElementById(id);
@@ -3525,6 +4018,11 @@ var EventHandlers = {
 
         var searchInput = document.getElementById('taskSearchInput');
         if (searchInput) searchInput.placeholder = t('taskSearchPlaceholder');
+
+        var incidentLabel = document.getElementById('incidentBtnLabel');
+        if (incidentLabel) {
+            incidentLabel.textContent = IncidentTracker.startTime ? t('incidentBtnStop') : t('incidentBtnStart');
+        }
     },
 
     onRefresh: function() {
@@ -4073,6 +4571,220 @@ var AutoScroll = {
 };
 
 /* ================================================================
+   INCIDENT TRACKER
+   ================================================================ */
+
+var IncidentTracker = {
+    startTime: null,
+    endTime: null,
+    timerId: null,
+
+    init: function() {
+        var self = this;
+
+        var btn = document.getElementById('btnIncident');
+        if (btn) btn.addEventListener('click', function() { self.toggle(); });
+
+        var form = document.getElementById('incidentForm');
+        if (form) form.addEventListener('submit', function(e) { e.preventDefault(); self.save(); });
+
+        var cancelBtn = document.getElementById('incidentCancelBtn');
+        if (cancelBtn) cancelBtn.addEventListener('click', function() { self.cancel(); });
+
+        var closeBtn = document.getElementById('incidentModalClose');
+        if (closeBtn) closeBtn.addEventListener('click', function() { self.cancel(); });
+
+        var overlay = document.getElementById('incidentModalOverlay');
+        if (overlay) {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) self.cancel();
+            });
+        }
+    },
+
+    toggle: function() {
+        if (this.startTime) {
+            this.stop();
+        } else {
+            this.start();
+        }
+    },
+
+    start: function() {
+        this.startTime = new Date();
+        this.endTime = null;
+
+        var btn = document.getElementById('btnIncident');
+        var label = document.getElementById('incidentBtnLabel');
+        var timerEl = document.getElementById('incidentTimer');
+
+        if (btn) btn.classList.add('is-recording');
+        if (label) label.textContent = t('incidentBtnStop');
+        if (timerEl) timerEl.style.display = '';
+
+        this._tick();
+        var self = this;
+        this.timerId = setInterval(function() { self._tick(); }, 1000);
+    },
+
+    _tick: function() {
+        var timerEl = document.getElementById('incidentTimer');
+        if (!timerEl || !this.startTime) return;
+        var diffSec = Math.floor((Date.now() - this.startTime.getTime()) / 1000);
+        var h = Math.floor(diffSec / 3600);
+        var m = Math.floor((diffSec % 3600) / 60);
+        var s = diffSec % 60;
+        timerEl.textContent = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    },
+
+    stop: function() {
+        if (!this.startTime) return;
+        this.endTime = new Date();
+        clearInterval(this.timerId);
+        this.timerId = null;
+        this._openModal();
+    },
+
+    cancel: function() {
+        clearInterval(this.timerId);
+        this.timerId = null;
+        this.startTime = null;
+        this.endTime = null;
+
+        this._resetButton();
+        this._closeModal();
+
+        var form = document.getElementById('incidentForm');
+        if (form) form.reset();
+        var errEl = document.getElementById('incidentFormError');
+        if (errEl) errEl.textContent = '';
+    },
+
+    _resetButton: function() {
+        var btn = document.getElementById('btnIncident');
+        var label = document.getElementById('incidentBtnLabel');
+        var timerEl = document.getElementById('incidentTimer');
+
+        if (btn) btn.classList.remove('is-recording');
+        if (label) label.textContent = t('incidentBtnStart');
+        if (timerEl) {
+            timerEl.style.display = 'none';
+            timerEl.textContent = '00:00:00';
+        }
+    },
+
+    _openModal: function() {
+        this._populateProductOptions();
+
+        var startDisp = document.getElementById('incidentStartDisplay');
+        var endDisp = document.getElementById('incidentEndDisplay');
+        var durDisp = document.getElementById('incidentDurationDisplay');
+
+        if (startDisp) startDisp.textContent = this._formatDateTime(this.startTime);
+        if (endDisp) endDisp.textContent = this._formatDateTime(this.endTime);
+        if (durDisp) durDisp.textContent = this._formatDuration(this.startTime, this.endTime);
+
+        var overlay = document.getElementById('incidentModalOverlay');
+        if (overlay) overlay.classList.add('is-open');
+    },
+
+    _closeModal: function() {
+        var overlay = document.getElementById('incidentModalOverlay');
+        if (overlay) overlay.classList.remove('is-open');
+    },
+
+    _formatDateTime: function(d) {
+        if (!d) return '-';
+        var pad = function(n) { return String(n).padStart(2, '0'); };
+        return pad(d.getMonth() + 1) + '/' + pad(d.getDate()) + '/' + d.getFullYear() + ' ' +
+            pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+    },
+
+    _formatDuration: function(start, end) {
+        if (!start || !end) return '-';
+        var totalSec = Math.max(0, Math.round((end.getTime() - start.getTime()) / 1000));
+        var h = Math.floor(totalSec / 3600);
+        var m = Math.floor((totalSec % 3600) / 60);
+        var s = totalSec % 60;
+        return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    },
+
+    _populateProductOptions: function() {
+        var select = document.getElementById('incidentProduct');
+        if (!select) return;
+        var current = select.value;
+        var products = Utils.Array.distinct(appState.tickets.map(function(r) { return r.product; })).filter(Boolean).sort();
+
+        select.innerHTML = '<option value="">' + t('incidentSelectProduct') + '</option>' +
+            products.map(function(p) {
+                return '<option value="' + Utils.String.escapeHtml(p) + '">' + Utils.String.escapeHtml(p) + '</option>';
+            }).join('');
+
+        if (products.indexOf(current) !== -1) select.value = current;
+    },
+
+    save: function() {
+        var productSel = document.getElementById('incidentProduct');
+        var problemEl = document.getElementById('incidentProblem');
+        var rootCauseEl = document.getElementById('incidentRootCause');
+        var errEl = document.getElementById('incidentFormError');
+        var saveBtn = document.getElementById('incidentSaveBtn');
+
+        var product = productSel ? productSel.value.trim() : '';
+        var problem = problemEl ? problemEl.value.trim() : '';
+        var rootCause = rootCauseEl ? rootCauseEl.value.trim() : '';
+
+        if (!product || !problem || !rootCause) {
+            if (errEl) errEl.textContent = t('incidentFormRequired');
+            return;
+        }
+        if (errEl) errEl.textContent = '';
+
+        var payload = {
+            startTime: this.startTime.toISOString(),
+            endTime: this.endTime.toISOString(),
+            product: product,
+            problem: problem,
+            rootCause: rootCause,
+        };
+
+        var self = this;
+        if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.textContent = t('incidentSaving');
+        }
+
+        fetch(CONFIG.API.incidentSave, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload),
+        })
+            .then(function(res) { return res.json(); })
+            .then(function(json) {
+                if (!json || json.success === false) {
+                    throw new Error((json && json.message) || 'Save failed');
+                }
+                self.startTime = null;
+                self.endTime = null;
+                self._resetButton();
+                self._closeModal();
+                var form = document.getElementById('incidentForm');
+                if (form) form.reset();
+            })
+            .catch(function(err) {
+                console.error('Failed to save incident:', err);
+                if (errEl) errEl.textContent = t('incidentSaveFailed');
+            })
+            .finally(function() {
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = t('incidentSaveBtn');
+                }
+            });
+    },
+};
+
+/* ================================================================
    BOOT
    ================================================================ */
 
@@ -4080,6 +4792,7 @@ document.addEventListener('DOMContentLoaded', function() {
     Auth.init();
     EventHandlers.applyStaticTranslations();
     AutoScroll.init();
+    IncidentTracker.init();
 
     if (Auth.isAuthenticated()) {
         Auth.hideLoginScreen();

@@ -8,6 +8,8 @@
     <!-- External Dependencies -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js">
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
 
     <!-- Styles -->
@@ -107,6 +109,12 @@
             </svg>
             <span id="lblMenuMTM">Month-to-Month</span>
         </button>
+
+        <button class="incident-btn" id="btnIncident" type="button" aria-label="Record incident">
+            <span class="incident-btn-dot" aria-hidden="true"></span>
+            <span id="incidentBtnLabel">Record Incident</span>
+            <span class="incident-btn-timer" id="incidentTimer" style="display:none">00:00:00</span>
+        </button>
     </nav>
 
     <!-- ============================================================ -->
@@ -168,7 +176,21 @@
 
         <div class="filter-separator" id="filterSeparatorDim" role="separator"></div>
 
-        <button class="filter-reset" id="btnResetFilters" aria-label="Reset all filters">Reset</button>
+        <div class="filter-actions">
+            <button class="filter-reset" id="btnResetFilters" aria-label="Reset all filters">Reset</button>
+            <div class="download-dropdown">
+                <button class="filter-download" id="btnDownloadTicket" aria-haspopup="true" aria-expanded="false">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" />
+                    </svg>
+                    <span id="lblDownload">Download</span>
+                </button>
+                <div class="download-menu" id="downloadMenuTicket">
+                    <button class="download-menu-item" data-format="csv">CSV</button>
+                    <button class="download-menu-item" data-format="xlsx">Excel (.xlsx)</button>
+                </div>
+            </div>
+        </div>
     </section>
 
     <!-- ============================================================ -->
@@ -195,7 +217,7 @@
             <div class="section-header">
                 <span id="lblDistribution">Distribution &amp; Categories</span>
             </div>
-            <div class="chart-grid">
+            <div class="chart-grid chart-grid-4">
                 <div class="chart-card">
                     <div class="chart-header">
                         <div class="chart-title" id="chartPriTitle">Priority Distribution</div>
@@ -251,6 +273,7 @@
                         <div class="chart-subtitle" id="chartTrend6MSub">Monthly volume — Issue vs Non-Issue (all data)</div>
                     </div>
                     <div class="chart-wrapper-tall"><canvas id="chartTrend6M" aria-label="6-month trend chart"></canvas></div>
+                    <div class="trend-comparison" id="trend6MComparison"></div>
                 </div>
 
                 <div class="chart-card chart-wide">
@@ -258,7 +281,7 @@
                         <div class="chart-title" id="chartShiftTitle">Shift Distribution</div>
                         <div class="chart-subtitle" id="chartShiftSub">Morning · Day · Night</div>
                     </div>
-                    <div class="chart-wrapper-md"><canvas id="chartShift" aria-label="Shift distribution chart"></canvas></div>
+                    <div class="chart-wrapper-tall"><canvas id="chartShift" aria-label="Shift distribution chart"></canvas></div>
                     <div class="chart-legend" id="legendShift"></div>
                 </div>
             </div>
@@ -364,7 +387,21 @@
                         <select id="filterMTMMonthTo" aria-label="MTM month to"></select>
                     </div>
                 </div>
-                <button class="filter-reset" id="btnResetMTMFilters" aria-label="Reset month comparison filters">Reset</button>
+                <div class="filter-actions">
+                    <button class="filter-reset" id="btnResetMTMFilters" aria-label="Reset month comparison filters">Reset</button>
+                    <div class="download-dropdown">
+                        <button class="filter-download" id="btnDownloadMTM" aria-haspopup="true" aria-expanded="false">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" />
+                            </svg>
+                            <span id="lblDownloadMTM">Download</span>
+                        </button>
+                        <div class="download-menu" id="downloadMenuMTM">
+                            <button class="download-menu-item" data-format="csv">CSV</button>
+                            <button class="download-menu-item" data-format="xlsx">Excel (.xlsx)</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="section-header">
@@ -523,6 +560,44 @@
                 <button class="modal-close" id="topClientModalClose" aria-label="Close">&times;</button>
             </div>
             <div class="modal-body" id="topClientModalBody"></div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- INCIDENT RECORD MODAL -->
+    <!-- ============================================================ -->
+    <div class="modal-overlay" id="incidentModalOverlay">
+        <div class="modal-box incident-modal-box" role="dialog" aria-modal="true" aria-labelledby="incidentModalTitle">
+            <div class="modal-header">
+                <div class="modal-title" id="incidentModalTitle">Record Incident</div>
+                <button class="modal-close" id="incidentModalClose" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="incidentForm" autocomplete="off">
+                    <div class="incident-form-summary">
+                        <div><span id="lblIncidentStart">Start</span>: <strong id="incidentStartDisplay">-</strong></div>
+                        <div><span id="lblIncidentEnd">End</span>: <strong id="incidentEndDisplay">-</strong></div>
+                        <div><span id="lblIncidentDuration">Duration</span>: <strong id="incidentDurationDisplay">-</strong></div>
+                    </div>
+                    <div class="login-field">
+                        <label for="incidentProduct" id="lblIncidentProduct">Product</label>
+                        <select id="incidentProduct" required></select>
+                    </div>
+                    <div class="login-field">
+                        <label for="incidentProblem" id="lblIncidentProblem">Problem</label>
+                        <textarea id="incidentProblem" rows="3" required></textarea>
+                    </div>
+                    <div class="login-field">
+                        <label for="incidentRootCause" id="lblIncidentRootCause">Root Cause</label>
+                        <textarea id="incidentRootCause" rows="3" required></textarea>
+                    </div>
+                    <div class="incident-form-error" id="incidentFormError"></div>
+                    <div class="incident-form-actions">
+                        <button type="button" class="filter-reset" id="incidentCancelBtn">Cancel</button>
+                        <button type="submit" class="login-btn" id="incidentSaveBtn">Save</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
