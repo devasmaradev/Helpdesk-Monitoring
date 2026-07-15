@@ -4,7 +4,7 @@
 
 var CONFIG = {
     APP: {
-        name: 'Helpdesk Monitor',
+        name: 'Helpdesk Monitoring Dashboard',
         version: '2.0.0',
         defaultLanguage: 'en',
         defaultTheme: 'light',
@@ -56,7 +56,7 @@ var CONFIG = {
 
 var LOCALE = {
     id: {
-        appTitle: 'Helpdesk Monitor',
+        appTitle: 'Helpdesk Monitoring Dashboard',
         appSubtitle: 'Januari 2026',
         live: 'Live',
         syncing: 'Menyinkronkan…',
@@ -229,7 +229,7 @@ var LOCALE = {
         incidentSaving: 'Menyimpan...',
     },
     en: {
-        appTitle: 'Helpdesk Monitor',
+        appTitle: 'Helpdesk Monitoring Dashboard',
         appSubtitle: 'January 2026',
         live: 'Live',
         syncing: 'Syncing…',
