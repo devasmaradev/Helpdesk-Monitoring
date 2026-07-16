@@ -63,14 +63,21 @@
     <!-- ============================================================ -->
     <header class="header" role="banner">
         <div class="header-left">
-            <div class="logo" aria-hidden="true">
-                <svg viewBox="0 0 16 16" fill="none">
-                    <rect x="1" y="8" width="3" height="7" rx="1" fill="white" opacity=".4" />
-                    <rect x="6" y="4" width="3" height="11" rx="1" fill="white" opacity=".75" />
-                    <rect x="11" y="1" width="3" height="14" rx="1" fill="white" />
-                </svg>
-            </div>
+            <img src="https://ivosights.com/images/logo/logo-ivosights-white_320_78.webp" alt="Ivosights" class="header-logo logo-for-dark" />
+            <img src="https://ivosights.com/images/logo/logo-ivosights-white_320_78.webp" alt="Ivosights" class="header-logo logo-for-light" />
             <span class="header-title" id="appTitle">Helpdesk Monitoring Dashboard</span>
+            <div class="header-partner-logos" aria-hidden="true">
+                <img src="https://ivosights.com/images/default/logo-header-sociomile_250_48.webp" alt="Sociomile" class="logo-for-dark" />
+                <img src="https://ivosights.com/images/logo/logo-sociomile_224_72.webp" alt="Sociomile" class="logo-for-light" />
+                <img src="https://ivosights.com/images/default/logo-header-ripple10_480_132.webp" alt="Ripple10" class="logo-for-dark" />
+                <img src="https://ivosights.com/images/logo/logo-r10_228_64.webp" alt="Ripple10" class="logo-for-light" />
+                <img src="https://ivosights.com/images/default/logo-header-waba_240_60.webp" alt="WABA" class="logo-for-dark" />
+                <img src="https://ivosights.com/images/logo/logo-waba_244_66.webp" alt="WABA" class="logo-for-light" />
+                <img src="https://ivosights.com/images/default/logo-header-sociomation_240_50.webp" alt="Sociomation" class="logo-for-dark" />
+                <img src="https://ivosights.com/images/logo/logo-sociomation_246_52.webp" alt="Sociomation" class="logo-for-light" />
+                <img src="https://ivosights.com/images/logo/logo-cognivo-white_222_62.webp" alt="Cognivo" class="logo-for-dark" />
+                <img src="https://ivosights.com/images/logo/logo-cognivo_222_42.webp" alt="Cognivo" class="logo-for-light" />
+            </div>
         </div>
         <div class="header-right">
             <button class="badge-live" id="syncBadge" title="Click to refresh" aria-label="Refresh data">
@@ -305,6 +312,29 @@
                     </table>
                 </div>
                 <div class="pagination" id="topClientPagination"></div>
+            </div>
+
+            <!-- Recent Incidents -->
+            <div class="chart-card" style="margin-top:12px">
+                <div class="chart-header">
+                    <div class="chart-title" id="chartRecentIncidentTitle">Recent Incidents</div>
+                    <div class="chart-subtitle" id="chartRecentIncidentSub">Last 5 incidents by date</div>
+                </div>
+                <div class="top-client-table-wrapper">
+                    <table class="top-client-table" id="incidentHistoryTable">
+                        <thead>
+                            <tr>
+                                <th id="thIncidentStart">Start Time</th>
+                                <th id="thIncidentEnd">End Time</th>
+                                <th id="thIncidentProduct">Product</th>
+                                <th id="thIncidentProblem">Problem</th>
+                                <th id="thIncidentRootCause">Root Cause</th>
+                                <th id="thIncidentDuration">Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody id="incidentHistoryTableBody"></tbody>
+                    </table>
+                </div>
             </div>
         </section>
 

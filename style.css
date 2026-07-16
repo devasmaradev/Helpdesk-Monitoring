@@ -195,10 +195,45 @@ body {
     height: 15px;
 }
 
+.header-logo {
+    flex-shrink: 0;
+    height: 22px;
+    width: auto;
+}
+
 .header-title {
     font-size: 14px;
     font-weight: 700;
     letter-spacing: -0.2px;
+    white-space: nowrap;
+}
+
+.header-partner-logos {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-left: 18px;
+    padding-left: 18px;
+    border-left: 1px solid var(--border-sub);
+}
+
+.header-partner-logos img {
+    height: 18px;
+    width: auto;
+    object-fit: contain;
+}
+
+.logo-for-light {
+    display: none;
+}
+
+[data-theme="light"] .logo-for-dark {
+    display: none;
+}
+
+[data-theme="light"] .logo-for-light {
+    display: inline;
 }
 
 .header-right {
@@ -283,6 +318,7 @@ body {
    MENU TABS
    ===================================================== */
 .menu-tabs {
+    position: relative;
     display: flex;
     gap: 4px;
     padding: 0 28px;
@@ -1241,8 +1277,7 @@ body {
 }
 
 /* =====================================================
-   TOP CLIENT TABLE
-   ===================================================== */
+   TOP CLIENT TABLE   ===================================================== */
 .top-client-table-wrapper {
     overflow-x: auto;
     border: 1px solid var(--border-sub);
@@ -1397,6 +1432,11 @@ body {
     .menu-tab {
         flex-shrink: 0;
         padding: 11px 14px;
+    }
+    .incident-btn {
+        position: static;
+        transform: none;
+        margin-left: auto;
     }
     .filter-bar,
     .mtm-filter-bar {
@@ -1817,6 +1857,41 @@ body {
     color: var(--text-muted);
 }
 
+.modal-problem-sociomile {
+    padding: 2px 7px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-dim);
+    border-radius: 4px;
+}
+
+.modal-crm-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    margin-left: auto;
+    color: var(--text-muted);
+    cursor: pointer;
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    transition: all 0.15s ease;
+}
+
+.modal-crm-link svg {
+    width: 12px;
+    height: 12px;
+}
+
+.modal-crm-link:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
 .modal-problem-text {
     font-size: 12px;
     line-height: 1.5;
@@ -1922,7 +1997,10 @@ body {
     align-items: center;
     height: 30px;
     gap: 7px;
-    margin-left: auto;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
     padding: 5px 12px;
     font-family: 'Inter', sans-serif;
     font-size: 12px;
@@ -1933,7 +2011,6 @@ body {
     border: 1px solid rgba(244, 63, 94, 0.35);
     border-radius: 8px;
     transition: all 0.15s ease;
-    align-self: center;
 }
 
 .incident-btn:hover {
