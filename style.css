@@ -320,6 +320,7 @@ body {
 .menu-tabs {
     position: relative;
     display: flex;
+    align-items: center;
     gap: 4px;
     padding: 0 28px;
     background: var(--surface);
@@ -405,6 +406,8 @@ body {
 .filter-bar select,
 .mtm-filter-bar select,
 .date-input {
+    height: 30px;
+    box-sizing: border-box;
     padding: 5px 28px 5px 10px;
     font-family: 'Inter', sans-serif;
     font-size: 12px;
@@ -1434,8 +1437,6 @@ body {
         padding: 11px 14px;
     }
     .incident-btn {
-        position: static;
-        transform: none;
         margin-left: auto;
     }
     .filter-bar,
@@ -1995,12 +1996,10 @@ body {
 .incident-btn {
     display: flex;
     align-items: center;
+    align-self: center;
     height: 30px;
     gap: 7px;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
+    margin-left: auto;
     padding: 5px 12px;
     font-family: 'Inter', sans-serif;
     font-size: 12px;
