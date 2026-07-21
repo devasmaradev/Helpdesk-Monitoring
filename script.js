@@ -448,6 +448,7 @@ const appState = {
     mtmFilters: {
         monthFrom: '',
         monthTo: '',
+        staff: 'all',
     },
     ui: {
         language: CONFIG.APP.defaultLanguage,
@@ -865,10 +866,14 @@ const DataLoader = {
             const rawDate = DataLoader.getField(rec, 'Ticket Date', 'Date');
             if (!rawDate) return;
 
+            const dateParts = Utils.Date.toJakartaParts(rawDate);
+            const rawMonth = DataLoader.getField(rec, 'Month').replace(/\[\d+\]\s*/, '').trim();
+            const monthWithYear = dateParts ? (rawMonth + ' - ' + dateParts.year) : rawMonth;
+
             out.push({
                 date: Utils.Date.isoToDDMMYYYY(rawDate),
                 day: DataLoader.getField(rec, 'Day'),
-                month: DataLoader.getField(rec, 'Month'),
+                month: monthWithYear,
                 week: DataLoader.getField(rec, 'Week'),
                 product: DataLoader.getField(rec, 'Product'),
                 type: DataLoader.getField(rec, 'Type'),
@@ -901,11 +906,14 @@ const DataLoader = {
             if (!staff && !task) return;
 
             const rawStart = DataLoader.getField(rec, 'Start Time');
+            const startParts = Utils.Date.toJakartaParts(rawStart);
+            const rawMonth = DataLoader.getField(rec, 'Month').replace(/\[\d+\]\s*/, '').trim();
+            const monthWithYear = startParts ? (rawMonth + ' - ' + startParts.year) : rawMonth;
 
             out.push({
                 staff,
                 task,
-                month: DataLoader.getField(rec, 'Month'),
+                month: monthWithYear,
                 week: DataLoader.getField(rec, 'Week'),
                 start: Utils.Date.isoToTaskDateString(rawStart),
                 end: DataLoader.getField(rec, 'End Time'),
@@ -1267,14 +1275,7 @@ const DataProcessor = {
     prepare6MonthTrendData(data) {
         const sortedMonths = Utils.Array.distinct(data.map(r => r.month))
             .filter(Boolean)
-            .sort((a, b) => {
-                const la = a.replace(/\[\d+\]\s*/, '').trim().toLowerCase();
-                const lb = b.replace(/\[\d+\]\s*/, '').trim().toLowerCase();
-                const na = UIRenderer._MONTH_ORDER[la] !== undefined ? UIRenderer._MONTH_ORDER[la] : 999;
-                const nb = UIRenderer._MONTH_ORDER[lb] !== undefined ? UIRenderer._MONTH_ORDER[lb] : 999;
-                if (na !== nb) return na - nb;
-                return la.localeCompare(lb);
-            });
+            .sort((a, b) => UIRenderer._monthSortValue(a) - UIRenderer._monthSortValue(b));
         const last6 = sortedMonths.slice(-6);
         const labels = last6.map(m => m.replace(/\[\d+\]\s*/, '').trim());
         const issue = last6.map(m => data.filter(r => r.month === m && r.type === 'Issue').length);
@@ -1326,19 +1327,13 @@ const DataProcessor = {
         return Utils.Array.distinct(data.map(r => r.staff).filter(Boolean)).sort();
     },
 
-    prepareMonthlyComparison(tickets, monthFrom, monthTo, responseTimes, tasks) {
+    prepareMonthlyComparison(tickets, monthFrom, monthTo, responseTimes, tasks, staffFilter) {
         if (!monthFrom || !monthTo) return null;
+        staffFilter = staffFilter || 'all';
 
         const sorted = Utils.Array.distinct(tickets.map(r => r.month))
             .filter(Boolean)
-            .sort((a, b) => {
-                const la = a.replace(/\[\d+\]\s*/, '').trim().toLowerCase();
-                const lb = b.replace(/\[\d+\]\s*/, '').trim().toLowerCase();
-                const na = UIRenderer._MONTH_ORDER[la] !== undefined ? UIRenderer._MONTH_ORDER[la] : 999;
-                const nb = UIRenderer._MONTH_ORDER[lb] !== undefined ? UIRenderer._MONTH_ORDER[lb] : 999;
-                if (na !== nb) return na - nb;
-                return la.localeCompare(lb);
-            });
+            .sort((a, b) => UIRenderer._monthSortValue(a) - UIRenderer._monthSortValue(b));
 
         let fromIdx = sorted.indexOf(monthFrom);
         let toIdx = sorted.indexOf(monthTo);
@@ -1352,15 +1347,15 @@ const DataProcessor = {
         const selectedMonths = sorted.slice(fromIdx, toIdx + 1);
         if (selectedMonths.length === 0) return null;
 
-        const inRange = tickets.filter(r => selectedMonths.indexOf(r.month) !== -1);
-        const taskData = tasks || [];
+        const inRange = tickets.filter(r => selectedMonths.indexOf(r.month) !== -1 && (staffFilter === 'all' || r.staff === staffFilter));
+        const taskData = (tasks || []).filter(tk => staffFilter === 'all' || tk.staff === staffFilter);
 
         const rtData = responseTimes || [];
         const buckets = selectedMonths.map(m => {
-            const rows = tickets.filter(r => r.month === m);
+            const rows = tickets.filter(r => r.month === m && (staffFilter === 'all' || r.staff === staffFilter));
             const taskRows = taskData.filter(tk => tk.month === m);
             const kpi = DataProcessor.calculateKPIs(rows);
-            const artResult = DataProcessor.calculateART(rtData.filter(r => r.month === m), 'all', appState.meta.responseTimeStaffCols);
+            const artResult = DataProcessor.calculateART(rtData.filter(r => r.month === m), staffFilter, appState.meta.responseTimeStaffCols);
             kpi.artMinutes = artResult.avgMinutes;
             kpi.artCount = artResult.count;
             kpi.totalTasks = taskRows.length;
@@ -2991,7 +2986,7 @@ const UIRenderer = {
         const emptyState = document.getElementById('mtmEmptyState');
         const content = document.getElementById('mtmContent');
 
-        const data = DataProcessor.prepareMonthlyComparison(appState.tickets, filters.monthFrom, filters.monthTo, appState.responseTimes, appState.tasks);
+        const data = DataProcessor.prepareMonthlyComparison(appState.tickets, filters.monthFrom, filters.monthTo, appState.responseTimes, appState.tasks, filters.staff);
 
         if (!data || data.buckets.length === 0) {
             if (emptyState) emptyState.style.display = 'block';
@@ -3233,10 +3228,7 @@ const UIRenderer = {
         const combinedForMonth = tickets.concat(tasks);
 
         UIRenderer._populateFilter('filterMonth', combinedForMonth, 'month', 'allMonths', v => v.replace(/\[\d+\]\s*/, ''), (a, b) => {
-            const na = UIRenderer._MONTH_ORDER[a.label.trim().toLowerCase()] ?? 999;
-            const nb = UIRenderer._MONTH_ORDER[b.label.trim().toLowerCase()] ?? 999;
-            if (na !== nb) return na - nb;
-            return a.label.localeCompare(b.label, 'en', { sensitivity: 'base' });
+            return UIRenderer._monthSortValue(a.label) - UIRenderer._monthSortValue(b.label);
         });
         UIRenderer._populateFilter('filterWeek', tickets, 'week', 'allWeeks');
         UIRenderer._populateFilter('filterProduct', tickets, 'product', 'allProducts');
@@ -3246,12 +3238,22 @@ const UIRenderer = {
         UIRenderer._populateFilter('filterTaskStaff', tasks, 'staff', 'allStaff');
         UIRenderer._populateTaskStaffFilter(tasks);
         UIRenderer._populateMTMMonthRangeFilters(tickets);
+        UIRenderer._populateMTMStaffFilter(combinedForMonth);
     },
 
     _MONTH_ORDER: {
         january: 1, februari: 2, february: 2, march: 3, maret: 3, april: 4,
         may: 5, mei: 5, june: 6, juni: 6, july: 7, juli: 7, august: 8, agustus: 8,
         september: 9, october: 10, oktober: 10, november: 11, december: 12, desember: 12,
+    },
+
+    _monthSortValue(label) {
+        const clean = String(label || '').replace(/\[\d+\]\s*/, '').trim();
+        const match = clean.match(/^(.*?)\s*-\s*(\d{4})\s*$/);
+        const monthPart = (match ? match[1] : clean).trim().toLowerCase();
+        const year = match ? parseInt(match[2], 10) : 0;
+        const monthNum = UIRenderer._MONTH_ORDER[monthPart] !== undefined ? UIRenderer._MONTH_ORDER[monthPart] : 999;
+        return year * 1000 + monthNum;
     },
 
     _populateFilter(selectId, data, key, allLabelKey, formatFn, sortFn) {
@@ -3312,12 +3314,7 @@ const UIRenderer = {
         const options = rawValues.map(val => ({
             val,
             label: val.replace(/\[\d+\]\s*/, '').trim()
-        })).sort((a, b) => {
-            const na = UIRenderer._MONTH_ORDER[a.label.trim().toLowerCase()] ?? 999;
-            const nb = UIRenderer._MONTH_ORDER[b.label.trim().toLowerCase()] ?? 999;
-            if (na !== nb) return na - nb;
-            return a.label.localeCompare(b.label, 'en', { sensitivity: 'base' });
-        });
+        })).sort((a, b) => UIRenderer._monthSortValue(a.val) - UIRenderer._monthSortValue(b.val));
 
         ['filterMTMMonthFrom', 'filterMTMMonthTo'].forEach(id => {
             const select = document.getElementById(id);
@@ -3347,6 +3344,27 @@ const UIRenderer = {
         const currentVal = select.value;
 
         select.innerHTML = '<option value="all">' + t('taskAllStaff') + '</option>';
+
+        staffs.forEach(staff => {
+            const opt = document.createElement('option');
+            opt.value = staff;
+            opt.textContent = staff;
+            select.appendChild(opt);
+        });
+
+        if (Array.from(select.options).some(o => o.value === currentVal)) {
+            select.value = currentVal;
+        }
+    },
+
+    _populateMTMStaffFilter(data) {
+        const select = document.getElementById('filterMTMStaff');
+        if (!select) return;
+
+        const staffs = Utils.Array.distinct(data.map(r => r.staff).filter(Boolean)).sort();
+        const currentVal = select.value;
+
+        select.innerHTML = '<option value="all">' + t('allStaff') + '</option>';
 
         staffs.forEach(staff => {
             const opt = document.createElement('option');
@@ -3394,7 +3412,8 @@ const ExportEngine = {
             const mtmPeriod = (mf.monthFrom && mf.monthTo) ?
                 (mf.monthFrom.replace(/\[\d+\]\s*/, '') + ' - ' + mf.monthTo.replace(/\[\d+\]\s*/, '')) :
                 t('allData');
-            return t('period') + ': ' + mtmPeriod;
+            const mtmDimension = (mf.staff && mf.staff !== 'all') ? (t('thStaff') + '=' + mf.staff) : t('allData');
+            return t('period') + ': ' + mtmPeriod + ' | ' + t('dimension') + ': ' + mtmDimension;
         }
 
         const filters = appState.filters;
@@ -3592,7 +3611,7 @@ const ExportEngine = {
 
     buildMTMSections() {
         const filters = appState.mtmFilters;
-        const data = DataProcessor.prepareMonthlyComparison(appState.tickets, filters.monthFrom, filters.monthTo, appState.responseTimes, appState.tasks);
+        const data = DataProcessor.prepareMonthlyComparison(appState.tickets, filters.monthFrom, filters.monthTo, appState.responseTimes, appState.tasks, filters.staff);
         if (!data || !data.buckets.length) return [];
 
         const buckets = data.buckets;
@@ -3768,7 +3787,7 @@ const EventHandlers = {
             if (el) el.addEventListener('change', () => self.onTaskFilterChange());
         });
 
-        ['filterMTMMonthFrom', 'filterMTMMonthTo'].forEach(id => {
+        ['filterMTMMonthFrom', 'filterMTMMonthTo', 'filterMTMStaff'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.addEventListener('change', () => self.onMTMFilterChange());
         });
@@ -3855,6 +3874,7 @@ const EventHandlers = {
     _readMTMFilters() {
         appState.mtmFilters.monthFrom = document.getElementById('filterMTMMonthFrom')?.value || '';
         appState.mtmFilters.monthTo = document.getElementById('filterMTMMonthTo')?.value || '';
+        appState.mtmFilters.staff = document.getElementById('filterMTMStaff')?.value || 'all';
     },
 
     _setDefaultMTMPeriod() {
@@ -3866,13 +3886,13 @@ const EventHandlers = {
         const prevDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
         const curCandidates = [
-            now.toLocaleDateString('en-US', { month: 'long' }),
-            now.toLocaleDateString('id-ID', { month: 'long' }),
+            now.toLocaleDateString('en-US', { month: 'long' }) + ' - ' + now.getFullYear(),
+            now.toLocaleDateString('id-ID', { month: 'long' }) + ' - ' + now.getFullYear(),
         ].map(s => s.trim().toLowerCase());
 
         const prevCandidates = [
-            prevDate.toLocaleDateString('en-US', { month: 'long' }),
-            prevDate.toLocaleDateString('id-ID', { month: 'long' }),
+            prevDate.toLocaleDateString('en-US', { month: 'long' }) + ' - ' + prevDate.getFullYear(),
+            prevDate.toLocaleDateString('id-ID', { month: 'long' }) + ' - ' + prevDate.getFullYear(),
         ].map(s => s.trim().toLowerCase());
 
         const findMatch = (select, candidates) => {
@@ -3908,6 +3928,8 @@ const EventHandlers = {
 
     onResetMTMFilters() {
         this._setDefaultMTMPeriod();
+        const staffSelect = document.getElementById('filterMTMStaff');
+        if (staffSelect) staffSelect.value = 'all';
         this._readMTMFilters();
         UIRenderer.renderMTM();
     },
@@ -4050,6 +4072,8 @@ const EventHandlers = {
             lblMTMOverview: 'mtmOverview',
             lblMTMDateTo: 'to',
             lblMTMPeriod: 'period',
+            lblMTMDimension: 'dimension',
+            optAllStaffMTM: 'allStaff',
             chartMTMProdTitle: 'mtmProdTitle', chartMTMProdSub: 'mtmProdSub',
             chartMTMStaffTitle: 'mtmStaffTitle', chartMTMStaffSub: 'mtmStaffSub',
             chartMTMTaskStaffTitle: 'mtmTaskStaffTitle', chartMTMTaskStaffSub: 'mtmTaskStaffSub',
@@ -4513,8 +4537,8 @@ const App = {
         if (!monthSelect) return;
         const now = new Date();
         const candidates = [
-            now.toLocaleDateString('en-US', { month: 'long' }),
-            now.toLocaleDateString('id-ID', { month: 'long' }),
+            now.toLocaleDateString('en-US', { month: 'long' }) + ' - ' + now.getFullYear(),
+            now.toLocaleDateString('id-ID', { month: 'long' }) + ' - ' + now.getFullYear(),
         ].map(s => s.trim().toLowerCase());
         let match = null;
         for (let i = 0; i < monthSelect.options.length; i++) {

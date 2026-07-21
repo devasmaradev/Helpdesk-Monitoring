@@ -929,8 +929,18 @@ body {
     margin-bottom: 24px;
 }
 
+.chart-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
 @media (max-width: 1300px) {
     .chart-grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .chart-grid-3 {
         grid-template-columns: repeat(2, 1fr);
     }
 }
@@ -1280,7 +1290,8 @@ body {
 }
 
 /* =====================================================
-   TOP CLIENT TABLE   ===================================================== */
+   TOP CLIENT TABLE
+   ===================================================== */
 .top-client-table-wrapper {
     overflow-x: auto;
     border: 1px solid var(--border-sub);
@@ -1375,7 +1386,8 @@ body {
 
 @media (max-width: 900px) {
     .chart-grid,
-    .chart-grid-4 {
+    .chart-grid-4,
+    .chart-grid-3 {
         grid-template-columns: 1fr;
     }
     .chart-wide {
