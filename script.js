@@ -946,10 +946,14 @@ const DataLoader = {
                 staffValues[name] = (raw !== undefined && raw !== null && raw !== '') ? Utils.Duration.parse(raw) : null;
             });
 
+            const dateParts = Utils.Date.toJakartaParts(rawDate);
+            const rawMonth = DataLoader.getField(rec, 'Month').replace(/\[\d+\]\s*/, '').trim();
+            const monthWithYear = dateParts ? (rawMonth + ' - ' + dateParts.year) : rawMonth;
+
             out.push({
                 date: Utils.Date.isoToDDMMYYYY(rawDate),
                 day: DataLoader.getField(rec, 'Day'),
-                month: DataLoader.getField(rec, 'Month'),
+                month: monthWithYear,
                 week: DataLoader.getField(rec, 'Week'),
                 average: (rec['Average'] !== undefined && rec['Average'] !== null && rec['Average'] !== '') ? Utils.Duration.parse(rec['Average']) : null,
                 staffValues,
