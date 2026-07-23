@@ -37,11 +37,13 @@ const CONFIG = {
         pageSize: 10,
     },
     API: {
-        tickets: 'https://script.google.com/macros/s/AKfycbyY9VnK8_ST99Ri_UDfrXmI2ILuFugNt1XR74AuJixxN4HnYIssXqA3-6VtlH-IHiTJKQ/exec?action=tickets',
-        tasks: 'https://script.google.com/macros/s/AKfycbyY9VnK8_ST99Ri_UDfrXmI2ILuFugNt1XR74AuJixxN4HnYIssXqA3-6VtlH-IHiTJKQ/exec?action=tasks',
-        responseTime: 'https://script.google.com/macros/s/AKfycbyY9VnK8_ST99Ri_UDfrXmI2ILuFugNt1XR74AuJixxN4HnYIssXqA3-6VtlH-IHiTJKQ/exec?action=responsetime',
-        incidents: 'https://script.google.com/macros/s/AKfycbyY9VnK8_ST99Ri_UDfrXmI2ILuFugNt1XR74AuJixxN4HnYIssXqA3-6VtlH-IHiTJKQ/exec?action=incident',
-        incidentSave: 'https://script.google.com/macros/s/AKfycbyY9VnK8_ST99Ri_UDfrXmI2ILuFugNt1XR74AuJixxN4HnYIssXqA3-6VtlH-IHiTJKQ/exec?action=incident',
+        tickets: 'https://script.google.com/macros/s/AKfycbykL9IAumoGJxl_6DASBAp0h9dQ_8JpXpia-RldFSCbnTRdf1AN7sOGrai5MHrtvztPbQ/exec?action=tickets',
+        tasks: 'https://script.google.com/macros/s/AKfycbykL9IAumoGJxl_6DASBAp0h9dQ_8JpXpia-RldFSCbnTRdf1AN7sOGrai5MHrtvztPbQ/exec?action=tasks',
+        responseTime: 'https://script.google.com/macros/s/AKfycbykL9IAumoGJxl_6DASBAp0h9dQ_8JpXpia-RldFSCbnTRdf1AN7sOGrai5MHrtvztPbQ/exec?action=responsetime',
+        incidents: 'https://script.google.com/macros/s/AKfycbykL9IAumoGJxl_6DASBAp0h9dQ_8JpXpia-RldFSCbnTRdf1AN7sOGrai5MHrtvztPbQ/exec?action=incident',
+        incidentSave: 'https://script.google.com/macros/s/AKfycbykL9IAumoGJxl_6DASBAp0h9dQ_8JpXpia-RldFSCbnTRdf1AN7sOGrai5MHrtvztPbQ/exec?action=incident',
+        updateTicket: 'https://script.google.com/macros/s/AKfycbykL9IAumoGJxl_6DASBAp0h9dQ_8JpXpia-RldFSCbnTRdf1AN7sOGrai5MHrtvztPbQ/exec?action=updateticket',
+        deleteTicket: 'https://script.google.com/macros/s/AKfycbykL9IAumoGJxl_6DASBAp0h9dQ_8JpXpia-RldFSCbnTRdf1AN7sOGrai5MHrtvztPbQ/exec?action=deleteticket',
     },
     AUTH: {
         username: 'admin',
@@ -237,6 +239,42 @@ const LOCALE = {
         thIncidentRootCause: 'Root Cause',
         thIncidentDuration: 'Durasi',
         noIncidents: 'Tidak ada data insiden',
+        thAction: 'Aksi',
+        btnEdit: 'Ubah',
+        btnDelete: 'Hapus',
+        addEscalation: 'Tambah Eskalasi',
+        addEscalationTitle: 'Tambah Eskalasi',
+        editEscalationTitle: 'Ubah Eskalasi',
+        escalationFormRequired: 'Semua field wajib diisi.',
+        escalationSaveFailed: 'Gagal menyimpan data. Coba lagi.',
+        escalationDeleteFailed: 'Gagal menghapus data. Coba lagi.',
+        escalationSaving: 'Menyimpan...',
+        confirmDeleteTicket: 'Apakah kamu yakin ingin menghapus data ini?',
+        confirmTitle: 'Konfirmasi',
+        alertTitle: 'Pemberitahuan',
+        btnOk: 'OK',
+        lblEscTicketDate: 'Ticket Date',
+        lblEscDay: 'Hari',
+        lblEscMonth: 'Bulan',
+        lblEscWeek: 'Minggu',
+        lblEscClientName: 'Nama Klien',
+        lblEscCreatedBy: 'Dibuat oleh',
+        lblEscProduct: 'Produk',
+        lblEscType: 'Tipe',
+        lblEscEscalationStatus: 'Status Eskalasi',
+        lblEscStatus: 'Status',
+        lblEscPriority: 'Prioritas',
+        lblEscFeature: 'Fitur',
+        lblEscStartTime: 'Waktu Mulai',
+        lblEscSolvedTime: 'Waktu Selesai/Eskalasi',
+        lblEscHandlingTime: 'Waktu Penanganan',
+        lblEscEscalatedTo: 'Eskalasi ke',
+        lblEscClientCategory: 'Kategori Klien',
+        lblEscProblem: 'Masalah',
+        lblEscOnSLA: 'On SLA?',
+        lblEscShift: 'Shift',
+        lblEscTicketCRM: 'Tiket CRM',
+        lblEscTicketSociomile: 'Tiket Sociomile',
     },
     en: {
         appTitle: 'Helpdesk Monitoring Dashboard',
@@ -419,6 +457,42 @@ const LOCALE = {
         thIncidentRootCause: 'Root Cause',
         thIncidentDuration: 'Duration',
         noIncidents: 'No incident data',
+        thAction: 'Action',
+        btnEdit: 'Edit',
+        btnDelete: 'Delete',
+        addEscalation: 'Add Escalation',
+        addEscalationTitle: 'Add Escalation',
+        editEscalationTitle: 'Edit Escalation',
+        escalationFormRequired: 'All fields are required.',
+        escalationSaveFailed: 'Failed to save data. Please try again.',
+        escalationDeleteFailed: 'Failed to delete data. Please try again.',
+        escalationSaving: 'Saving...',
+        confirmDeleteTicket: 'Are you sure you want to delete this record?',
+        confirmTitle: 'Confirm',
+        alertTitle: 'Notice',
+        btnOk: 'OK',
+        lblEscTicketDate: 'Ticket Date',
+        lblEscDay: 'Day',
+        lblEscMonth: 'Month',
+        lblEscWeek: 'Week',
+        lblEscClientName: 'Client Name',
+        lblEscCreatedBy: 'Created by',
+        lblEscProduct: 'Product',
+        lblEscType: 'Type',
+        lblEscEscalationStatus: 'Escalation Status',
+        lblEscStatus: 'Status',
+        lblEscPriority: 'Priority',
+        lblEscFeature: 'Feature',
+        lblEscStartTime: 'Start Time',
+        lblEscSolvedTime: 'Solved/Escalated Time',
+        lblEscHandlingTime: 'Handling Time',
+        lblEscEscalatedTo: 'Escalated to',
+        lblEscClientCategory: 'Client Category',
+        lblEscProblem: 'Problem',
+        lblEscOnSLA: 'On SLA?',
+        lblEscShift: 'Shift',
+        lblEscTicketCRM: 'Ticket CRM',
+        lblEscTicketSociomile: 'Ticket Sociomile',
     },
 };
 
@@ -516,6 +590,17 @@ const Utils = {
             const p = Utils.Date.toJakartaParts(isoStr);
             if (!p) return '';
             return String(p.day).padStart(2, '0') + '/' + String(p.month).padStart(2, '0') + '/' + p.year;
+        },
+
+        isoToTimeString(str) {
+            if (!str) return '';
+            if (/^\d{2}:\d{2}(:\d{2})?$/.test(str)) {
+                const parts = str.split(':');
+                return parts[0].padStart(2, '0') + ':' + parts[1].padStart(2, '0') + ':' + (parts[2] ? parts[2].padStart(2, '0') : '00');
+            }
+            const p = Utils.Date.toJakartaParts(str);
+            if (!p) return '';
+            return String(p.hour).padStart(2, '0') + ':' + String(p.minute).padStart(2, '0') + ':' + String(p.second).padStart(2, '0');
         },
 
         isoToTaskDateString(isoStr) {
@@ -642,7 +727,11 @@ const Utils = {
 
     Duration: {
         parse(str) {
-            if (!str) return 0;
+            if (str === null || str === undefined || str === '') return 0;
+            if (typeof str === 'number') {
+                return str * 24 * 60;
+            }
+            if (typeof str !== 'string') return 0;
             const isIso = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(str);
             if (isIso) {
                 const p = Utils.Date.toJakartaParts(str);
@@ -655,7 +744,11 @@ const Utils = {
         },
 
         parseTimeToSeconds(str) {
-            if (!str) return null;
+            if (str === null || str === undefined || str === '') return null;
+            if (typeof str === 'number') {
+                return str * 24 * 3600;
+            }
+            if (typeof str !== 'string') return null;
             const isIso = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(str);
             if (isIso) {
                 const p = Utils.Date.toJakartaParts(str);
@@ -893,6 +986,7 @@ const DataLoader = {
                 escalatedTo: DataLoader.getField(rec, 'Escalated to'),
                 ticketCRM: DataLoader.getField(rec, 'Tiket CRM', 'Ticket CRM'),
                 ticketSociomile: DataLoader.getField(rec, 'Tiket Sociomile', 'Ticket Sociomile'),
+                rowIndex: rec._row || null,
             });
         });
         return out;
@@ -1142,6 +1236,8 @@ const DataProcessor = {
                     startTime: Utils.String.sanitizePlaceholderDate(r.startTime),
                     shift: r.shift,
                     escalatedTo: Utils.String.escapeHtml(r.escalatedTo || '-'),
+                    rowIndex: r.rowIndex || null,
+                    raw: r,
                 };
             }) : [];
 
@@ -2364,6 +2460,9 @@ const UIRenderer = {
         }
 
         if (stats.active > 0) {
+            const editIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" /><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4z" /></svg>';
+            const deleteIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z" /></svg>';
+
             const rows = stats.activeRows.map(r => {
                 return '<tr>' +
                     '<td>' +
@@ -2375,6 +2474,10 @@ const UIRenderer = {
                     '<td><span class="esc-pri-badge" style="background:' + Utils.Color.toRGBA(r.priorityColor, 0.2) + ';color:' + r.priorityColor + '">' + r.priority + '</span></td>' +
                     '<td><div class="esc-date">' + r.date + '</div>' + (r.startTime ? '<div style="font-size:10px;color:var(--text-muted)">' + r.startTime + '</div>' : '') + '</td>' +
                     '<td><span style="font-size:11px;padding:2px 7px;border-radius:4px;background:var(--surface-3);color:var(--text-sec)">' + r.escalatedTo + '</span></td>' +
+                    '<td><div class="esc-action-group">' +
+                    '<button class="esc-action-btn esc-edit-btn" title="' + t('btnEdit') + '">' + editIcon + '</button>' +
+                    '<button class="esc-action-btn esc-delete-btn" title="' + t('btnDelete') + '">' + deleteIcon + '</button>' +
+                    '</div></td>' +
                     '</tr>';
             }).join('');
 
@@ -2389,6 +2492,7 @@ const UIRenderer = {
                 '<th>' + t('thStatus') + '</th>' +
                 '<th>' + t('thDate') + '</th>' +
                 '<th>' + t('thEscalatedto') + '</th>' +
+                '<th>' + t('thAction') + '</th>' +
                 '</tr></thead>' +
                 '<tbody>' + rows + '</tbody>' +
                 '</table>' +
@@ -2397,6 +2501,15 @@ const UIRenderer = {
         }
 
         panel.innerHTML = html;
+
+        if (stats.active > 0) {
+            panel.querySelectorAll('.esc-edit-btn').forEach((btn, idx) => {
+                btn.addEventListener('click', () => EscalationCRUD.openEdit(stats.activeRows[idx].raw));
+            });
+            panel.querySelectorAll('.esc-delete-btn').forEach((btn, idx) => {
+                btn.addEventListener('click', () => EscalationCRUD.delete(stats.activeRows[idx].raw));
+            });
+        }
     },
 
     renderCharts(data) {
@@ -4116,6 +4229,29 @@ const EventHandlers = {
             lblIncidentRootCause: 'lblIncidentRootCause',
             incidentCancelBtn: 'incidentCancelBtn',
             incidentSaveBtn: 'incidentSaveBtn',
+            lblAddEscalation: 'addEscalation',
+            lblEscTicketDate: 'lblEscTicketDate',
+            lblEscDay: 'lblEscDay',
+            lblEscMonth: 'lblEscMonth',
+            lblEscWeek: 'lblEscWeek',
+            lblEscClientName: 'lblEscClientName',
+            lblEscCreatedBy: 'lblEscCreatedBy',
+            lblEscProduct: 'lblEscProduct',
+            lblEscType: 'lblEscType',
+            lblEscEscalationStatus: 'lblEscEscalationStatus',
+            lblEscStatus: 'lblEscStatus',
+            lblEscPriority: 'lblEscPriority',
+            lblEscFeature: 'lblEscFeature',
+            lblEscStartTime: 'lblEscStartTime',
+            lblEscSolvedTime: 'lblEscSolvedTime',
+            lblEscHandlingTime: 'lblEscHandlingTime',
+            lblEscEscalatedTo: 'lblEscEscalatedTo',
+            lblEscClientCategory: 'lblEscClientCategory',
+            lblEscProblem: 'lblEscProblem',
+            lblEscOnSLA: 'lblEscOnSLA',
+            lblEscShift: 'lblEscShift',
+            lblEscTicketCRM: 'lblEscTicketCRM',
+            lblEscTicketSociomile: 'lblEscTicketSociomile',
         };
         Object.keys(map).forEach(id => {
             const el = document.getElementById(id);
@@ -4892,6 +5028,358 @@ const IncidentTracker = {
 };
 
 /* ================================================================
+   CONFIRM / ALERT MODAL
+   ================================================================ */
+
+const ConfirmModal = {
+    _onConfirm: null,
+
+    init() {
+        const self = this;
+        document.getElementById('confirmModalClose')?.addEventListener('click', () => self.hide());
+        document.getElementById('confirmModalCancelBtn')?.addEventListener('click', () => self.hide());
+        document.getElementById('confirmModalOverlay')?.addEventListener('click', function (e) {
+            if (e.target === this) self.hide();
+        });
+        document.getElementById('confirmModalConfirmBtn')?.addEventListener('click', () => {
+            const cb = self._onConfirm;
+            self.hide();
+            if (cb) cb();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') self.hide();
+        });
+    },
+
+    confirm(message, onConfirm) {
+        const icon = document.getElementById('confirmModalIcon');
+        const cancelBtn = document.getElementById('confirmModalCancelBtn');
+        const confirmBtn = document.getElementById('confirmModalConfirmBtn');
+
+        document.getElementById('confirmModalTitle').textContent = t('confirmTitle');
+        document.getElementById('confirmModalText').textContent = message;
+        if (icon) icon.classList.remove('is-info');
+        if (cancelBtn) cancelBtn.style.display = '';
+        if (confirmBtn) {
+            confirmBtn.textContent = t('btnDelete');
+            confirmBtn.classList.add('confirm-modal-danger-btn');
+        }
+
+        this._onConfirm = onConfirm || null;
+        document.getElementById('confirmModalOverlay')?.classList.add('is-open');
+    },
+
+    alert(message) {
+        const icon = document.getElementById('confirmModalIcon');
+        const cancelBtn = document.getElementById('confirmModalCancelBtn');
+        const confirmBtn = document.getElementById('confirmModalConfirmBtn');
+
+        document.getElementById('confirmModalTitle').textContent = t('alertTitle');
+        document.getElementById('confirmModalText').textContent = message;
+        if (icon) icon.classList.add('is-info');
+        if (cancelBtn) cancelBtn.style.display = 'none';
+        if (confirmBtn) {
+            confirmBtn.textContent = t('btnOk');
+            confirmBtn.classList.remove('confirm-modal-danger-btn');
+        }
+
+        this._onConfirm = null;
+        document.getElementById('confirmModalOverlay')?.classList.add('is-open');
+    },
+
+    hide() {
+        document.getElementById('confirmModalOverlay')?.classList.remove('is-open');
+        this._onConfirm = null;
+    },
+};
+
+/* ================================================================
+   ESCALATION CRUD
+   ================================================================ */
+
+const EscalationCRUD = {
+
+    init() {
+        const self = this;
+        document.getElementById('escalationModalClose')?.addEventListener('click', () => self.close());
+        document.getElementById('escalationCancelBtn')?.addEventListener('click', () => self.close());
+        document.getElementById('escalationModalOverlay')?.addEventListener('click', function (e) {
+            if (e.target === this) self.close();
+        });
+        document.getElementById('escalationForm')?.addEventListener('submit', e => {
+            e.preventDefault();
+            self.save();
+        });
+        document.getElementById('escTicketDate')?.addEventListener('change', () => self._updateDateFields());
+        document.getElementById('escStartTime')?.addEventListener('change', () => self._updateComputedTimeFields());
+        document.getElementById('escSolvedTime')?.addEventListener('change', () => self._updateComputedTimeFields());
+    },
+
+    _staticOptions: {
+        escProduct: ['Ivowaba', 'Ripple10', 'Sociomile Omni', 'Sociomile Voice'],
+        escType: ['Issue', 'Non Issue'],
+        escEscalationStatus: ['Yes', 'No'],
+        escStatus: ['Escalated', 'Closed'],
+        escPriority: ['Critical', 'High', 'Medium', 'Low'],
+        escClientCategory: ['Tier1', 'Tier2', 'Tier3'],
+    },
+
+    _dayNamesEN: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    _monthNamesEN: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+
+    _populateSelects() {
+        Object.keys(this._staticOptions).forEach(id => {
+            const select = document.getElementById(id);
+            if (!select) return;
+            const current = select.value;
+            select.innerHTML = this._staticOptions[id].map(v =>
+                '<option value="' + Utils.String.escapeHtml(v) + '">' + Utils.String.escapeHtml(v) + '</option>'
+            ).join('');
+            if (this._staticOptions[id].indexOf(current) !== -1) select.value = current;
+        });
+
+        const featureSelect = document.getElementById('escFeature');
+        if (featureSelect) {
+            const current = featureSelect.value;
+            const features = Utils.Array.distinct(appState.tickets.map(r => r.feature).filter(Boolean)).sort();
+            featureSelect.innerHTML = features.map(f =>
+                '<option value="' + Utils.String.escapeHtml(f) + '">' + Utils.String.escapeHtml(f) + '</option>'
+            ).join('');
+            if (features.indexOf(current) !== -1) featureSelect.value = current;
+        }
+
+        const createdBySelect = document.getElementById('escCreatedBy');
+        if (createdBySelect) {
+            const current = createdBySelect.value;
+            const staffList = Utils.Array.distinct(appState.tickets.map(r => r.staff).filter(Boolean)).sort();
+            if (current && staffList.indexOf(current) === -1) staffList.push(current);
+            createdBySelect.innerHTML = staffList.map(s =>
+                '<option value="' + Utils.String.escapeHtml(s) + '">' + Utils.String.escapeHtml(s) + '</option>'
+            ).join('');
+            if (staffList.indexOf(current) !== -1) createdBySelect.value = current;
+        }
+    },
+
+    _updateDateFields() {
+        const dateInput = document.getElementById('escTicketDate');
+        const dayInput = document.getElementById('escDay');
+        const monthInput = document.getElementById('escMonth');
+        const weekInput = document.getElementById('escWeek');
+
+        if (!dateInput || !dateInput.value) {
+            if (dayInput) dayInput.value = '';
+            if (monthInput) monthInput.value = '';
+            if (weekInput) weekInput.value = '';
+            return;
+        }
+
+        const parts = dateInput.value.split('-').map(Number);
+        const d = new Date(parts[0], parts[1] - 1, parts[2]);
+
+        if (dayInput) dayInput.value = this._dayNamesEN[d.getDay()];
+        if (monthInput) monthInput.value = this._monthNamesEN[d.getMonth()];
+        if (weekInput) weekInput.value = 'Week ' + Math.min(5, Math.ceil(d.getDate() / 7));
+    },
+
+    _timeToSeconds(str) {
+        if (!str) return null;
+        const parts = str.split(':').map(Number);
+        if (parts.some(isNaN)) return null;
+        return (parts[0] || 0) * 3600 + (parts[1] || 0) * 60 + (parts[2] || 0);
+    },
+
+    _updateComputedTimeFields() {
+        const startVal = document.getElementById('escStartTime')?.value || '';
+        const solvedVal = document.getElementById('escSolvedTime')?.value || '';
+        const handlingInput = document.getElementById('escHandlingTime');
+        const onSLAInput = document.getElementById('escOnSLA');
+        const shiftInput = document.getElementById('escShift');
+
+        const startSec = this._timeToSeconds(startVal);
+        const solvedSec = this._timeToSeconds(solvedVal);
+
+        if (startSec !== null && solvedSec !== null) {
+            let diff = solvedSec - startSec;
+            if (diff < 0) diff += 24 * 3600;
+            const diffMinutes = diff / 60;
+            if (handlingInput) handlingInput.value = Utils.Duration.formatHMS(diffMinutes);
+            if (onSLAInput) onSLAInput.value = diffMinutes <= 60 ? 'On SLA' : 'Off SLA';
+        } else {
+            if (handlingInput) handlingInput.value = '';
+            if (onSLAInput) onSLAInput.value = '';
+        }
+
+        if (startSec !== null) {
+            const hour = Math.floor(startSec / 3600);
+            let shift;
+            if (hour >= 0 && hour < 9) shift = 'Malam';
+            else if (hour >= 9 && hour < 15) shift = 'Pagi';
+            else shift = 'Siang';
+            if (shiftInput) shiftInput.value = shift;
+        } else if (shiftInput) {
+            shiftInput.value = '';
+        }
+    },
+
+    _resetForm() {
+        const form = document.getElementById('escalationForm');
+        if (form) form.reset();
+        document.getElementById('escRowIndex').value = '';
+        document.getElementById('escDay').value = '';
+        document.getElementById('escMonth').value = '';
+        document.getElementById('escWeek').value = '';
+        document.getElementById('escHandlingTime').value = '';
+        document.getElementById('escOnSLA').value = '';
+        document.getElementById('escShift').value = '';
+        const errEl = document.getElementById('escalationFormError');
+        if (errEl) errEl.textContent = '';
+    },
+
+    openEdit(ticket) {
+        if (!ticket) return;
+        this._resetForm();
+        document.getElementById('escCreatedBy').value = ticket.staff || '';
+        this._populateSelects();
+
+        document.getElementById('escRowIndex').value = ticket.rowIndex || '';
+
+        const dateInput = document.getElementById('escTicketDate');
+        const parsedDate = Utils.Date.parseDate(ticket.date);
+        if (dateInput && parsedDate) {
+            const yyyy = parsedDate.getFullYear();
+            const mm = String(parsedDate.getMonth() + 1).padStart(2, '0');
+            const dd = String(parsedDate.getDate()).padStart(2, '0');
+            dateInput.value = yyyy + '-' + mm + '-' + dd;
+        }
+        this._updateDateFields();
+
+        document.getElementById('escClientName').value = ticket.client || '';
+        document.getElementById('escProduct').value = ticket.product || '';
+        document.getElementById('escType').value = ticket.type || '';
+        document.getElementById('escEscalationStatus').value = ticket.esc || '';
+        document.getElementById('escStatus').value = ticket.status || '';
+        document.getElementById('escPriority').value = ticket.priority || '';
+        document.getElementById('escFeature').value = ticket.feature || '';
+        document.getElementById('escStartTime').value = Utils.Date.isoToTimeString(ticket.startTime || '');
+        document.getElementById('escSolvedTime').value = Utils.Date.isoToTimeString(ticket.solvedTime || '');
+        document.getElementById('escEscalatedTo').value = ticket.escalatedTo || '';
+        document.getElementById('escClientCategory').value = ticket.tier || '';
+        document.getElementById('escProblem').value = ticket.problem || '';
+        document.getElementById('escTicketCRM').value = ticket.ticketCRM || '';
+        document.getElementById('escTicketSociomile').value = ticket.ticketSociomile || '';
+
+        this._updateComputedTimeFields();
+
+        document.getElementById('escalationModalTitle').textContent = t('editEscalationTitle');
+        document.getElementById('escalationModalOverlay').classList.add('is-open');
+    },
+
+    close() {
+        document.getElementById('escalationModalOverlay')?.classList.remove('is-open');
+        this._resetForm();
+    },
+
+    _collectPayload() {
+        return {
+            ticketDate: document.getElementById('escTicketDate').value,
+            day: document.getElementById('escDay').value,
+            month: document.getElementById('escMonth').value,
+            week: document.getElementById('escWeek').value,
+            clientName: document.getElementById('escClientName').value.trim(),
+            createdBy: document.getElementById('escCreatedBy').value,
+            product: document.getElementById('escProduct').value,
+            type: document.getElementById('escType').value,
+            escalationStatus: document.getElementById('escEscalationStatus').value,
+            status: document.getElementById('escStatus').value,
+            priority: document.getElementById('escPriority').value,
+            feature: document.getElementById('escFeature').value,
+            startTime: document.getElementById('escStartTime').value,
+            solvedTime: document.getElementById('escSolvedTime').value,
+            handlingTime: document.getElementById('escHandlingTime').value,
+            escalatedTo: document.getElementById('escEscalatedTo').value.trim(),
+            clientCategory: document.getElementById('escClientCategory').value,
+            problem: document.getElementById('escProblem').value.trim(),
+            onSLA: document.getElementById('escOnSLA').value,
+            shift: document.getElementById('escShift').value,
+            ticketCRM: document.getElementById('escTicketCRM').value.trim(),
+            ticketSociomile: document.getElementById('escTicketSociomile').value.trim(),
+        };
+    },
+
+    _validate(payload) {
+        const requiredFields = ['ticketDate', 'clientName', 'createdBy', 'product', 'type', 'escalationStatus', 'status', 'priority', 'feature', 'startTime', 'solvedTime', 'clientCategory', 'problem'];
+        return requiredFields.every(f => payload[f] !== '' && payload[f] !== null && payload[f] !== undefined);
+    },
+
+    save() {
+        const payload = this._collectPayload();
+        const errEl = document.getElementById('escalationFormError');
+
+        if (!this._validate(payload)) {
+            if (errEl) errEl.textContent = t('escalationFormRequired');
+            return;
+        }
+        if (errEl) errEl.textContent = '';
+
+        const saveBtn = document.getElementById('escalationSaveBtn');
+        if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.textContent = t('escalationSaving');
+        }
+
+        payload.rowIndex = document.getElementById('escRowIndex').value;
+
+        const self = this;
+        fetch(CONFIG.API.updateTicket, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload),
+        })
+            .then(res => res.json())
+            .then(json => {
+                if (!json || json.success === false) {
+                    throw new Error((json && json.message) || 'Save failed');
+                }
+                self.close();
+                EventHandlers.onRefresh();
+            })
+            .catch(err => {
+                console.error('Failed to save ticket:', err);
+                if (errEl) errEl.textContent = t('escalationSaveFailed');
+            })
+            .finally(() => {
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = t('incidentSaveBtn');
+                }
+            });
+    },
+
+    delete(ticket) {
+        if (!ticket || !ticket.rowIndex) return;
+
+        ConfirmModal.confirm(t('confirmDeleteTicket'), () => {
+            fetch(CONFIG.API.deleteTicket, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ rowIndex: ticket.rowIndex }),
+            })
+                .then(res => res.json())
+                .then(json => {
+                    if (!json || json.success === false) {
+                        throw new Error((json && json.message) || 'Delete failed');
+                    }
+                    EventHandlers.onRefresh();
+                })
+                .catch(err => {
+                    console.error('Failed to delete ticket:', err);
+                    ConfirmModal.alert(t('escalationDeleteFailed'));
+                });
+        });
+    },
+};
+
+/* ================================================================
    BOOT
    ================================================================ */
 
@@ -4900,6 +5388,8 @@ document.addEventListener('DOMContentLoaded', function () {
     EventHandlers.applyStaticTranslations();
     AutoScroll.init();
     IncidentTracker.init();
+    EscalationCRUD.init();
+    ConfirmModal.init();
 
     if (Auth.isAuthenticated()) {
         Auth.hideLoginScreen();

@@ -116,7 +116,9 @@ body {
 }
 
 @keyframes app-loading-spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .app-loading-count {
@@ -310,8 +312,12 @@ body {
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.4;
+    }
 }
 
 /* =====================================================
@@ -1962,11 +1968,21 @@ body {
     border-color: var(--accent);
 }
 
-.as-speed-bar.as1 { width: 28px; }
-.as-speed-bar.as2 { width: 22px; }
-.as-speed-bar.as3 { width: 17px; }
-.as-speed-bar.as4 { width: 12px; }
-.as-speed-bar.as5 { width: 7px; }
+.as-speed-bar.as1 {
+    width: 28px;
+}
+.as-speed-bar.as2 {
+    width: 22px;
+}
+.as-speed-bar.as3 {
+    width: 17px;
+}
+.as-speed-bar.as4 {
+    width: 12px;
+}
+.as-speed-bar.as5 {
+    width: 7px;
+}
 
 .as-playstop-btn {
     display: flex;
@@ -2067,6 +2083,11 @@ body {
     max-width: 460px;
 }
 
+.escalation-modal-box {
+    max-width: 1280px;
+    max-height: 80vh;
+}
+
 .incident-form-summary {
     display: flex;
     flex-direction: column;
@@ -2085,12 +2106,15 @@ body {
     color: var(--text);
 }
 
-#incidentForm .login-field {
+#incidentForm .login-field,
+#escalationForm .login-field {
     margin-bottom: 12px;
 }
 
 #incidentForm select,
-#incidentForm textarea {
+#incidentForm textarea,
+#escalationForm select,
+#escalationForm textarea {
     width: 100%;
     padding: 9px 12px;
     font-family: 'Inter', sans-serif;
@@ -2105,8 +2129,25 @@ body {
 }
 
 #incidentForm select:focus,
-#incidentForm textarea:focus {
+#incidentForm textarea:focus,
+#escalationForm select:focus,
+#escalationForm textarea:focus {
     border-color: var(--accent);
+}
+
+#escalationForm input[readonly] {
+    background: var(--surface-3);
+    color: var(--text-sec);
+    border-style: dashed;
+    cursor: not-allowed;
+}
+
+.login-field:has(> input[required]) > label::after,
+.login-field:has(> select[required]) > label::after,
+.login-field:has(> textarea[required]) > label::after {
+    content: ' *';
+    color: var(--red);
+    font-weight: 800;
 }
 
 .incident-form-error {
@@ -2127,4 +2168,168 @@ body {
     width: auto;
     margin-top: 0;
     padding: 9px 18px;
+}
+
+/* =====================================================
+   ESCALATION ADD BUTTON
+   ===================================================== */
+.escalation-add-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    cursor: pointer;
+    background: var(--accent-dim);
+    border: 1px solid rgba(91, 115, 255, 0.3);
+    border-radius: 6px;
+    text-transform: none;
+    letter-spacing: 0;
+    transition: all 0.15s ease;
+}
+
+.escalation-add-btn:hover {
+    color: #fff;
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.escalation-add-btn svg {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+}
+
+/* =====================================================
+   CONFIRM / ALERT MODAL
+   ===================================================== */
+.confirm-modal-box {
+    max-width: 400px;
+}
+
+.confirm-modal-box .modal-body {
+    align-items: center;
+    padding: 6px 24px 22px;
+    text-align: center;
+}
+
+.confirm-modal-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 2px;
+    color: var(--red);
+    background: var(--red-dim);
+    border-radius: 50%;
+}
+
+.confirm-modal-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.confirm-modal-icon.is-info {
+    color: var(--accent);
+    background: var(--accent-dim);
+}
+
+.confirm-modal-text {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-sec);
+}
+
+.confirm-modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 20px 20px;
+}
+
+.confirm-modal-actions .login-btn,
+.confirm-modal-actions .filter-reset {
+    width: auto;
+    margin-top: 0;
+    padding: 9px 20px;
+}
+
+.confirm-modal-danger-btn {
+    background: var(--red) !important;
+    border-color: var(--red) !important;
+}
+
+.confirm-modal-danger-btn:hover {
+    opacity: 0.9;
+}
+
+/* =====================================================
+   ESCALATION FORM MODAL
+   ===================================================== */
+.escalation-form-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px 14px;
+}
+
+.escalation-form-span2 {
+    grid-column: span 2;
+}
+
+@media (max-width: 1100px) {
+    .escalation-form-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .escalation-form-grid {
+        grid-template-columns: 1fr;
+    }
+    .escalation-form-span2 {
+        grid-column: 1;
+    }
+}
+
+/* =====================================================
+   ESCALATION TABLE ACTIONS
+   ===================================================== */
+.esc-action-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.esc-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    color: var(--text-muted);
+    cursor: pointer;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    transition: all 0.15s ease;
+}
+
+.esc-action-btn svg {
+    width: 12px;
+    height: 12px;
+}
+
+.esc-edit-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.esc-delete-btn:hover {
+    color: var(--red);
+    border-color: var(--red);
 }

@@ -640,6 +640,142 @@
     </div>
 
     <!-- ============================================================ -->
+    <!-- ESCALATION TICKET FORM MODAL (Add/Edit) -->
+    <!-- ============================================================ -->
+    <div class="modal-overlay" id="escalationModalOverlay">
+        <div class="modal-box incident-modal-box escalation-modal-box" role="dialog" aria-modal="true" aria-labelledby="escalationModalTitle">
+            <div class="modal-header">
+                <div class="modal-title" id="escalationModalTitle">Add Escalation</div>
+                <button class="modal-close" id="escalationModalClose" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="escalationForm" autocomplete="off">
+                    <input type="hidden" id="escRowIndex" value="" />
+                    <div class="escalation-form-grid">
+                        <div class="login-field">
+                            <label for="escTicketDate" id="lblEscTicketDate">Ticket Date</label>
+                            <input type="date" id="escTicketDate" required />
+                        </div>
+                        <div class="login-field">
+                            <label for="escDay" id="lblEscDay">Day</label>
+                            <input type="text" id="escDay" readonly />
+                        </div>
+                        <div class="login-field">
+                            <label for="escMonth" id="lblEscMonth">Month</label>
+                            <input type="text" id="escMonth" readonly />
+                        </div>
+                        <div class="login-field">
+                            <label for="escWeek" id="lblEscWeek">Week</label>
+                            <input type="text" id="escWeek" readonly />
+                        </div>
+                        <div class="login-field">
+                            <label for="escClientName" id="lblEscClientName">Client Name</label>
+                            <input type="text" id="escClientName" required />
+                        </div>
+                        <div class="login-field">
+                            <label for="escCreatedBy" id="lblEscCreatedBy">Created by</label>
+                            <select id="escCreatedBy" required></select>
+                        </div>
+                        <div class="login-field">
+                            <label for="escProduct" id="lblEscProduct">Product</label>
+                            <select id="escProduct" required></select>
+                        </div>
+                        <div class="login-field">
+                            <label for="escType" id="lblEscType">Type</label>
+                            <select id="escType" required></select>
+                        </div>
+                        <div class="login-field">
+                            <label for="escEscalationStatus" id="lblEscEscalationStatus">Escalation Status</label>
+                            <select id="escEscalationStatus" required></select>
+                        </div>
+                        <div class="login-field">
+                            <label for="escStatus" id="lblEscStatus">Status</label>
+                            <select id="escStatus" required></select>
+                        </div>
+                        <div class="login-field">
+                            <label for="escPriority" id="lblEscPriority">Priority</label>
+                            <select id="escPriority" required></select>
+                        </div>
+                        <div class="login-field">
+                            <label for="escFeature" id="lblEscFeature">Feature</label>
+                            <select id="escFeature" required></select>
+                        </div>
+                        <div class="login-field">
+                            <label for="escStartTime" id="lblEscStartTime">Start Time</label>
+                            <input type="time" id="escStartTime" step="1" required />
+                        </div>
+                        <div class="login-field">
+                            <label for="escSolvedTime" id="lblEscSolvedTime">Solved/Escalated Time</label>
+                            <input type="time" id="escSolvedTime" step="1" required />
+                        </div>
+                        <div class="login-field">
+                            <label for="escHandlingTime" id="lblEscHandlingTime">Handling Time</label>
+                            <input type="text" id="escHandlingTime" readonly />
+                        </div>
+                        <div class="login-field">
+                            <label for="escEscalatedTo" id="lblEscEscalatedTo">Escalated to</label>
+                            <input type="text" id="escEscalatedTo" />
+                        </div>
+                        <div class="login-field">
+                            <label for="escClientCategory" id="lblEscClientCategory">Client Category</label>
+                            <select id="escClientCategory" required></select>
+                        </div>
+                        <div class="login-field escalation-form-span2">
+                            <label for="escProblem" id="lblEscProblem">Problem</label>
+                            <textarea id="escProblem" rows="3" required></textarea>
+                        </div>
+                        <div class="login-field">
+                            <label for="escOnSLA" id="lblEscOnSLA">On SLA?</label>
+                            <input type="text" id="escOnSLA" readonly />
+                        </div>
+                        <div class="login-field">
+                            <label for="escShift" id="lblEscShift">Shift</label>
+                            <input type="text" id="escShift" readonly />
+                        </div>
+                        <div class="login-field">
+                            <label for="escTicketCRM" id="lblEscTicketCRM">Tiket CRM</label>
+                            <input type="text" id="escTicketCRM" />
+                        </div>
+                        <div class="login-field">
+                            <label for="escTicketSociomile" id="lblEscTicketSociomile">Tiket Sociomile</label>
+                            <input type="text" id="escTicketSociomile" />
+                        </div>
+                    </div>
+                    <div class="incident-form-error" id="escalationFormError"></div>
+                    <div class="incident-form-actions">
+                        <button type="button" class="filter-reset" id="escalationCancelBtn">Cancel</button>
+                        <button type="submit" class="login-btn" id="escalationSaveBtn">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CONFIRM / ALERT MODAL -->
+    <!-- ============================================================ -->
+    <div class="modal-overlay" id="confirmModalOverlay">
+        <div class="modal-box confirm-modal-box" role="alertdialog" aria-modal="true" aria-labelledby="confirmModalTitle">
+            <div class="modal-header">
+                <div class="modal-title" id="confirmModalTitle">Confirm</div>
+                <button class="modal-close" id="confirmModalClose" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="confirm-modal-icon" id="confirmModalIcon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z" />
+                    </svg>
+                </div>
+                <div class="confirm-modal-text" id="confirmModalText">-</div>
+            </div>
+            <div class="confirm-modal-actions">
+                <button type="button" class="filter-reset" id="confirmModalCancelBtn">Cancel</button>
+                <button type="button" class="login-btn confirm-modal-danger-btn" id="confirmModalConfirmBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
     <!-- AUTO SCROLL CONTROL (hanya tampil saat fullscreen) -->
     <!-- ============================================================ -->
     <div class="autoscroll-panel" id="autoScrollPanel">
