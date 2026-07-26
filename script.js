@@ -37,13 +37,13 @@ const CONFIG = {
         pageSize: 10,
     },
     API: {
-        tickets: 'https://script.google.com/macros/s/AKfycbykL9IAumoGJxl_6DASBAp0h9dQ_8JpXpia-RldFSCbnTRdf1AN7sOGrai5MHrtvztPbQ/exec?action=tickets',
-        tasks: 'https://script.google.com/macros/s/AKfycbykL9IAumoGJxl_6DASBAp0h9dQ_8JpXpia-RldFSCbnTRdf1AN7sOGrai5MHrtvztPbQ/exec?action=tasks',
-        responseTime: 'https://script.google.com/macros/s/AKfycbykL9IAumoGJxl_6DASBAp0h9dQ_8JpXpia-RldFSCbnTRdf1AN7sOGrai5MHrtvztPbQ/exec?action=responsetime',
-        incidents: 'https://script.google.com/macros/s/AKfycbykL9IAumoGJxl_6DASBAp0h9dQ_8JpXpia-RldFSCbnTRdf1AN7sOGrai5MHrtvztPbQ/exec?action=incident',
-        incidentSave: 'https://script.google.com/macros/s/AKfycbykL9IAumoGJxl_6DASBAp0h9dQ_8JpXpia-RldFSCbnTRdf1AN7sOGrai5MHrtvztPbQ/exec?action=incident',
-        updateTicket: 'https://script.google.com/macros/s/AKfycbykL9IAumoGJxl_6DASBAp0h9dQ_8JpXpia-RldFSCbnTRdf1AN7sOGrai5MHrtvztPbQ/exec?action=updateticket',
-        deleteTicket: 'https://script.google.com/macros/s/AKfycbykL9IAumoGJxl_6DASBAp0h9dQ_8JpXpia-RldFSCbnTRdf1AN7sOGrai5MHrtvztPbQ/exec?action=deleteticket',
+        tickets: 'https://script.google.com/macros/s/AKfycbxlYLYS2pPiCvywL0fnfJKbUwAB3bMJNc5RMQ4ZiV2eC4c0hv4Jevx5IN4nBjRXazOK/exec?action=tickets',
+        tasks: 'https://script.google.com/macros/s/AKfycbxlYLYS2pPiCvywL0fnfJKbUwAB3bMJNc5RMQ4ZiV2eC4c0hv4Jevx5IN4nBjRXazOK/exec?action=tasks',
+        responseTime: 'https://script.google.com/macros/s/AKfycbxlYLYS2pPiCvywL0fnfJKbUwAB3bMJNc5RMQ4ZiV2eC4c0hv4Jevx5IN4nBjRXazOK/exec?action=responsetime',
+        incidents: 'https://script.google.com/macros/s/AKfycbxlYLYS2pPiCvywL0fnfJKbUwAB3bMJNc5RMQ4ZiV2eC4c0hv4Jevx5IN4nBjRXazOK/exec?action=incident',
+        incidentSave: 'https://script.google.com/macros/s/AKfycbxlYLYS2pPiCvywL0fnfJKbUwAB3bMJNc5RMQ4ZiV2eC4c0hv4Jevx5IN4nBjRXazOK/exec?action=incident',
+        updateTicket: 'https://script.google.com/macros/s/AKfycbxlYLYS2pPiCvywL0fnfJKbUwAB3bMJNc5RMQ4ZiV2eC4c0hv4Jevx5IN4nBjRXazOK/exec?action=updateticket',
+        deleteTicket: 'https://script.google.com/macros/s/AKfycbxlYLYS2pPiCvywL0fnfJKbUwAB3bMJNc5RMQ4ZiV2eC4c0hv4Jevx5IN4nBjRXazOK/exec?action=deleteticket',
     },
     AUTH: {
         username: 'admin',
@@ -1021,7 +1021,7 @@ const DataLoader = {
 
     getResponseTimeStaffCols(records) {
         if (!records || !records.length) return [];
-        const fixedCols = ['Date', 'Day', 'Month', 'Week', 'Average'];
+        const fixedCols = ['Date', 'Day', 'Month', 'Week', 'Average', '_row'];
         return Object.keys(records[0]).filter(k => fixedCols.indexOf(k) === -1);
     },
 
@@ -1579,17 +1579,15 @@ const DataProcessor = {
             }
 
             const cols = staffCols || [];
-            let addedAny = false;
+            const rowValues = [];
             cols.forEach(col => {
                 const vv = r.staffValues ? r.staffValues[col] : null;
                 if (vv !== null && vv !== undefined && !isNaN(vv)) {
-                    values.push(vv);
-                    addedAny = true;
+                    rowValues.push(vv);
                 }
             });
-
-            if (!addedAny && r.average !== null && r.average !== undefined && !isNaN(r.average)) {
-                values.push(r.average);
+            if (rowValues.length) {
+                values.push(Utils.Math.average(rowValues));
             }
         });
         return { avgMinutes: values.length ? Utils.Math.average(values) : 0, count: values.length };
