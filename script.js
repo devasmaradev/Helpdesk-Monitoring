@@ -40,17 +40,17 @@ const CONFIG = {
         pollIntervalMs: 5000,
     },
     API: {
-        tickets: 'https://script.google.com/macros/s/AKfycbwqxjpXYZAB26SDUcsKhcgsh6rVBSYbSVwVWq9-mMolp4AC3S8WouywOp5q6ntbxmFOZA/exec?action=tickets',
-        tasks: 'https://script.google.com/macros/s/AKfycbwqxjpXYZAB26SDUcsKhcgsh6rVBSYbSVwVWq9-mMolp4AC3S8WouywOp5q6ntbxmFOZA/exec?action=tasks',
-        responseTime: 'https://script.google.com/macros/s/AKfycbwqxjpXYZAB26SDUcsKhcgsh6rVBSYbSVwVWq9-mMolp4AC3S8WouywOp5q6ntbxmFOZA/exec?action=responsetime',
-        incidents: 'https://script.google.com/macros/s/AKfycbwqxjpXYZAB26SDUcsKhcgsh6rVBSYbSVwVWq9-mMolp4AC3S8WouywOp5q6ntbxmFOZA/exec?action=incident',
-        incidentSave: 'https://script.google.com/macros/s/AKfycbwqxjpXYZAB26SDUcsKhcgsh6rVBSYbSVwVWq9-mMolp4AC3S8WouywOp5q6ntbxmFOZA/exec?action=incident',
-        incidentState: 'https://script.google.com/macros/s/AKfycbwqxjpXYZAB26SDUcsKhcgsh6rVBSYbSVwVWq9-mMolp4AC3S8WouywOp5q6ntbxmFOZA/exec?action=incidentstate',
-        startIncident: 'https://script.google.com/macros/s/AKfycbwqxjpXYZAB26SDUcsKhcgsh6rVBSYbSVwVWq9-mMolp4AC3S8WouywOp5q6ntbxmFOZA/exec?action=startincident',
-        stopIncident: 'https://script.google.com/macros/s/AKfycbwqxjpXYZAB26SDUcsKhcgsh6rVBSYbSVwVWq9-mMolp4AC3S8WouywOp5q6ntbxmFOZA/exec?action=stopincident',
-        cancelIncident: 'https://script.google.com/macros/s/AKfycbwqxjpXYZAB26SDUcsKhcgsh6rVBSYbSVwVWq9-mMolp4AC3S8WouywOp5q6ntbxmFOZA/exec?action=cancelincident',
-        updateTicket: 'https://script.google.com/macros/s/AKfycbwqxjpXYZAB26SDUcsKhcgsh6rVBSYbSVwVWq9-mMolp4AC3S8WouywOp5q6ntbxmFOZA/exec?action=updateticket',
-        deleteTicket: 'https://script.google.com/macros/s/AKfycbwqxjpXYZAB26SDUcsKhcgsh6rVBSYbSVwVWq9-mMolp4AC3S8WouywOp5q6ntbxmFOZA/exec?action=deleteticket',
+        tickets: 'https://script.google.com/macros/s/AKfycbxERDUaKOf4G9TDFdIXIxFcC-bTTMLEEgLALhMs9GXmtE6kh-AhovlQY4QexmtkbpDfkA/exec?action=tickets',
+        tasks: 'https://script.google.com/macros/s/AKfycbxERDUaKOf4G9TDFdIXIxFcC-bTTMLEEgLALhMs9GXmtE6kh-AhovlQY4QexmtkbpDfkA/exec?action=tasks',
+        responseTime: 'https://script.google.com/macros/s/AKfycbxERDUaKOf4G9TDFdIXIxFcC-bTTMLEEgLALhMs9GXmtE6kh-AhovlQY4QexmtkbpDfkA/exec?action=responsetime',
+        incidents: 'https://script.google.com/macros/s/AKfycbxERDUaKOf4G9TDFdIXIxFcC-bTTMLEEgLALhMs9GXmtE6kh-AhovlQY4QexmtkbpDfkA/exec?action=incident',
+        incidentSave: 'https://script.google.com/macros/s/AKfycbxERDUaKOf4G9TDFdIXIxFcC-bTTMLEEgLALhMs9GXmtE6kh-AhovlQY4QexmtkbpDfkA/exec?action=incident',
+        incidentState: 'https://script.google.com/macros/s/AKfycbxERDUaKOf4G9TDFdIXIxFcC-bTTMLEEgLALhMs9GXmtE6kh-AhovlQY4QexmtkbpDfkA/exec?action=incidentstate',
+        startIncident: 'https://script.google.com/macros/s/AKfycbxERDUaKOf4G9TDFdIXIxFcC-bTTMLEEgLALhMs9GXmtE6kh-AhovlQY4QexmtkbpDfkA/exec?action=startincident',
+        stopIncident: 'https://script.google.com/macros/s/AKfycbxERDUaKOf4G9TDFdIXIxFcC-bTTMLEEgLALhMs9GXmtE6kh-AhovlQY4QexmtkbpDfkA/exec?action=stopincident',
+        cancelIncident: 'https://script.google.com/macros/s/AKfycbxERDUaKOf4G9TDFdIXIxFcC-bTTMLEEgLALhMs9GXmtE6kh-AhovlQY4QexmtkbpDfkA/exec?action=cancelincident',
+        updateTicket: 'https://script.google.com/macros/s/AKfycbxERDUaKOf4G9TDFdIXIxFcC-bTTMLEEgLALhMs9GXmtE6kh-AhovlQY4QexmtkbpDfkA/exec?action=updateticket',
+        deleteTicket: 'https://script.google.com/macros/s/AKfycbxERDUaKOf4G9TDFdIXIxFcC-bTTMLEEgLALhMs9GXmtE6kh-AhovlQY4QexmtkbpDfkA/exec?action=deleteticket',
     },
     AUTH: {
         username: 'admin',
@@ -274,6 +274,7 @@ const LOCALE = {
         lblEscStartTime: 'Waktu Mulai',
         lblEscSolvedTime: 'Waktu Selesai/Eskalasi',
         lblEscHandlingTime: 'Waktu Penanganan',
+        lblEscSolvedBug: 'Solved Bug',
         lblEscEscalatedTo: 'Eskalasi ke',
         lblEscClientCategory: 'Kategori Klien',
         lblEscProblem: 'Masalah',
@@ -490,6 +491,7 @@ const LOCALE = {
         lblEscStartTime: 'Start Time',
         lblEscSolvedTime: 'Solved/Escalated Time',
         lblEscHandlingTime: 'Handling Time',
+        lblEscSolvedBug: 'Solved Bug',
         lblEscEscalatedTo: 'Escalated to',
         lblEscClientCategory: 'Client Category',
         lblEscProblem: 'Problem',
@@ -1000,6 +1002,7 @@ const DataLoader = {
                 tier: DataLoader.getField(rec, 'Client Category', 'Tier'),
                 onSLA: DataLoader.normalizeYesNo(DataLoader.getField(rec, 'On SLA?', 'On SLA', 'OnSLA')),
                 ht: DataLoader.getField(rec, 'Handling Time'),
+                solvedBug: DataLoader.getField(rec, 'Solved Bug'),
                 client: DataLoader.getField(rec, 'Client Name'),
                 problem: DataLoader.getField(rec, 'Problem'),
                 startTime: DataLoader.getField(rec, 'Start Time'),
@@ -4652,6 +4655,7 @@ const EventHandlers = {
             lblEscStartTime: 'lblEscStartTime',
             lblEscSolvedTime: 'lblEscSolvedTime',
             lblEscHandlingTime: 'lblEscHandlingTime',
+            lblEscSolvedBug: 'lblEscSolvedBug',
             lblEscEscalatedTo: 'lblEscEscalatedTo',
             lblEscClientCategory: 'lblEscClientCategory',
             lblEscProblem: 'lblEscProblem',
@@ -5804,6 +5808,7 @@ const EscalationCRUD = {
         document.getElementById('escMonth').value = '';
         document.getElementById('escWeek').value = '';
         document.getElementById('escHandlingTime').value = '';
+        document.getElementById('escSolvedBug').value = '';
         document.getElementById('escOnSLA').value = '';
         document.getElementById('escShift').value = '';
         const errEl = document.getElementById('escalationFormError');
@@ -5837,6 +5842,7 @@ const EscalationCRUD = {
         document.getElementById('escFeature').value = ticket.feature || '';
         document.getElementById('escStartTime').value = Utils.Date.isoToTimeString(ticket.startTime || '');
         document.getElementById('escSolvedTime').value = Utils.Date.isoToTimeString(ticket.solvedTime || '');
+        document.getElementById('escSolvedBug').value = Utils.Date.isoToTimeString(ticket.solvedBug || '');
         document.getElementById('escEscalatedTo').value = ticket.escalatedTo || '';
         document.getElementById('escClientCategory').value = ticket.tier || '';
         document.getElementById('escProblem').value = ticket.problem || '';
@@ -5871,6 +5877,7 @@ const EscalationCRUD = {
             startTime: document.getElementById('escStartTime').value,
             solvedTime: document.getElementById('escSolvedTime').value,
             handlingTime: document.getElementById('escHandlingTime').value,
+            solvedBug: document.getElementById('escSolvedBug').value,
             escalatedTo: document.getElementById('escEscalatedTo').value.trim(),
             clientCategory: document.getElementById('escClientCategory').value,
             problem: document.getElementById('escProblem').value.trim(),
