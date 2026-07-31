@@ -253,7 +253,8 @@
                     </div>
                     <div class="chart-wrapper-md"><canvas id="chartTicketStaff" aria-label="Staff tickets chart"></canvas></div>
                 </div>
-            </div>
+
+                </div>
 
             <div class="section-header">
                 <span id="lblTrend">Trend &amp; Pattern</span>
@@ -423,7 +424,7 @@
                     </div>
                 </div>
 
-                <div class="filter-separator" id="filterSeparatorDim" role="separator"></div>
+                <div class="filter-separator" id="filterSeparatorMTMDim" role="separator"></div>
 
                 <button class="filter-reset" id="btnResetMTMFilters" aria-label="Reset month comparison filters">Reset</button>
 
@@ -608,7 +609,7 @@
         <div class="modal-box incident-modal-box" role="dialog" aria-modal="true" aria-labelledby="incidentModalTitle">
             <div class="modal-header">
                 <div class="modal-title" id="incidentModalTitle">Record Incident</div>
-                <button class="modal-close" id="incidentModalClose" aria-label="Close">&times;</button>
+                <button class="modal-close" id="incidentModalClose" title="Minimize (recording continues)" aria-label="Minimize">&minus;</button>
             </div>
             <div class="modal-body">
                 <form id="incidentForm" autocomplete="off">

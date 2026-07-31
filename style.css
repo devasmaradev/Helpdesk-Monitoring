@@ -116,9 +116,7 @@ body {
 }
 
 @keyframes app-loading-spin {
-    to {
-        transform: rotate(360deg);
-    }
+    to { transform: rotate(360deg); }
 }
 
 .app-loading-count {
@@ -312,12 +310,8 @@ body {
 }
 
 @keyframes pulse {
-    0%, 100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.4;
-    }
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
 }
 
 /* =====================================================
@@ -1233,6 +1227,13 @@ body {
     font-size: 13px;
     text-align: center;
     color: var(--text-muted);
+}
+
+.chart-empty-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
 }
 
 /* =====================================================

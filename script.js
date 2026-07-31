@@ -36,19 +36,27 @@ const CONFIG = {
     PAGINATION: {
         pageSize: 10,
     },
+    INCIDENT: {
+        pollIntervalMs: 5000,
+    },
     API: {
-        tickets: 'https://script.google.com/macros/s/AKfycbxlYLYS2pPiCvywL0fnfJKbUwAB3bMJNc5RMQ4ZiV2eC4c0hv4Jevx5IN4nBjRXazOK/exec?action=tickets',
-        tasks: 'https://script.google.com/macros/s/AKfycbxlYLYS2pPiCvywL0fnfJKbUwAB3bMJNc5RMQ4ZiV2eC4c0hv4Jevx5IN4nBjRXazOK/exec?action=tasks',
-        responseTime: 'https://script.google.com/macros/s/AKfycbxlYLYS2pPiCvywL0fnfJKbUwAB3bMJNc5RMQ4ZiV2eC4c0hv4Jevx5IN4nBjRXazOK/exec?action=responsetime',
-        incidents: 'https://script.google.com/macros/s/AKfycbxlYLYS2pPiCvywL0fnfJKbUwAB3bMJNc5RMQ4ZiV2eC4c0hv4Jevx5IN4nBjRXazOK/exec?action=incident',
-        incidentSave: 'https://script.google.com/macros/s/AKfycbxlYLYS2pPiCvywL0fnfJKbUwAB3bMJNc5RMQ4ZiV2eC4c0hv4Jevx5IN4nBjRXazOK/exec?action=incident',
-        updateTicket: 'https://script.google.com/macros/s/AKfycbxlYLYS2pPiCvywL0fnfJKbUwAB3bMJNc5RMQ4ZiV2eC4c0hv4Jevx5IN4nBjRXazOK/exec?action=updateticket',
-        deleteTicket: 'https://script.google.com/macros/s/AKfycbxlYLYS2pPiCvywL0fnfJKbUwAB3bMJNc5RMQ4ZiV2eC4c0hv4Jevx5IN4nBjRXazOK/exec?action=deleteticket',
+        tickets: 'https://script.google.com/macros/s/AKfycbwqxjpXYZAB26SDUcsKhcgsh6rVBSYbSVwVWq9-mMolp4AC3S8WouywOp5q6ntbxmFOZA/exec?action=tickets',
+        tasks: 'https://script.google.com/macros/s/AKfycbwqxjpXYZAB26SDUcsKhcgsh6rVBSYbSVwVWq9-mMolp4AC3S8WouywOp5q6ntbxmFOZA/exec?action=tasks',
+        responseTime: 'https://script.google.com/macros/s/AKfycbwqxjpXYZAB26SDUcsKhcgsh6rVBSYbSVwVWq9-mMolp4AC3S8WouywOp5q6ntbxmFOZA/exec?action=responsetime',
+        incidents: 'https://script.google.com/macros/s/AKfycbwqxjpXYZAB26SDUcsKhcgsh6rVBSYbSVwVWq9-mMolp4AC3S8WouywOp5q6ntbxmFOZA/exec?action=incident',
+        incidentSave: 'https://script.google.com/macros/s/AKfycbwqxjpXYZAB26SDUcsKhcgsh6rVBSYbSVwVWq9-mMolp4AC3S8WouywOp5q6ntbxmFOZA/exec?action=incident',
+        incidentState: 'https://script.google.com/macros/s/AKfycbwqxjpXYZAB26SDUcsKhcgsh6rVBSYbSVwVWq9-mMolp4AC3S8WouywOp5q6ntbxmFOZA/exec?action=incidentstate',
+        startIncident: 'https://script.google.com/macros/s/AKfycbwqxjpXYZAB26SDUcsKhcgsh6rVBSYbSVwVWq9-mMolp4AC3S8WouywOp5q6ntbxmFOZA/exec?action=startincident',
+        stopIncident: 'https://script.google.com/macros/s/AKfycbwqxjpXYZAB26SDUcsKhcgsh6rVBSYbSVwVWq9-mMolp4AC3S8WouywOp5q6ntbxmFOZA/exec?action=stopincident',
+        cancelIncident: 'https://script.google.com/macros/s/AKfycbwqxjpXYZAB26SDUcsKhcgsh6rVBSYbSVwVWq9-mMolp4AC3S8WouywOp5q6ntbxmFOZA/exec?action=cancelincident',
+        updateTicket: 'https://script.google.com/macros/s/AKfycbwqxjpXYZAB26SDUcsKhcgsh6rVBSYbSVwVWq9-mMolp4AC3S8WouywOp5q6ntbxmFOZA/exec?action=updateticket',
+        deleteTicket: 'https://script.google.com/macros/s/AKfycbwqxjpXYZAB26SDUcsKhcgsh6rVBSYbSVwVWq9-mMolp4AC3S8WouywOp5q6ntbxmFOZA/exec?action=deleteticket',
     },
     AUTH: {
         username: 'admin',
         password: 'helpdesk2026',
         sessionKey: 'hd_auth_session',
+        userKey: 'hd_auth_user',
     },
     PRIORITIES: ['Critical', 'High', 'Medium', 'Low'],
 };
@@ -113,8 +121,6 @@ const LOCALE = {
         tierSub: 'Distribusi per segmen klien',
         prodTitle: 'Produk · Issue vs Non-Issue',
         prodSub: 'Perbandingan per produk',
-        featTitle: 'Fitur · Issue vs Non-Issue',
-        featSub: 'Distribusi berdasarkan fitur',
         staffTitle: 'Tiket per Staff',
         staffSub: 'Jumlah tiket yang ditangani per staff',
         trendTitle: 'Tren Tiket 7 Hari',
@@ -176,16 +182,12 @@ const LOCALE = {
         mtmAHTSub: 'Rata-rata waktu menangani per bulan (menit)',
         mtmSLATitle: 'SLA Rate Bulanan',
         mtmSLASub: 'Tingkat kepatuhan SLA per bulan',
-        mtmTierTitle: 'Tier Klien Bulanan · Issue vs Non-Issue',
-        mtmTierSub: 'Distribusi per segmen klien per bulan',
         mtmProdTitle: 'Produk Bulanan · Issue vs Non-Issue',
         mtmProdSub: 'Perbandingan per produk per bulan',
         mtmStaffTitle: 'Tiket per Staff Bulanan',
         mtmStaffSub: 'Jumlah tiket per staff per bulan',
         mtmTaskStaffTitle: 'Task per Staff Bulanan',
         mtmTaskStaffSub: 'Jumlah task per staff per bulan',
-        mtmFeatTitle: 'Fitur Bulanan · Issue vs Non-Issue',
-        mtmFeatSub: 'Distribusi fitur per bulan',
         mtmShiftTitle: 'Distribusi Shift Bulanan',
         days: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
         footer: 'Helpdesk Monitoring Dashboard · Data: Google Sheets · Dibuat dengan ☕ oleh Helpdesk Developer Team',
@@ -227,9 +229,13 @@ const LOCALE = {
         incidentSelectProduct: 'Pilih product',
         incidentFormRequired: 'Semua field wajib diisi.',
         incidentSaveFailed: 'Gagal menyimpan incident. Coba lagi.',
+        incidentConfirmStart: 'Apakah kamu yakin ingin memulai pencatatan incident?',
+        btnStartIncident: 'Ya, Mulai',
         incidentCancelBtn: 'Cancel',
         incidentSaveBtn: 'Save',
         incidentSaving: 'Menyimpan...',
+        incidentCancelling: 'Membatalkan...',
+        incidentCancelFailed: 'Gagal membatalkan incident. Coba lagi.',
         recentIncidentTitle: 'Insiden Terbaru',
         recentIncidentSub: '5 insiden terakhir berdasarkan tanggal',
         thIncidentStart: 'Waktu Mulai',
@@ -331,8 +337,6 @@ const LOCALE = {
         tierSub: 'Distribution by client segment',
         prodTitle: 'Product · Issue vs Non-Issue',
         prodSub: 'Comparison by product',
-        featTitle: 'Feature · Issue vs Non-Issue',
-        featSub: 'Distribution by feature',
         staffTitle: 'Tickets per Staff',
         staffSub: 'Number of tickets handled per staff',
         trendTitle: '7-Day Ticket Trend',
@@ -394,16 +398,12 @@ const LOCALE = {
         mtmAHTSub: 'Average handling time per month (minutes)',
         mtmSLATitle: 'Monthly SLA Rate',
         mtmSLASub: 'SLA compliance rate per month',
-        mtmTierTitle: 'Monthly Client Tier · Issue vs Non-Issue',
-        mtmTierSub: 'Distribution by client segment per month',
         mtmProdTitle: 'Monthly Product · Issue vs Non-Issue',
         mtmProdSub: 'Comparison by product per month',
         mtmStaffTitle: 'Monthly Tickets per Staff',
         mtmStaffSub: 'Number of tickets handled per staff per month',
         mtmTaskStaffTitle: 'Monthly Tasks per Staff',
         mtmTaskStaffSub: 'Number of tasks handled per staff per month',
-        mtmFeatTitle: 'Monthly Feature · Issue vs Non-Issue',
-        mtmFeatSub: 'Distribution by feature per month',
         mtmShiftTitle: 'Monthly Shift Distribution',
         days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         footer: 'Helpdesk Monitoring Dashboard · Data: Google Sheets · Made with ☕ by Helpdesk Developer Team',
@@ -445,9 +445,13 @@ const LOCALE = {
         incidentSelectProduct: 'Select product',
         incidentFormRequired: 'All fields are required.',
         incidentSaveFailed: 'Failed to save incident. Please try again.',
+        incidentConfirmStart: 'Are you sure you want to start recording an incident?',
+        btnStartIncident: 'Yes, Start',
         incidentCancelBtn: 'Cancel',
         incidentSaveBtn: 'Save',
         incidentSaving: 'Saving...',
+        incidentCancelling: 'Cancelling...',
+        incidentCancelFailed: 'Failed to cancel incident. Please try again.',
         recentIncidentTitle: 'Recent Incidents',
         recentIncidentSub: 'Last 5 incidents by date',
         thIncidentStart: 'Start Time',
@@ -569,8 +573,13 @@ const Utils = {
             if (isNaN(d.getTime())) return null;
             const fmt = new Intl.DateTimeFormat('en-US', {
                 timeZone: 'Asia/Jakarta',
-                year: 'numeric', month: '2-digit', day: '2-digit',
-                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false,
             });
             const parts = fmt.formatToParts(d).reduce((acc, p) => {
                 acc[p.type] = p.value;
@@ -589,29 +598,37 @@ const Utils = {
         isoToDDMMYYYY(isoStr) {
             const p = Utils.Date.toJakartaParts(isoStr);
             if (!p) return '';
-            return String(p.day).padStart(2, '0') + '/' + String(p.month).padStart(2, '0') + '/' + p.year;
+            return String(p.day).padStart(2, '0') + '/' +
+                   String(p.month).padStart(2, '0') + '/' +
+                   p.year;
         },
 
         isoToTimeString(str) {
             if (!str) return '';
             if (/^\d{2}:\d{2}(:\d{2})?$/.test(str)) {
                 const parts = str.split(':');
-                return parts[0].padStart(2, '0') + ':' + parts[1].padStart(2, '0') + ':' + (parts[2] ? parts[2].padStart(2, '0') : '00');
+                return parts[0].padStart(2, '0') + ':' +
+                       parts[1].padStart(2, '0') + ':' +
+                       (parts[2] ? parts[2].padStart(2, '0') : '00');
             }
             const p = Utils.Date.toJakartaParts(str);
             if (!p) return '';
-            return String(p.hour).padStart(2, '0') + ':' + String(p.minute).padStart(2, '0') + ':' + String(p.second).padStart(2, '0');
+            return String(p.hour).padStart(2, '0') + ':' +
+                   String(p.minute).padStart(2, '0') + ':' +
+                   String(p.second).padStart(2, '0');
         },
 
         isoToTaskDateString(isoStr) {
             const p = Utils.Date.toJakartaParts(isoStr);
             if (!p) return '';
-            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
             const dd = String(p.day).padStart(2, '0');
             const hh = String(p.hour).padStart(2, '0');
             const mi = String(p.minute).padStart(2, '0');
             const ss = String(p.second).padStart(2, '0');
-            return dd + '-' + monthNames[p.month - 1] + '-' + p.year + ' ' + hh + ':' + mi + ':' + ss;
+            return dd + '-' + monthNames[p.month - 1] + '-' + p.year +
+                   ' ' + hh + ':' + mi + ':' + ss;
         },
 
         parseTaskDate(str) {
@@ -621,8 +638,18 @@ const Utils = {
             const timePart = parts[1] || '0:0:0';
             const dParts = datePart.split('-');
             const tParts = timePart.split(':').map(Number);
-            const monthMap = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
-            return new Date(Number(dParts[2]), monthMap[dParts[1]], Number(dParts[0]), tParts[0] || 0, tParts[1] || 0, tParts[2] || 0);
+            const monthMap = {
+                Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
+                Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
+            };
+            return new Date(
+                Number(dParts[2]),
+                monthMap[dParts[1]],
+                Number(dParts[0]),
+                tParts[0] || 0,
+                tParts[1] || 0,
+                tParts[2] || 0
+            );
         },
 
         taskDateOnly(str) {
@@ -643,8 +670,10 @@ const Utils = {
             const datePart = parts[0] || '';
             if (!datePart) return '';
             const dParts = datePart.split('-');
-            const monthMap = { Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '04', Jun: '05',
-                Jul: '06', Aug: '07', Sep: '08', Oct: '09', Nov: '10', Dec: '11' };
+            const monthMap = {
+                Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06',
+                Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12',
+            };
             const monthNum = monthMap[dParts[1]] || dParts[1];
             const day = String(Number(dParts[0])).padStart(2, '0');
             return day + '/' + monthNum + '/' + dParts[2];
@@ -728,12 +757,9 @@ const Utils = {
     Duration: {
         parse(str) {
             if (str === null || str === undefined || str === '') return 0;
-            if (typeof str === 'number') {
-                return str * 24 * 60;
-            }
+            if (typeof str === 'number') return str * 24 * 60;
             if (typeof str !== 'string') return 0;
-            const isIso = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(str);
-            if (isIso) {
+            if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(str)) {
                 const p = Utils.Date.toJakartaParts(str);
                 if (!p) return 0;
                 return p.hour * 60 + p.minute + (p.second || 0) / 60;
@@ -745,12 +771,9 @@ const Utils = {
 
         parseTimeToSeconds(str) {
             if (str === null || str === undefined || str === '') return null;
-            if (typeof str === 'number') {
-                return str * 24 * 3600;
-            }
+            if (typeof str === 'number') return str * 24 * 3600;
             if (typeof str !== 'string') return null;
-            const isIso = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(str);
-            if (isIso) {
+            if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(str)) {
                 const p = Utils.Date.toJakartaParts(str);
                 if (!p) return null;
                 return p.hour * 3600 + p.minute * 60 + (p.second || 0);
@@ -778,10 +801,9 @@ const Utils = {
             const h = Math.floor(totalSeconds / 3600);
             const m = Math.floor((totalSeconds % 3600) / 60);
             const s = totalSeconds % 60;
-            const hh = String(h).padStart(2, '0');
-            const mm = String(m).padStart(2, '0');
-            const ss = String(s).padStart(2, '0');
-            return hh + '.' + mm + '.' + ss;
+            return String(h).padStart(2, '0') + '.' +
+                   String(m).padStart(2, '0') + '.' +
+                   String(s).padStart(2, '0');
         },
 
         sum(items, key) {
@@ -1037,7 +1059,9 @@ const DataLoader = {
             const staffValues = {};
             staffCols.forEach(name => {
                 const raw = rec[name];
-                staffValues[name] = (raw !== undefined && raw !== null && raw !== '') ? Utils.Duration.parse(raw) : null;
+                staffValues[name] = (raw !== undefined && raw !== null && raw !== '')
+                    ? Utils.Duration.parse(raw)
+                    : null;
             });
 
             const dateParts = Utils.Date.toJakartaParts(rawDate);
@@ -1049,7 +1073,9 @@ const DataLoader = {
                 day: DataLoader.getField(rec, 'Day'),
                 month: monthWithYear,
                 week: DataLoader.getField(rec, 'Week'),
-                average: (rec['Average'] !== undefined && rec['Average'] !== null && rec['Average'] !== '') ? Utils.Duration.parse(rec['Average']) : null,
+                average: (rec.Average !== undefined && rec.Average !== null && rec.Average !== '')
+                    ? Utils.Duration.parse(rec.Average)
+                    : null,
                 staffValues,
             });
         });
@@ -1124,6 +1150,7 @@ const DataLoader = {
             const taskRecords = results[1];
             const rtRecords = results[2];
             const incidentRecords = results[3];
+
             const mappedTickets = DataLoader.mapTicketRows(ticketRecords);
             const mappedTasks = DataLoader.mapTaskRows(taskRecords);
             const mappedRT = DataLoader.mapResponseTimeRows(rtRecords);
@@ -1151,7 +1178,7 @@ const DataLoader = {
             appState.meta.lastSync = new Date();
             return false;
         });
-    }
+    },
 };
 
 /* ================================================================
@@ -1208,8 +1235,20 @@ const DataProcessor = {
         })).filter(x => x.total > 0);
 
         const byType = [
-            { name: t('issue'), key: 'Issue', total: esc.filter(r => r.type === 'Issue').length, active: esc.filter(r => r.type === 'Issue' && r.status !== 'Closed').length, color: CONFIG.CHART.colors.issue },
-            { name: t('nonIssue'), key: 'Non Issue', total: esc.filter(r => r.type === 'Non Issue').length, active: esc.filter(r => r.type === 'Non Issue' && r.status !== 'Closed').length, color: CONFIG.CHART.colors.non },
+            {
+                name: t('issue'),
+                key: 'Issue',
+                total: esc.filter(r => r.type === 'Issue').length,
+                active: esc.filter(r => r.type === 'Issue' && r.status !== 'Closed').length,
+                color: CONFIG.CHART.colors.issue,
+            },
+            {
+                name: t('nonIssue'),
+                key: 'Non Issue',
+                total: esc.filter(r => r.type === 'Non Issue').length,
+                active: esc.filter(r => r.type === 'Non Issue' && r.status !== 'Closed').length,
+                color: CONFIG.CHART.colors.non,
+            },
         ].filter(x => x.total > 0);
 
         const activeRows = active > 0 ? esc
@@ -1274,11 +1313,15 @@ const DataProcessor = {
 
             if (!from || !to) {
                 const dates = Utils.Array.distinct(data.map(r => r.date))
-                    .map(Utils.Date.parseDate).filter(Boolean).sort((a, b) => a - b);
+                    .map(Utils.Date.parseDate)
+                    .filter(Boolean)
+                    .sort((a, b) => a - b);
                 if (dates.length === 0) return [];
                 if (!from) from = dates[0];
-                if (!to) { to = new Date(dates[dates.length - 1]);
-                    to.setHours(23, 59, 59, 999); }
+                if (!to) {
+                    to = new Date(dates[dates.length - 1]);
+                    to.setHours(23, 59, 59, 999);
+                }
             }
 
             const duration = to.getTime() - from.getTime() + 1;
@@ -1296,7 +1339,9 @@ const DataProcessor = {
             const idx = weeks.indexOf(week);
             const prevWeek = idx > 0 ? weeks[idx - 1] : null;
             if (!prevWeek) return [];
-            return applyDim(data.filter(r => r.week === prevWeek && (month === 'all' || r.month === month)));
+            return applyDim(data.filter(r =>
+                r.week === prevWeek && (month === 'all' || r.month === month)
+            ));
         }
 
         const allDates = Utils.Array.distinct(data.map(r => r.date))
@@ -1336,14 +1381,6 @@ const DataProcessor = {
         return { labels, issue, nonIssue };
     },
 
-    prepareFeatureData(data) {
-        const features = Utils.Array.distinct(data.map(r => r.feature || 'Lainnya'));
-        const labels = features;
-        const issue = features.map(f => data.filter(r => (r.feature || 'Lainnya') === f && r.type === 'Issue').length);
-        const nonIssue = features.map(f => data.filter(r => (r.feature || 'Lainnya') === f && r.type === 'Non Issue').length);
-        return { labels, issue, nonIssue };
-    },
-
     prepareStaffData(data) {
         const unassignedLabel = t('unassigned');
         const staffs = Utils.Array.distinct(data.map(r => r.staff || unassignedLabel)).sort();
@@ -1365,7 +1402,8 @@ const DataProcessor = {
         const labels = last7.map(dt => {
             const parts = dt.split('/').map(Number);
             const dayName = days[new Date(parts[2], parts[1] - 1, parts[0]).getDay()];
-            return dayName + ' ' + String(parts[0]).padStart(2, '0') + '/' + String(parts[1]).padStart(2, '0');
+            return dayName + ' ' + String(parts[0]).padStart(2, '0') +
+                   '/' + String(parts[1]).padStart(2, '0');
         });
         const issue = last7.map(dt => data.filter(r => r.date === dt && r.type === 'Issue').length);
         const nonIssue = last7.map(dt => data.filter(r => r.date === dt && r.type === 'Non Issue').length);
@@ -1401,7 +1439,6 @@ const DataProcessor = {
 
             const problemText = (r.problem || '').trim();
             const problemPrefix = problemText.split(' - ')[0].trim();
-
             const name = problemPrefix ? clientName + ' - ' + problemPrefix : clientName;
 
             if (!groups[name]) {
@@ -1447,15 +1484,26 @@ const DataProcessor = {
         const selectedMonths = sorted.slice(fromIdx, toIdx + 1);
         if (selectedMonths.length === 0) return null;
 
-        const inRange = tickets.filter(r => selectedMonths.indexOf(r.month) !== -1 && (staffFilter === 'all' || r.staff === staffFilter));
-        const taskData = (tasks || []).filter(tk => staffFilter === 'all' || tk.staff === staffFilter);
-
+        const inRange = tickets.filter(r =>
+            selectedMonths.indexOf(r.month) !== -1 &&
+            (staffFilter === 'all' || r.staff === staffFilter)
+        );
+        const taskData = (tasks || []).filter(tk =>
+            staffFilter === 'all' || tk.staff === staffFilter
+        );
         const rtData = responseTimes || [];
+
         const buckets = selectedMonths.map(m => {
-            const rows = tickets.filter(r => r.month === m && (staffFilter === 'all' || r.staff === staffFilter));
+            const rows = tickets.filter(r =>
+                r.month === m && (staffFilter === 'all' || r.staff === staffFilter)
+            );
             const taskRows = taskData.filter(tk => tk.month === m);
             const kpi = DataProcessor.calculateKPIs(rows);
-            const artResult = DataProcessor.calculateART(rtData.filter(r => r.month === m), staffFilter, appState.meta.responseTimeStaffCols);
+            const artResult = DataProcessor.calculateART(
+                rtData.filter(r => r.month === m),
+                staffFilter,
+                appState.meta.responseTimeStaffCols
+            );
             kpi.artMinutes = artResult.avgMinutes;
             kpi.artCount = artResult.count;
             kpi.totalTasks = taskRows.length;
@@ -1471,18 +1519,6 @@ const DataProcessor = {
         });
 
         return { buckets, totalRecords: inRange.length, allRows: inRange };
-    },
-
-    prepareMonthlyTierComparison(buckets) {
-        const allRows = buckets.reduce((acc, b) => acc.concat(b.rows), []);
-        const tiers = Utils.Array.distinct(allRows.map(r => r.tier).filter(Boolean)).sort();
-        const palette = ['#5b73ff', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b'];
-        const datasets = tiers.map((tier, i) => ({
-            label: Utils.String.formatTier(tier),
-            data: buckets.map(b => b.rows.filter(r => r.tier === tier).length),
-            color: CONFIG.CHART.colors[tier] || palette[i % palette.length],
-        }));
-        return { labels: buckets.map(b => b.label), datasets };
     },
 
     prepareMonthlyProductComparison(buckets) {
@@ -1504,7 +1540,9 @@ const DataProcessor = {
         const palette = ['#5b73ff', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#fb923c', '#f43f5e'];
         const datasets = staffs.map((s, i) => ({
             label: s.split(' ').slice(0, 2).join(' '),
-            data: buckets.map(b => b.rows.filter(r => (r.staff || unassignedLabel) === s).length),
+            data: buckets.map(b =>
+                b.rows.filter(r => (r.staff || unassignedLabel) === s).length
+            ),
             color: palette[i % palette.length],
         }));
         return { labels: buckets.map(b => b.label), datasets };
@@ -1517,19 +1555,9 @@ const DataProcessor = {
         const palette = ['#5b73ff', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#fb923c', '#f43f5e'];
         const datasets = staffs.map((s, i) => ({
             label: s.split(' ').slice(0, 2).join(' '),
-            data: buckets.map(b => (b.taskRows || []).filter(tk => (tk.staff || unassignedLabel) === s).length),
-            color: palette[i % palette.length],
-        }));
-        return { labels: buckets.map(b => b.label), datasets };
-    },
-
-    prepareMonthlyFeatureComparison(buckets) {
-        const allRows = buckets.reduce((acc, b) => acc.concat(b.rows), []);
-        const features = Utils.Array.distinct(allRows.map(r => r.feature || 'Lainnya'));
-        const palette = ['#5b73ff', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#fb923c', '#f43f5e'];
-        const datasets = features.map((f, i) => ({
-            label: f,
-            data: buckets.map(b => b.rows.filter(r => (r.feature || 'Lainnya') === f).length),
+            data: buckets.map(b =>
+                (b.taskRows || []).filter(tk => (tk.staff || unassignedLabel) === s).length
+            ),
             color: palette[i % palette.length],
         }));
         return { labels: buckets.map(b => b.label), datasets };
@@ -1616,7 +1644,7 @@ const DataProcessor = {
             avgSeconds,
             formatted: minutes > 0 ? minutes + 'm ' + seconds + 's' : seconds + 's',
             count,
-            totalSeconds
+            totalSeconds,
         };
     },
 };
@@ -1706,11 +1734,16 @@ const FilterEngine = {
             if (to) to.setHours(23, 59, 59, 999);
 
             if (!from || !to) {
-                const dates = data.map(t => t.start).map(Utils.Date.taskDateOnly).filter(Boolean).sort((a, b) => a - b);
+                const dates = data.map(t => t.start)
+                    .map(Utils.Date.taskDateOnly)
+                    .filter(Boolean)
+                    .sort((a, b) => a - b);
                 if (dates.length === 0) return [];
                 if (!from) from = dates[0];
-                if (!to) { to = new Date(dates[dates.length - 1]);
-                    to.setHours(23, 59, 59, 999); }
+                if (!to) {
+                    to = new Date(dates[dates.length - 1]);
+                    to.setHours(23, 59, 59, 999);
+                }
             }
 
             const duration = to.getTime() - from.getTime() + 1;
@@ -1728,10 +1761,13 @@ const FilterEngine = {
             const idx = weeks.indexOf(week);
             const prevWeek = idx > 0 ? weeks[idx - 1] : null;
             if (!prevWeek) return [];
-            return applyDim(data.filter(t => t.week === prevWeek && (month === 'all' || t.month === month)));
+            return applyDim(data.filter(t =>
+                t.week === prevWeek && (month === 'all' || t.month === month)
+            ));
         }
 
-        const allDates = data.map(t => t.start).sort((a, b) => Utils.Date.parseTaskDate(a) - Utils.Date.parseTaskDate(b));
+        const allDates = data.map(t => t.start)
+            .sort((a, b) => Utils.Date.parseTaskDate(a) - Utils.Date.parseTaskDate(b));
         if (allDates.length < 2) return [];
         const half = Math.ceil(allDates.length / 2);
         const prevSet = new Set(allDates.slice(0, half));
@@ -1781,11 +1817,15 @@ const FilterEngine = {
 
             if (!from || !to) {
                 const dates = Utils.Array.distinct(data.map(r => r.date))
-                    .map(Utils.Date.parseDate).filter(Boolean).sort((a, b) => a - b);
+                    .map(Utils.Date.parseDate)
+                    .filter(Boolean)
+                    .sort((a, b) => a - b);
                 if (dates.length === 0) return [];
                 if (!from) from = dates[0];
-                if (!to) { to = new Date(dates[dates.length - 1]);
-                    to.setHours(23, 59, 59, 999); }
+                if (!to) {
+                    to = new Date(dates[dates.length - 1]);
+                    to.setHours(23, 59, 59, 999);
+                }
             }
 
             const duration = to.getTime() - from.getTime() + 1;
@@ -1803,7 +1843,9 @@ const FilterEngine = {
             const idx = weeks.indexOf(week);
             const prevWeek = idx > 0 ? weeks[idx - 1] : null;
             if (!prevWeek) return [];
-            return data.filter(r => r.week === prevWeek && (month === 'all' || r.month === month));
+            return data.filter(r =>
+                r.week === prevWeek && (month === 'all' || r.month === month)
+            );
         }
 
         const allDates = Utils.Array.distinct(data.map(r => r.date))
@@ -1820,9 +1862,13 @@ const FilterEngine = {
             parts.push(filters.month.replace(/\[\d+\]\s*/, ''));
         }
         if (filters.week !== 'all') parts.push(filters.week);
-        if (filters.dateFrom && filters.dateTo) parts.push(filters.dateFrom + ' – ' + filters.dateTo);
-        else if (filters.dateFrom) parts.push('≥ ' + filters.dateFrom);
-        else if (filters.dateTo) parts.push('≤ ' + filters.dateTo);
+        if (filters.dateFrom && filters.dateTo) {
+            parts.push(filters.dateFrom + ' – ' + filters.dateTo);
+        } else if (filters.dateFrom) {
+            parts.push('≥ ' + filters.dateFrom);
+        } else if (filters.dateTo) {
+            parts.push('≤ ' + filters.dateTo);
+        }
         return parts.length ? parts.join(' · ') : t('allData');
     },
 };
@@ -1844,6 +1890,29 @@ const ChartEngine = {
 
     destroyAll() {
         Object.keys(this._charts).forEach(key => this.destroy(key));
+    },
+
+    showEmptyState(canvasId, message) {
+        this.destroy(canvasId);
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        canvas.style.display = 'none';
+        let placeholder = canvas.parentElement.querySelector('.chart-empty-placeholder');
+        if (!placeholder) {
+            placeholder = document.createElement('div');
+            placeholder.className = 'task-empty chart-empty-placeholder';
+            canvas.parentElement.appendChild(placeholder);
+        }
+        placeholder.textContent = message || t('noData');
+        placeholder.style.display = '';
+    },
+
+    hideEmptyState(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        canvas.style.display = '';
+        const placeholder = canvas.parentElement.querySelector('.chart-empty-placeholder');
+        if (placeholder) placeholder.style.display = 'none';
     },
 
     createDoughnut(canvasId, labels, data, colors, cutout) {
@@ -1877,10 +1946,10 @@ const ChartEngine = {
                                     const total = data.reduce((a, b) => a + b, 0);
                                     const pct = total > 0 ? Math.round((c.parsed / total) * 100) : 0;
                                     return c.label + ': ' + c.parsed + ' (' + pct + '%)';
-                                }
-                            }
-                        }
-                    }
+                                },
+                            },
+                        },
+                    },
                 },
                 plugins: [ChartEngine._plugins.doughnutCenter],
             });
@@ -1917,7 +1986,11 @@ const ChartEngine = {
                     indexAxis: isHorizontal ? 'y' : 'x',
                     plugins: {
                         legend: {
-                            labels: { color: getTickColor(), boxWidth: 10, font: { size: 11, family: 'Inter' } },
+                            labels: {
+                                color: getTickColor(),
+                                boxWidth: 10,
+                                font: { size: 11, family: 'Inter' },
+                            },
                         },
                         tooltip: { mode: 'index', intersect: false },
                     },
@@ -1925,16 +1998,24 @@ const ChartEngine = {
                         x: {
                             stacked: true,
                             grid: { color: getGridColor() },
-                            ticks: { color: getTickColor(), font: { size: 11, family: 'Inter' } },
+                            ticks: {
+                                color: getTickColor(),
+                                font: { size: 11, family: 'Inter' },
+                            },
                         },
                         y: {
                             stacked: true,
                             grid: { color: getGridColor() },
-                            ticks: { color: getTickColor(), font: { size: 11, family: 'Inter' } },
+                            ticks: {
+                                color: getTickColor(),
+                                font: { size: 11, family: 'Inter' },
+                            },
                         },
                     },
                 },
-                plugins: isHorizontal ? [ChartEngine._plugins.horizontalEnd] : [ChartEngine._plugins.stackTop],
+                plugins: isHorizontal
+                    ? [ChartEngine._plugins.horizontalEnd]
+                    : [ChartEngine._plugins.stackTop],
             });
 
             this._charts[canvasId] = chart;
@@ -1977,11 +2058,17 @@ const ChartEngine = {
                     scales: {
                         x: {
                             grid: { color: getGridColor() },
-                            ticks: { color: getTickColor(), font: { size: 11, family: 'Inter' } },
+                            ticks: {
+                                color: getTickColor(),
+                                font: { size: 11, family: 'Inter' },
+                            },
                         },
                         y: {
                             grid: { color: getGridColor() },
-                            ticks: { color: getTickColor(), font: { size: 11, family: 'Inter' } },
+                            ticks: {
+                                color: getTickColor(),
+                                font: { size: 11, family: 'Inter' },
+                            },
                         },
                     },
                 },
@@ -2010,8 +2097,11 @@ const ChartEngine = {
                 tension: CONFIG.CHART.tension,
                 fill: true,
                 pointRadius: ds.pointRadius !== undefined ? ds.pointRadius : 5,
-                pointHoverRadius: ds.pointRadius !== undefined ?
-                    (Array.isArray(ds.pointRadius) ? ds.pointRadius.map(r => r === 0 ? 0 : 8) : 8) : 8,
+                pointHoverRadius: ds.pointRadius !== undefined
+                    ? (Array.isArray(ds.pointRadius)
+                        ? ds.pointRadius.map(r => r === 0 ? 0 : 8)
+                        : 8)
+                    : 8,
                 pointBackgroundColor: ds.color,
                 borderWidth: 2,
                 formatter: typeof tooltipFormatter === 'function' ? tooltipFormatter : null,
@@ -2027,7 +2117,9 @@ const ChartEngine = {
             if (typeof tooltipFormatter === 'function') {
                 tooltipCallbacks.label = function (item) {
                     const val = item.parsed.y;
-                    if (val === null || val === undefined) return item.dataset.label + ': -';
+                    if (val === null || val === undefined) {
+                        return item.dataset.label + ': -';
+                    }
                     return item.dataset.label + ': ' + tooltipFormatter(val);
                 };
                 tooltipCallbacks.footer = function (items) {
@@ -2045,7 +2137,12 @@ const ChartEngine = {
                     interaction: { intersect: false, mode: 'index' },
                     plugins: {
                         legend: {
-                            labels: { color: getTickColor(), boxWidth: 10, font: { size: 11, family: 'Inter' }, padding: 14 },
+                            labels: {
+                                color: getTickColor(),
+                                boxWidth: 10,
+                                font: { size: 11, family: 'Inter' },
+                                padding: 14,
+                            },
                         },
                         tooltip: {
                             callbacks: tooltipCallbacks,
@@ -2055,12 +2152,19 @@ const ChartEngine = {
                     scales: {
                         x: {
                             grid: { color: getGridColor() },
-                            ticks: { color: getTickColor(), font: { size: 11, family: 'Inter' } },
+                            ticks: {
+                                color: getTickColor(),
+                                font: { size: 11, family: 'Inter' },
+                            },
                         },
                         y: {
                             beginAtZero: true,
                             grid: { color: getGridColor() },
-                            ticks: { color: getTickColor(), font: { size: 11, family: 'Inter' }, stepSize: 2 },
+                            ticks: {
+                                color: getTickColor(),
+                                font: { size: 11, family: 'Inter' },
+                                stepSize: 2,
+                            },
                         },
                     },
                 },
@@ -2121,7 +2225,7 @@ const ChartEngine = {
                 ctx.fillStyle = getTickColor();
                 ctx.fillText(t('total'), cx, cy + 9);
                 ctx.restore();
-            }
+            },
         },
 
         stackTop: {
@@ -2171,7 +2275,7 @@ const ChartEngine = {
                     ctx.fillText(total, lastBar.x, topY - 4);
                     ctx.restore();
                 });
-            }
+            },
         },
 
         horizontalEnd: {
@@ -2221,7 +2325,7 @@ const ChartEngine = {
                     ctx.fillText(total, rx + 6, bar.y);
                     ctx.restore();
                 });
-            }
+            },
         },
 
         singleBarLabel: {
@@ -2241,7 +2345,7 @@ const ChartEngine = {
                     ctx.fillText(val, bar.x + 6, bar.y);
                     ctx.restore();
                 });
-            }
+            },
         },
 
         lineLabel: {
@@ -2254,7 +2358,9 @@ const ChartEngine = {
                     meta.data.forEach((pt, i) => {
                         const val = ds.data[i];
                         if (val == null) return;
-                        const radius = (pt.options && pt.options.radius !== undefined) ? pt.options.radius : null;
+                        const radius = (pt.options && pt.options.radius !== undefined)
+                            ? pt.options.radius
+                            : null;
                         if (radius === 0) return;
                         const text = ds.formatter ? ds.formatter(val) : val;
                         ctx.save();
@@ -2266,7 +2372,7 @@ const ChartEngine = {
                         ctx.restore();
                     });
                 });
-            }
+            },
         },
     },
 
@@ -2349,10 +2455,15 @@ const UIRenderer = {
             },
             {
                 id: 'avgResponseTime',
-                value: (artInfo && artInfo.cur && artInfo.cur.count > 0) ? Utils.Duration.formatAHT(artInfo.cur.avgMinutes) : '-',
+                value: (artInfo && artInfo.cur && artInfo.cur.count > 0)
+                    ? Utils.Duration.formatAHT(artInfo.cur.avgMinutes)
+                    : '-',
                 color: '#06b6d4',
                 sub: t('subART'),
-                delta: (artInfo && artInfo.cur && artInfo.cur.count > 0 && artInfo.prev && artInfo.prev.count > 0) ? UIRenderer._deltaAHT(artInfo.cur.avgMinutes, artInfo.prev.avgMinutes) : null,
+                delta: (artInfo && artInfo.cur && artInfo.cur.count > 0 &&
+                        artInfo.prev && artInfo.prev.count > 0)
+                    ? UIRenderer._deltaAHT(artInfo.cur.avgMinutes, artInfo.prev.avgMinutes)
+                    : null,
                 large: true,
             },
             {
@@ -2368,7 +2479,10 @@ const UIRenderer = {
         if (badgeEl) badgeEl.textContent = filterSummary;
 
         grid.innerHTML = kpis.map(k => {
-            const deltaHtml = k.delta ? '<div style="margin-top:6px;display:flex;align-items:center;gap:6px">' + k.delta + '<span class="kpi-compare">' + prevLabel + '</span></div>' : '';
+            const deltaHtml = k.delta
+                ? '<div style="margin-top:6px;display:flex;align-items:center;gap:6px">' +
+                  k.delta + '<span class="kpi-compare">' + prevLabel + '</span></div>'
+                : '';
             const cardClass = 'kpi-card' + (k.large ? ' kpi-card-lg' : '');
             return '<div class="' + cardClass + '" style="--kpi-color:' + k.color + '">' +
                 '<div class="kpi-bar"></div>' +
@@ -2387,8 +2501,12 @@ const UIRenderer = {
 
         const stats = DataProcessor.calculateEscalationStats(data);
 
-        const prevData = (prevDataParam !== undefined) ? prevDataParam : DataProcessor.getPreviousPeriodData(appState.tickets, appState.filters);
-        const prevStats = (prevData && prevData.length) ? DataProcessor.calculateEscalationStats(prevData) : null;
+        const prevData = (prevDataParam !== undefined)
+            ? prevDataParam
+            : DataProcessor.getPreviousPeriodData(appState.tickets, appState.filters);
+        const prevStats = (prevData && prevData.length)
+            ? DataProcessor.calculateEscalationStats(prevData)
+            : null;
         const hasPrev = prevStats !== null && prevStats.total > 0;
         const prevLabel = UIRenderer._getPrevLabel();
 
@@ -2397,18 +2515,29 @@ const UIRenderer = {
             '<div class="esc-card-label">' + t('escTotal') + '</div>' +
             '<div class="esc-card-value" style="color:#fb923c">' + stats.total + '</div>' +
             '<div class="esc-card-sub">' + stats.rate.toFixed(1) + '% ' + t('ofTotal') + '</div>' +
-            (hasPrev ? '<div style="margin-top:5px;display:flex;align-items:center;gap:5px">' + UIRenderer._deltaTag(stats.total, prevStats.total, true) + '<span style="font-size:10px;color:var(--text-muted)">' + prevLabel + '</span></div>' : '') +
+            (hasPrev
+                ? '<div style="margin-top:5px;display:flex;align-items:center;gap:5px">' +
+                  UIRenderer._deltaTag(stats.total, prevStats.total, true) +
+                  '<span style="font-size:10px;color:var(--text-muted)">' + prevLabel + '</span></div>'
+                : '') +
             '</div>' +
             '<div class="esc-card">' +
             '<div class="esc-card-label">' + t('escActive') + '</div>' +
             '<div class="esc-card-value" style="color:#f43f5e">' + stats.active + '</div>' +
             '<div class="esc-card-sub">' + t('subForwarded') + '</div>' +
-            (hasPrev ? '<div style="margin-top:5px;display:flex;align-items:center;gap:5px">' + UIRenderer._deltaTag(stats.active, prevStats.active, true) + '<span style="font-size:10px;color:var(--text-muted)">' + prevLabel + '</span></div>' : '') +
+            (hasPrev
+                ? '<div style="margin-top:5px;display:flex;align-items:center;gap:5px">' +
+                  UIRenderer._deltaTag(stats.active, prevStats.active, true) +
+                  '<span style="font-size:10px;color:var(--text-muted)">' + prevLabel + '</span></div>'
+                : '') +
             '</div>' +
             '<div class="esc-card">' +
             '<div class="esc-card-label">' + t('escClosed') + '</div>' +
             '<div class="esc-card-value" style="color:#10b981">' + stats.closed + '</div>' +
-            '<div class="esc-card-sub">' + (stats.total > 0 ? Math.round((stats.closed / stats.total) * 100) : 0) + '% ' + t('resolutionRate') + '</div>' +
+            '<div class="esc-card-sub">' +
+            (stats.total > 0 ? Math.round((stats.closed / stats.total) * 100) : 0) +
+            '% ' + t('resolutionRate') +
+            '</div>' +
             '</div>' +
             '<div class="esc-card">' +
             '<div class="esc-card-label">' + t('escRate') + '</div>' +
@@ -2424,7 +2553,16 @@ const UIRenderer = {
                 '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
                 stats.byProduct.map(x => {
                     const clr = CONFIG.CHART.colors[x.name] || '#5b73ff';
-                    return '<span class="esc-chip" style="background:' + Utils.Color.toRGBA(clr, 0.15) + ';color:' + clr + '">' + x.label + ' <strong>' + x.total + '</strong>' + (x.active > 0 ? ' <span style="background:' + Utils.Color.toRGBA('#fb923c', 0.25) + ';color:#fb923c;padding:0 4px;border-radius:3px;font-size:10px">' + x.active + ' ' + t('active') + '</span>' : '') + '</span>';
+                    return '<span class="esc-chip" style="background:' +
+                        Utils.Color.toRGBA(clr, 0.15) + ';color:' + clr + '">' +
+                        x.label + ' <strong>' + x.total + '</strong>' +
+                        (x.active > 0
+                            ? ' <span style="background:' +
+                              Utils.Color.toRGBA('#fb923c', 0.25) +
+                              ';color:#fb923c;padding:0 4px;border-radius:3px;font-size:10px">' +
+                              x.active + ' ' + t('active') + '</span>'
+                            : '') +
+                        '</span>';
                 }).join('') +
                 '</div>' +
                 '</div>' +
@@ -2437,7 +2575,16 @@ const UIRenderer = {
                 '<span class="esc-row-label">' + t('escByTier') + '</span>' +
                 '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
                 stats.byTier.map(x => {
-                    return '<span class="esc-chip" style="background:' + Utils.Color.toRGBA(x.color, 0.15) + ';color:' + x.color + '">' + x.label + ' <strong>' + x.total + '</strong>' + (x.active > 0 ? ' <span style="background:' + Utils.Color.toRGBA('#fb923c', 0.25) + ';color:#fb923c;padding:0 4px;border-radius:3px;font-size:10px">' + x.active + ' ' + t('active') + '</span>' : '') + '</span>';
+                    return '<span class="esc-chip" style="background:' +
+                        Utils.Color.toRGBA(x.color, 0.15) + ';color:' + x.color + '">' +
+                        x.label + ' <strong>' + x.total + '</strong>' +
+                        (x.active > 0
+                            ? ' <span style="background:' +
+                              Utils.Color.toRGBA('#fb923c', 0.25) +
+                              ';color:#fb923c;padding:0 4px;border-radius:3px;font-size:10px">' +
+                              x.active + ' ' + t('active') + '</span>'
+                            : '') +
+                        '</span>';
                 }).join('') +
                 '</div>' +
                 '</div>' +
@@ -2450,7 +2597,16 @@ const UIRenderer = {
                 '<span class="esc-row-label">' + t('escByType') + '</span>' +
                 '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
                 stats.byType.map(x => {
-                    return '<span class="esc-chip" style="background:' + Utils.Color.toRGBA(x.color, 0.15) + ';color:' + x.color + '">' + x.name + ' <strong>' + x.total + '</strong>' + (x.active > 0 ? ' <span style="background:' + Utils.Color.toRGBA('#fb923c', 0.25) + ';color:#fb923c;padding:0 4px;border-radius:3px;font-size:10px">' + x.active + ' ' + t('active') + '</span>' : '') + '</span>';
+                    return '<span class="esc-chip" style="background:' +
+                        Utils.Color.toRGBA(x.color, 0.15) + ';color:' + x.color + '">' +
+                        x.name + ' <strong>' + x.total + '</strong>' +
+                        (x.active > 0
+                            ? ' <span style="background:' +
+                              Utils.Color.toRGBA('#fb923c', 0.25) +
+                              ';color:#fb923c;padding:0 4px;border-radius:3px;font-size:10px">' +
+                              x.active + ' ' + t('active') + '</span>'
+                            : '') +
+                        '</span>';
                 }).join('') +
                 '</div>' +
                 '</div>' +
@@ -2458,8 +2614,11 @@ const UIRenderer = {
         }
 
         if (stats.active > 0) {
-            const editIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" /><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4z" /></svg>';
-            const deleteIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z" /></svg>';
+            const editIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                '<path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />' +
+                '<path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4z" /></svg>';
+            const deleteIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                '<path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z" /></svg>';
 
             const rows = stats.activeRows.map(r => {
                 return '<tr>' +
@@ -2468,19 +2627,34 @@ const UIRenderer = {
                     (r.company ? '<div class="esc-client-full">' + r.company + '</div>' : '') +
                     '</td>' +
                     '<td><div class="esc-problem">' + r.problem + '</div></td>' +
-                    '<td><span class="esc-prod-badge" style="background:' + Utils.Color.toRGBA(r.productColor, 0.15) + ';color:' + r.productColor + '">' + r.product + '</span></td>' +
-                    '<td><span class="esc-pri-badge" style="background:' + Utils.Color.toRGBA(r.priorityColor, 0.2) + ';color:' + r.priorityColor + '">' + r.priority + '</span></td>' +
-                    '<td><div class="esc-date">' + r.date + '</div>' + (r.startTime ? '<div style="font-size:10px;color:var(--text-muted)">' + r.startTime + '</div>' : '') + '</td>' +
-                    '<td><span style="font-size:11px;padding:2px 7px;border-radius:4px;background:var(--surface-3);color:var(--text-sec)">' + r.escalatedTo + '</span></td>' +
+                    '<td><span class="esc-prod-badge" style="background:' +
+                        Utils.Color.toRGBA(r.productColor, 0.15) + ';color:' + r.productColor + '">' +
+                        r.product + '</span></td>' +
+                    '<td><span class="esc-pri-badge" style="background:' +
+                        Utils.Color.toRGBA(r.priorityColor, 0.2) + ';color:' + r.priorityColor + '">' +
+                        r.priority + '</span></td>' +
+                    '<td><div class="esc-date">' + r.date + '</div>' +
+                        (r.startTime
+                            ? '<div style="font-size:10px;color:var(--text-muted)">' +
+                              r.startTime + '</div>'
+                            : '') +
+                    '</td>' +
+                    '<td><span style="font-size:11px;padding:2px 7px;border-radius:4px;' +
+                        'background:var(--surface-3);color:var(--text-sec)">' +
+                        r.escalatedTo + '</span></td>' +
                     '<td><div class="esc-action-group">' +
-                    '<button class="esc-action-btn esc-edit-btn" title="' + t('btnEdit') + '">' + editIcon + '</button>' +
-                    '<button class="esc-action-btn esc-delete-btn" title="' + t('btnDelete') + '">' + deleteIcon + '</button>' +
+                    '<button class="esc-action-btn esc-edit-btn" title="' + t('btnEdit') + '">' +
+                        editIcon + '</button>' +
+                    '<button class="esc-action-btn esc-delete-btn" title="' + t('btnDelete') + '">' +
+                        deleteIcon + '</button>' +
                     '</div></td>' +
                     '</tr>';
             }).join('');
 
             html += '<div class="esc-active-detail">' +
-                '<div class="esc-active-title">' + t('activeEscalation', { count: stats.active, plural: stats.active > 1 ? 's' : '' }) + '</div>' +
+                '<div class="esc-active-title">' +
+                    t('activeEscalation', { count: stats.active, plural: stats.active > 1 ? 's' : '' }) +
+                '</div>' +
                 '<div class="esc-table-wrapper">' +
                 '<table class="esc-table">' +
                 '<thead><tr>' +
@@ -2536,7 +2710,8 @@ const UIRenderer = {
             legend.innerHTML = chartData.labels.map((label, i) => {
                 return '<div class="legend-item">' +
                     '<div class="legend-dot" style="background:' + chartData.colors[i] + '"></div>' +
-                    label + ' <strong style="color:' + chartData.colors[i] + '">' + chartData.values[i] + '</strong>' +
+                    label + ' <strong style="color:' + chartData.colors[i] + '">' +
+                    chartData.values[i] + '</strong>' +
                     '</div>';
             }).join('');
         }
@@ -2546,7 +2721,14 @@ const UIRenderer = {
         canvasId = canvasId || 'chartTier';
         legendId = legendId || 'legendTier';
         const chartData = DataProcessor.prepareTierData(data);
-        if (chartData.labels.length === 0) return;
+        const legendEmpty = document.getElementById(legendId);
+
+        if (chartData.labels.length === 0) {
+            ChartEngine.showEmptyState(canvasId);
+            if (legendEmpty) legendEmpty.innerHTML = '';
+            return;
+        }
+        ChartEngine.hideEmptyState(canvasId);
 
         ChartEngine.createStackedBar(
             canvasId,
@@ -2560,12 +2742,16 @@ const UIRenderer = {
         const legend = document.getElementById(legendId);
         if (legend) {
             let html = '';
-            html += '<div class="legend-item"><div class="legend-dot" style="background:' + CONFIG.CHART.colors.non + '"></div>' + t('nonIssue') + '</div>';
-            html += '<div class="legend-item"><div class="legend-dot" style="background:' + CONFIG.CHART.colors.issue + '"></div>' + t('issue') + '</div>';
+            html += '<div class="legend-item"><div class="legend-dot" style="background:' +
+                CONFIG.CHART.colors.non + '"></div>' + t('nonIssue') + '</div>';
+            html += '<div class="legend-item"><div class="legend-dot" style="background:' +
+                CONFIG.CHART.colors.issue + '"></div>' + t('issue') + '</div>';
             chartData.labels.forEach((label, i) => {
                 const rawTier = chartData.rawTiers[i];
-                const color = CONFIG.CHART.colors[rawTier] || ['#5b73ff', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b'][i % 5];
-                html += '<div class="legend-item"><div class="legend-dot" style="background:' + color + '"></div>' + label + ' <strong>' + chartData.totals[i] + '</strong></div>';
+                const color = CONFIG.CHART.colors[rawTier] ||
+                    ['#5b73ff', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b'][i % 5];
+                html += '<div class="legend-item"><div class="legend-dot" style="background:' +
+                    color + '"></div>' + label + ' <strong>' + chartData.totals[i] + '</strong></div>';
             });
             legend.innerHTML = html;
         }
@@ -2574,7 +2760,11 @@ const UIRenderer = {
     _renderProductChart(data, canvasId) {
         canvasId = canvasId || 'chartProduct';
         const chartData = DataProcessor.prepareProductData(data);
-        if (chartData.labels.length === 0) return;
+        if (chartData.labels.length === 0) {
+            ChartEngine.showEmptyState(canvasId);
+            return;
+        }
+        ChartEngine.hideEmptyState(canvasId);
         ChartEngine.createStackedBar(
             canvasId,
             chartData.labels,
@@ -2586,34 +2776,25 @@ const UIRenderer = {
         );
     },
 
-    _renderFeatureChart(data, canvasId) {
-        canvasId = canvasId || 'chartFeature';
-        const chartData = DataProcessor.prepareFeatureData(data);
-        if (chartData.labels.length === 0) return;
-        ChartEngine.createStackedBar(
-            canvasId,
-            chartData.labels,
-            [
-                { label: t('issue'), data: chartData.issue, color: CONFIG.CHART.colors.issue },
-                { label: t('nonIssue'), data: chartData.nonIssue, color: CONFIG.CHART.colors.non },
-            ]
-        );
-    },
-
     _renderStaffChart(data, canvasId) {
         canvasId = canvasId || 'chartTicketStaff';
         const chartData = DataProcessor.prepareStaffData(data);
         if (chartData.labels.length === 0) {
-            const container = document.getElementById(canvasId)?.parentElement;
-            if (container) container.innerHTML = '<div class="task-empty">' + t('noData') + '</div>';
+            ChartEngine.showEmptyState(canvasId);
             return;
         }
+        ChartEngine.hideEmptyState(canvasId);
         ChartEngine.createSingleBar(canvasId, chartData.labels, chartData.values);
     },
 
     _renderTrendChart() {
         const chartData = DataProcessor.prepareTrendData(appState.tickets);
-        if (chartData.labels.length === 0) return;
+        if (chartData.labels.length === 0) {
+            ChartEngine.destroy('chartTrend');
+            const comp = document.getElementById('trendComparison');
+            if (comp) comp.innerHTML = '';
+            return;
+        }
 
         const labels = chartData.labels.map(label => {
             const parts = label.split(' ');
@@ -2636,7 +2817,9 @@ const UIRenderer = {
             const cmp = (arr, label) => {
                 const prev = arr.slice(0, half).reduce((a, b) => a + b, 0);
                 const cur = arr.slice(half).reduce((a, b) => a + b, 0);
-                if (!prev && !cur) return '<div class="trend-badge flat">→ ' + label + ' ' + t('stable') + '</div>';
+                if (!prev && !cur) {
+                    return '<div class="trend-badge flat">→ ' + label + ' ' + t('stable') + '</div>';
+                }
                 const delta = cur - prev;
                 const pct = prev > 0 ? Math.abs(Math.round((delta / prev) * 100)) : 100;
                 if (delta > 0) return '<div class="trend-badge up">↑ ' + label + ' +' + pct + '%</div>';
@@ -2644,14 +2827,20 @@ const UIRenderer = {
                 return '<div class="trend-badge flat">→ ' + label + ' ' + t('stable') + '</div>';
             };
 
-            comp.innerHTML = cmp(chartData.issue, t('issue')) + cmp(chartData.nonIssue, t('nonIssue')) +
+            comp.innerHTML = cmp(chartData.issue, t('issue')) +
+                cmp(chartData.nonIssue, t('nonIssue')) +
                 '<span class="trend-context">' + t('trendContext') + '</span>';
         }
     },
 
     _render6MonthTrendChart() {
         const chartData = DataProcessor.prepare6MonthTrendData(appState.tickets);
-        if (chartData.labels.length === 0) return;
+        if (chartData.labels.length === 0) {
+            ChartEngine.destroy('chartTrend6M');
+            const comp = document.getElementById('trend6MComparison');
+            if (comp) comp.innerHTML = '';
+            return;
+        }
 
         ChartEngine.createLine(
             'chartTrend6M',
@@ -2669,7 +2858,9 @@ const UIRenderer = {
             const cmp = (arr, label) => {
                 const prev = arr.slice(0, half).reduce((a, b) => a + b, 0);
                 const cur = arr.slice(half).reduce((a, b) => a + b, 0);
-                if (!prev && !cur) return '<div class="trend-badge flat">→ ' + label + ' ' + t('stable') + '</div>';
+                if (!prev && !cur) {
+                    return '<div class="trend-badge flat">→ ' + label + ' ' + t('stable') + '</div>';
+                }
                 const delta = cur - prev;
                 const pct = prev > 0 ? Math.abs(Math.round((delta / prev) * 100)) : 100;
                 if (delta > 0) return '<div class="trend-badge up">↑ ' + label + ' +' + pct + '%</div>';
@@ -2677,7 +2868,8 @@ const UIRenderer = {
                 return '<div class="trend-badge flat">→ ' + label + ' ' + t('stable') + '</div>';
             };
 
-            comp.innerHTML = cmp(chartData.issue, t('issue')) + cmp(chartData.nonIssue, t('nonIssue')) +
+            comp.innerHTML = cmp(chartData.issue, t('issue')) +
+                cmp(chartData.nonIssue, t('nonIssue')) +
                 '<span class="trend-context">' + t('trendContext') + '</span>';
         }
     },
@@ -2691,13 +2883,21 @@ const UIRenderer = {
         const shifts = canonicalShifts.filter(s => data.some(r => r.shift === s));
 
         if (shifts.length === 0 || data.length === 0) {
-            const container = document.getElementById(canvasId)?.parentElement;
-            if (container) container.innerHTML = '<div class="task-empty">' + t('noData') + '</div>';
+            ChartEngine.showEmptyState(canvasId);
+            const emptyLegend = document.getElementById(legendId);
+            if (emptyLegend) emptyLegend.innerHTML = '';
+            const emptySubtitle = document.getElementById(subtitleId);
+            if (emptySubtitle) emptySubtitle.textContent = t('shiftSub');
             return;
         }
+        ChartEngine.hideEmptyState(canvasId);
 
-        const nonIssue = shifts.map(s => data.filter(r => r.shift === s && r.type === 'Non Issue').length);
-        const issue = shifts.map(s => data.filter(r => r.shift === s && r.type === 'Issue').length);
+        const nonIssue = shifts.map(s =>
+            data.filter(r => r.shift === s && r.type === 'Non Issue').length
+        );
+        const issue = shifts.map(s =>
+            data.filter(r => r.shift === s && r.type === 'Issue').length
+        );
         const totals = shifts.map(s => data.filter(r => r.shift === s).length);
 
         const shiftLabelMap = { Pagi: t('morning'), Siang: t('day'), Malam: t('night') };
@@ -2717,8 +2917,18 @@ const UIRenderer = {
             canvasId,
             paddedLabels,
             [
-                { label: t('nonIssue'), data: paddedNonIssue, color: CONFIG.CHART.colors.non, pointRadius: edgeRadius },
-                { label: t('issue'), data: paddedIssue, color: CONFIG.CHART.colors.issue, pointRadius: edgeRadius },
+                {
+                    label: t('nonIssue'),
+                    data: paddedNonIssue,
+                    color: CONFIG.CHART.colors.non,
+                    pointRadius: edgeRadius,
+                },
+                {
+                    label: t('issue'),
+                    data: paddedIssue,
+                    color: CONFIG.CHART.colors.issue,
+                    pointRadius: edgeRadius,
+                },
             ]
         );
 
@@ -2726,8 +2936,10 @@ const UIRenderer = {
         if (legend) {
             legend.innerHTML = shifts.map((shift, i) => {
                 return '<div class="legend-item">' +
-                    '<div class="legend-dot" style="background:' + CONFIG.CHART.colors[shift] + '"></div>' +
-                    labels[i] + ' <strong style="color:' + CONFIG.CHART.colors[shift] + '">' + totals[i] + '</strong>' +
+                    '<div class="legend-dot" style="background:' +
+                    CONFIG.CHART.colors[shift] + '"></div>' +
+                    labels[i] + ' <strong style="color:' +
+                    CONFIG.CHART.colors[shift] + '">' + totals[i] + '</strong>' +
                     '</div>';
             }).join('');
         }
@@ -2746,13 +2958,22 @@ const UIRenderer = {
             { id: 'totalTasks', value: metrics.total, color: '#5b73ff', sub: t('totalTasks') },
             { id: 'done', value: metrics.done, color: '#10b981', sub: completionRate + '% ' + t('completed') },
             { id: 'progress', value: metrics.progress, color: '#f59e0b', sub: t('inProgress') },
-            { id: 'totalWorkHours', value: Utils.Duration.formatHMS(metrics.totalMinutes), color: '#8b5cf6', sub: metrics.staffCount + ' ' + t('activeStaff') },
+            {
+                id: 'totalWorkHours',
+                value: Utils.Duration.formatHMS(metrics.totalMinutes),
+                color: '#8b5cf6',
+                sub: metrics.staffCount + ' ' + t('activeStaff'),
+            },
         ];
 
         const grid = document.getElementById('taskKpiGrid');
         if (grid) {
             grid.innerHTML = taskStats.map(s => {
-                const deltaHtml = prevMetrics ? '<div style="margin-top:6px;display:flex;align-items:center;gap:6px">' + UIRenderer._deltaTag(metrics.total, prevMetrics.total, false) + '<span class="kpi-compare">' + prevLabel + '</span></div>' : '';
+                const deltaHtml = prevMetrics
+                    ? '<div style="margin-top:6px;display:flex;align-items:center;gap:6px">' +
+                      UIRenderer._deltaTag(metrics.total, prevMetrics.total, false) +
+                      '<span class="kpi-compare">' + prevLabel + '</span></div>'
+                    : '';
                 return '<div class="kpi-card" style="--kpi-color:' + s.color + '">' +
                     '<div class="kpi-bar"></div>' +
                     '<div class="kpi-label">' + t(s.id) + '</div>' +
@@ -2768,33 +2989,44 @@ const UIRenderer = {
         const statusData = [];
         const statusLabels = [];
         const statusColors = [];
-        if (metrics.done > 0) { statusLabels.push('Done');
+        if (metrics.done > 0) {
+            statusLabels.push('Done');
             statusData.push(metrics.done);
-            statusColors.push('#10b981'); }
-        if (metrics.progress > 0) { statusLabels.push('Progress');
+            statusColors.push('#10b981');
+        }
+        if (metrics.progress > 0) {
+            statusLabels.push('Progress');
             statusData.push(metrics.progress);
-            statusColors.push('#f59e0b'); }
+            statusColors.push('#f59e0b');
+        }
 
         if (statusData.length) {
+            ChartEngine.hideEmptyState('chartTaskStatus');
             ChartEngine.createDoughnut('chartTaskStatus', statusLabels, statusData, statusColors);
             const legend = document.getElementById('legendTaskStatus');
             if (legend) {
                 legend.innerHTML = statusLabels.map((label, i) => {
                     return '<div class="legend-item">' +
                         '<div class="legend-dot" style="background:' + statusColors[i] + '"></div>' +
-                        label + ' <strong style="color:' + statusColors[i] + '">' + statusData[i] + '</strong>' +
-                        '<span style="color:var(--text-muted)">(' + Math.round((statusData[i] / filtered.length) * 100) + '%)</span>' +
+                        label + ' <strong style="color:' + statusColors[i] + '">' +
+                        statusData[i] + '</strong>' +
+                        '<span style="color:var(--text-muted)">(' +
+                        Math.round((statusData[i] / filtered.length) * 100) + '%)</span>' +
                         '</div>';
                 }).join('');
             }
+        } else {
+            ChartEngine.showEmptyState('chartTaskStatus');
+            const legend = document.getElementById('legendTaskStatus');
+            if (legend) legend.innerHTML = '';
         }
 
         const staffData = UIRenderer._prepareTaskStaffData(filtered);
         if (staffData.labels.length) {
+            ChartEngine.hideEmptyState('chartTaskStaff');
             ChartEngine.createSingleBar('chartTaskStaff', staffData.labels, staffData.values);
         } else {
-            const container = document.getElementById('chartTaskStaff')?.parentElement;
-            if (container) container.innerHTML = '<div class="task-empty">' + t('noData') + '</div>';
+            ChartEngine.showEmptyState('chartTaskStaff');
         }
 
         UIRenderer._populateTaskFilters(filtered);
@@ -2829,12 +3061,15 @@ const UIRenderer = {
         }).slice(0, 5);
 
         if (list.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6"><div class="task-empty">' + t('noIncidents') + '</div></td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6"><div class="task-empty">' +
+                t('noIncidents') + '</div></td></tr>';
             return;
         }
 
         tbody.innerHTML = list.map(inc => {
-            const durationText = (inc.durationMinutes !== null && inc.durationMinutes !== undefined) ? Utils.Duration.formatHMS(inc.durationMinutes) : '-';
+            const durationText = (inc.durationMinutes !== null && inc.durationMinutes !== undefined)
+                ? Utils.Duration.formatHMS(inc.durationMinutes)
+                : '-';
             return '<tr>' +
                 '<td>' + Utils.String.escapeHtml(inc.startTime || '-') + '</td>' +
                 '<td>' + Utils.String.escapeHtml(inc.endTime || '-') + '</td>' +
@@ -2857,7 +3092,8 @@ const UIRenderer = {
         if (!tbody) return;
 
         if (pageItems.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="3"><div class="task-empty">' + t('noData') + '</div></td></tr>';
+            tbody.innerHTML = '<tr><td colspan="3"><div class="task-empty">' +
+                t('noData') + '</div></td></tr>';
             UIRenderer._renderTopClientPagination(list, 0, 0);
             return;
         }
@@ -2889,7 +3125,9 @@ const UIRenderer = {
         const startIdx = totalItems > 0 ? (page - 1) * pageSize + 1 : 0;
         const endIdx = Math.min(page * pageSize, totalItems);
 
-        const infoText = totalItems > 0 ? (startIdx + ' - ' + endIdx + ' / ' + totalItems) : t('noData');
+        const infoText = totalItems > 0
+            ? (startIdx + ' - ' + endIdx + ' / ' + totalItems)
+            : t('noData');
 
         if (totalPages <= 1) {
             el.innerHTML = '<div class="pagination-info">' + infoText + '</div>';
@@ -2898,8 +3136,10 @@ const UIRenderer = {
 
         el.innerHTML = '<div class="pagination-info">' + infoText + '</div>' +
             '<div class="pagination-buttons">' +
-            '<button class="pagination-btn" data-page="prev" ' + (page <= 1 ? 'disabled' : '') + '>&lsaquo;</button>' +
-            '<button class="pagination-btn" data-page="next" ' + (page >= totalPages ? 'disabled' : '') + '>&rsaquo;</button>' +
+            '<button class="pagination-btn" data-page="prev" ' +
+                (page <= 1 ? 'disabled' : '') + '>&lsaquo;</button>' +
+            '<button class="pagination-btn" data-page="next" ' +
+                (page >= totalPages ? 'disabled' : '') + '>&rsaquo;</button>' +
             '</div>';
 
         el.querySelectorAll('.pagination-btn[data-page]').forEach(btn => {
@@ -2927,19 +3167,34 @@ const UIRenderer = {
         } else {
             body.innerHTML = item.problems.map(p => {
                 const priColor = CONFIG.CHART.colors[p.priority] || CONFIG.CHART.colors.Low;
-                const crmUrl = p.ticketCRM ? 'https://crm3.ivosights.com/admin/tickets/ticket/' + encodeURIComponent(p.ticketCRM) : '';
-                const crmLinkHtml = crmUrl ?
-                    '<a class="modal-crm-link" href="' + crmUrl + '" target="_blank" rel="noopener noreferrer" title="Open Tiket CRM">' +
-                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><path d="M15 3h6v6" /><path d="M10 14L21 3" /></svg>' +
-                    '</a>' : '';
+                const crmUrl = p.ticketCRM
+                    ? 'https://crm3.ivosights.com/admin/tickets/ticket/' +
+                      encodeURIComponent(p.ticketCRM)
+                    : '';
+                const crmLinkHtml = crmUrl
+                    ? '<a class="modal-crm-link" href="' + crmUrl +
+                      '" target="_blank" rel="noopener noreferrer" title="Open Tiket CRM">' +
+                      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                      '<path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />' +
+                      '<path d="M15 3h6v6" />' +
+                      '<path d="M10 14L21 3" /></svg></a>'
+                    : '';
                 return '<div class="modal-problem-item">' +
                     '<div class="modal-problem-top">' +
-                    '<span class="esc-pri-badge" style="background:' + Utils.Color.toRGBA(priColor, 0.2) + ';color:' + priColor + '">' + Utils.String.escapeHtml(p.priority || '-') + '</span>' +
-                    '<span class="modal-problem-date">' + Utils.String.escapeHtml(p.date || '-') + '</span>' +
-                    (p.ticketSociomile ? '<span class="modal-problem-sociomile">' + Utils.String.escapeHtml(p.ticketSociomile) + '</span>' : '') +
+                    '<span class="esc-pri-badge" style="background:' +
+                        Utils.Color.toRGBA(priColor, 0.2) + ';color:' + priColor + '">' +
+                        Utils.String.escapeHtml(p.priority || '-') + '</span>' +
+                    '<span class="modal-problem-date">' +
+                        Utils.String.escapeHtml(p.date || '-') + '</span>' +
+                    (p.ticketSociomile
+                        ? '<span class="modal-problem-sociomile">' +
+                          Utils.String.escapeHtml(p.ticketSociomile) + '</span>'
+                        : '') +
                     crmLinkHtml +
                     '</div>' +
-                    '<div class="modal-problem-text">' + Utils.String.escapeHtml(p.problem || '-') + '</div>' +
+                    '<div class="modal-problem-text">' +
+                        Utils.String.escapeHtml(p.problem || '-') +
+                    '</div>' +
                     '</div>';
             }).join('');
         }
@@ -2990,12 +3245,17 @@ const UIRenderer = {
         let filtered = data.filter(t => {
             if (staffFilter !== 'all' && t.staff !== staffFilter) return false;
             if (statusFilter !== 'all' && t.status !== statusFilter) return false;
-            if (search && t.task.toLowerCase().indexOf(search) === -1 && t.staff.toLowerCase().indexOf(search) === -1)
+            if (search &&
+                t.task.toLowerCase().indexOf(search) === -1 &&
+                t.staff.toLowerCase().indexOf(search) === -1) {
                 return false;
+            }
             return true;
         });
 
-        filtered = filtered.slice().sort((a, b) => Utils.Date.parseTaskDate(b.start) - Utils.Date.parseTaskDate(a.start));
+        filtered = filtered.slice().sort((a, b) =>
+            Utils.Date.parseTaskDate(b.start) - Utils.Date.parseTaskDate(a.start)
+        );
 
         const pageSize = CONFIG.PAGINATION.pageSize;
         const totalPages = Utils.Array.totalPages(filtered, pageSize);
@@ -3006,7 +3266,8 @@ const UIRenderer = {
         if (!tbody) return;
 
         if (pageItems.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6"><div class="task-empty">' + t('noTasks') + '</div></td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6"><div class="task-empty">' +
+                t('noTasks') + '</div></td></tr>';
             UIRenderer._renderPagination(0, 0);
             return;
         }
@@ -3015,17 +3276,26 @@ const UIRenderer = {
             const statusColor = t.status === 'Done' ? '#10b981' : '#f59e0b';
             const initials = Utils.String.escapeHtml(Utils.String.getInitials(t.staff));
             const tags = (t.note || '').split(' ').filter(x => x.indexOf('#') === 0);
-            const tagHtml = tags.length ?
-                tags.map(tag => '<span class="task-tag">' + Utils.String.escapeHtml(tag) + '</span>').join(' ') :
-                (t.note ? '<span style="font-size:11px;color:var(--text-muted)">' + Utils.String.escapeHtml(t.note) + '</span>' : '-');
+            const tagHtml = tags.length
+                ? tags.map(tag => '<span class="task-tag">' +
+                    Utils.String.escapeHtml(tag) + '</span>').join(' ')
+                : (t.note
+                    ? '<span style="font-size:11px;color:var(--text-muted)">' +
+                      Utils.String.escapeHtml(t.note) + '</span>'
+                    : '-');
             const staffShort = Utils.String.escapeHtml(t.staff.split(' ').slice(0, 2).join(' '));
 
             return '<tr>' +
-                '<td><div class="task-staff-cell"><div class="task-avatar">' + initials + '</div><span>' + staffShort + '</span></div></td>' +
+                '<td><div class="task-staff-cell"><div class="task-avatar">' +
+                    initials + '</div><span>' + staffShort + '</span></div></td>' +
                 '<td><div class="task-name">' + Utils.String.escapeHtml(t.task) + '</div></td>' +
                 '<td>' + tagHtml + '</td>' +
-                '<td><div class="task-duration">' + Utils.Duration.formatHMS(Utils.Duration.parse(t.duration)) + '</div></td>' +
-                '<td><span class="task-status-badge" style="background:' + Utils.Color.toRGBA(statusColor, 0.18) + ';color:' + statusColor + '">' + t.status + '</span></td>' +
+                '<td><div class="task-duration">' +
+                    Utils.Duration.formatHMS(Utils.Duration.parse(t.duration)) +
+                '</div></td>' +
+                '<td><span class="task-status-badge" style="background:' +
+                    Utils.Color.toRGBA(statusColor, 0.18) + ';color:' + statusColor + '">' +
+                    t.status + '</span></td>' +
                 '<td><div class="task-date">' + Utils.Date.formatTaskDate(t.start) + '</div></td>' +
                 '</tr>';
         }).join('');
@@ -3041,9 +3311,10 @@ const UIRenderer = {
         const startIdx = (page - 1) * CONFIG.PAGINATION.pageSize + 1;
         const endIdx = Math.min(page * CONFIG.PAGINATION.pageSize, totalItems);
 
-        const infoText = totalItems > 0 ?
-            t('showing') + ' ' + startIdx + '–' + endIdx + ' ' + t('from') + ' ' + totalItems + ' ' + t('totalTasks').toLowerCase() :
-            t('noTasks');
+        const infoText = totalItems > 0
+            ? t('showing') + ' ' + startIdx + '–' + endIdx + ' ' + t('from') + ' ' +
+              totalItems + ' ' + t('totalTasks').toLowerCase()
+            : t('noTasks');
 
         if (totalPages <= 1) {
             el.innerHTML = '<div class="pagination-info">' + infoText + '</div>';
@@ -3062,14 +3333,17 @@ const UIRenderer = {
 
         const btnsHtml = pages.map(pg => {
             if (pg === '…') return '<span class="pagination-ellipsis">…</span>';
-            return '<button class="pagination-btn' + (pg === page ? ' active' : '') + '" data-page="' + pg + '">' + pg + '</button>';
+            return '<button class="pagination-btn' + (pg === page ? ' active' : '') +
+                '" data-page="' + pg + '">' + pg + '</button>';
         }).join('');
 
         el.innerHTML = '<div class="pagination-info">' + infoText + '</div>' +
             '<div class="pagination-buttons">' +
-            '<button class="pagination-btn" data-page="prev" ' + (page <= 1 ? 'disabled' : '') + '>&lsaquo;</button>' +
+            '<button class="pagination-btn" data-page="prev" ' +
+                (page <= 1 ? 'disabled' : '') + '>&lsaquo;</button>' +
             btnsHtml +
-            '<button class="pagination-btn" data-page="next" ' + (page >= totalPages ? 'disabled' : '') + '>&rsaquo;</button>' +
+            '<button class="pagination-btn" data-page="next" ' +
+                (page >= totalPages ? 'disabled' : '') + '>&rsaquo;</button>' +
             '</div>';
 
         el.querySelectorAll('.pagination-btn[data-page]').forEach(btn => {
@@ -3091,7 +3365,7 @@ const UIRenderer = {
     scrollToTop() {
         window.scrollTo({
             top: 0,
-            behavior: 'smooth'
+            behavior: 'smooth',
         });
     },
 
@@ -3101,7 +3375,14 @@ const UIRenderer = {
         const emptyState = document.getElementById('mtmEmptyState');
         const content = document.getElementById('mtmContent');
 
-        const data = DataProcessor.prepareMonthlyComparison(appState.tickets, filters.monthFrom, filters.monthTo, appState.responseTimes, appState.tasks, filters.staff);
+        const data = DataProcessor.prepareMonthlyComparison(
+            appState.tickets,
+            filters.monthFrom,
+            filters.monthTo,
+            appState.responseTimes,
+            appState.tasks,
+            filters.staff
+        );
 
         if (!data || data.buckets.length === 0) {
             if (emptyState) emptyState.style.display = 'block';
@@ -3142,10 +3423,30 @@ const UIRenderer = {
             { id: 'nonIssue', get: k => k.nonIssue, fmt: v => String(v), invert: false },
             { id: 'activeEsc', get: k => k.activeEsc, fmt: v => String(v), invert: true },
             { id: 'totalTasks', get: k => k.totalTasks, fmt: v => String(v), invert: false },
-            { id: 'aht', get: k => k.aht, fmt: v => Utils.Duration.formatAHT(v), invert: true },
-            { id: 'avgResponseTime', get: k => k.artCount > 0 ? k.artMinutes : null, fmt: v => v === null ? '-' : Utils.Duration.formatAHT(v), invert: true },
-            { id: 'fcrRate', get: k => k.fcrRate, fmt: v => v.toFixed(1) + '%', invert: false },
-            { id: 'sla', get: k => k.slaRate, fmt: v => v.toFixed(1) + '%', invert: false },
+            {
+                id: 'aht',
+                get: k => k.aht,
+                fmt: v => Utils.Duration.formatAHT(v),
+                invert: true,
+            },
+            {
+                id: 'avgResponseTime',
+                get: k => k.artCount > 0 ? k.artMinutes : null,
+                fmt: v => v === null ? '-' : Utils.Duration.formatAHT(v),
+                invert: true,
+            },
+            {
+                id: 'fcrRate',
+                get: k => k.fcrRate,
+                fmt: v => v.toFixed(1) + '%',
+                invert: false,
+            },
+            {
+                id: 'sla',
+                get: k => k.slaRate,
+                fmt: v => v.toFixed(1) + '%',
+                invert: false,
+            },
         ];
 
         const head = '<thead><tr><th>' + t('mtmMetricHeader') + '</th>' +
@@ -3163,7 +3464,9 @@ const UIRenderer = {
                         deltaHtml = UIRenderer._deltaTag(val, prevVal, m.invert);
                     }
                 }
-                return '<td><div class="mtm-cell-value">' + display + '</div>' + (deltaHtml ? '<div class="mtm-cell-delta">' + deltaHtml + '</div>' : '') + '</td>';
+                return '<td><div class="mtm-cell-value">' + display + '</div>' +
+                    (deltaHtml ? '<div class="mtm-cell-delta">' + deltaHtml + '</div>' : '') +
+                    '</td>';
             }).join('');
             return '<tr><td class="mtm-row-label">' + t(m.id) + '</td>' + cells + '</tr>';
         }).join('') + '</tbody>';
@@ -3185,8 +3488,10 @@ const UIRenderer = {
         const legendVol = document.getElementById('legendMTMVolume');
         if (legendVol) {
             legendVol.innerHTML =
-                '<div class="legend-item"><div class="legend-dot" style="background:' + CONFIG.CHART.colors.non + '"></div>' + t('nonIssue') + '</div>' +
-                '<div class="legend-item"><div class="legend-dot" style="background:' + CONFIG.CHART.colors.issue + '"></div>' + t('issue') + '</div>';
+                '<div class="legend-item"><div class="legend-dot" style="background:' +
+                    CONFIG.CHART.colors.non + '"></div>' + t('nonIssue') + '</div>' +
+                '<div class="legend-item"><div class="legend-dot" style="background:' +
+                    CONFIG.CHART.colors.issue + '"></div>' + t('issue') + '</div>';
         }
 
         const closedValues = buckets.map(b => b.kpi.closed);
@@ -3226,7 +3531,8 @@ const UIRenderer = {
         const legendPri = document.getElementById('legendMTMPriority');
         if (legendPri) {
             legendPri.innerHTML = CONFIG.PRIORITIES.map(p => {
-                return '<div class="legend-item"><div class="legend-dot" style="background:' + CONFIG.CHART.colors[p] + '"></div>' + p + '</div>';
+                return '<div class="legend-item"><div class="legend-dot" style="background:' +
+                    CONFIG.CHART.colors[p] + '"></div>' + p + '</div>';
             }).join('');
         }
 
@@ -3245,7 +3551,8 @@ const UIRenderer = {
         const legendProductCompare = document.getElementById('legendMTMProductCompare');
         if (legendProductCompare) {
             legendProductCompare.innerHTML = productData.datasets.map(ds => {
-                return '<div class="legend-item"><div class="legend-dot" style="background:' + ds.color + '"></div>' + ds.label + '</div>';
+                return '<div class="legend-item"><div class="legend-dot" style="background:' +
+                    ds.color + '"></div>' + ds.label + '</div>';
             }).join('');
         }
 
@@ -3254,7 +3561,8 @@ const UIRenderer = {
         const legendStaffCompare = document.getElementById('legendMTMStaffCompare');
         if (legendStaffCompare) {
             legendStaffCompare.innerHTML = staffCompareData.datasets.map(ds => {
-                return '<div class="legend-item"><div class="legend-dot" style="background:' + ds.color + '"></div>' + ds.label + '</div>';
+                return '<div class="legend-item"><div class="legend-dot" style="background:' +
+                    ds.color + '"></div>' + ds.label + '</div>';
             }).join('');
         }
 
@@ -3263,7 +3571,8 @@ const UIRenderer = {
         const legendTaskStaffCompare = document.getElementById('legendMTMTaskStaffCompare');
         if (legendTaskStaffCompare) {
             legendTaskStaffCompare.innerHTML = taskStaffCompareData.datasets.map(ds => {
-                return '<div class="legend-item"><div class="legend-dot" style="background:' + ds.color + '"></div>' + ds.label + '</div>';
+                return '<div class="legend-item"><div class="legend-dot" style="background:' +
+                    ds.color + '"></div>' + ds.label + '</div>';
             }).join('');
         }
 
@@ -3272,7 +3581,8 @@ const UIRenderer = {
         const legendShiftCompare = document.getElementById('legendMTMShiftCompare');
         if (legendShiftCompare) {
             legendShiftCompare.innerHTML = shiftCompareData.datasets.map(ds => {
-                return '<div class="legend-item"><div class="legend-dot" style="background:' + ds.color + '"></div>' + ds.label + '</div>';
+                return '<div class="legend-item"><div class="legend-dot" style="background:' +
+                    ds.color + '"></div>' + ds.label + '</div>';
             }).join('');
         }
     },
@@ -3284,7 +3594,12 @@ const UIRenderer = {
 
         if (!dot || !label) return;
 
-        const ts = timestamp ? timestamp.toLocaleTimeString(getLang() === 'id' ? 'id-ID' : 'en-US', { hour: '2-digit', minute: '2-digit' }) : '';
+        const ts = timestamp
+            ? timestamp.toLocaleTimeString(
+                getLang() === 'id' ? 'id-ID' : 'en-US',
+                { hour: '2-digit', minute: '2-digit' }
+              )
+            : '';
 
         if (status === 'syncing') {
             label.textContent = t('syncing');
@@ -3333,7 +3648,7 @@ const UIRenderer = {
     },
 
     _getPrevLabel() {
-        const week = appState.filters.week, dateFrom = appState.filters.dateFrom, dateTo = appState.filters.dateTo;
+        const { week, dateFrom, dateTo } = appState.filters;
         if (dateFrom || dateTo) return t('vsPrevPeriod');
         if (week !== 'all') return t('vsPrevWeek');
         return t('vsPrevHalf');
@@ -3342,12 +3657,23 @@ const UIRenderer = {
     populateDynamicFilters(tickets, tasks) {
         const combinedForMonth = tickets.concat(tasks);
 
-        UIRenderer._populateFilter('filterMonth', combinedForMonth, 'month', 'allMonths', v => v.replace(/\[\d+\]\s*/, ''), (a, b) => {
-            return UIRenderer._monthSortValue(a.label) - UIRenderer._monthSortValue(b.label);
-        });
+        UIRenderer._populateFilter(
+            'filterMonth',
+            combinedForMonth,
+            'month',
+            'allMonths',
+            v => v.replace(/\[\d+\]\s*/, ''),
+            (a, b) => UIRenderer._monthSortValue(a.label) - UIRenderer._monthSortValue(b.label)
+        );
         UIRenderer._populateFilter('filterWeek', tickets, 'week', 'allWeeks');
         UIRenderer._populateFilter('filterProduct', tickets, 'product', 'allProducts');
-        UIRenderer._populateFilter('filterTier', tickets, 'tier', 'allTiers', v => Utils.String.formatTier(v));
+        UIRenderer._populateFilter(
+            'filterTier',
+            tickets,
+            'tier',
+            'allTiers',
+            v => Utils.String.formatTier(v)
+        );
         UIRenderer._populateShiftFilter();
         UIRenderer._populateFilter('filterStaff', tickets, 'staff', 'allStaff');
         UIRenderer._populateFilter('filterTaskStaff', tasks, 'staff', 'allStaff');
@@ -3367,7 +3693,9 @@ const UIRenderer = {
         const match = clean.match(/^(.*?)\s*-\s*(\d{4})\s*$/);
         const monthPart = (match ? match[1] : clean).trim().toLowerCase();
         const year = match ? parseInt(match[2], 10) : 0;
-        const monthNum = UIRenderer._MONTH_ORDER[monthPart] !== undefined ? UIRenderer._MONTH_ORDER[monthPart] : 999;
+        const monthNum = UIRenderer._MONTH_ORDER[monthPart] !== undefined
+            ? UIRenderer._MONTH_ORDER[monthPart]
+            : 999;
         return year * 1000 + monthNum;
     },
 
@@ -3382,7 +3710,7 @@ const UIRenderer = {
 
         const options = rawValues.map(val => ({
             val,
-            label: (formatFn ? formatFn(val) : val).trim()
+            label: (formatFn ? formatFn(val) : val).trim(),
         })).sort(sortFn || defaultSort);
 
         select.innerHTML = '<option value="all">' + t(allLabelKey) + '</option>';
@@ -3428,7 +3756,7 @@ const UIRenderer = {
 
         const options = rawValues.map(val => ({
             val,
-            label: val.replace(/\[\d+\]\s*/, '').trim()
+            label: val.replace(/\[\d+\]\s*/, '').trim(),
         })).sort((a, b) => UIRenderer._monthSortValue(a.val) - UIRenderer._monthSortValue(b.val));
 
         ['filterMTMMonthFrom', 'filterMTMMonthTo'].forEach(id => {
@@ -3503,11 +3831,14 @@ const ExportEngine = {
     _timestamp() {
         const d = new Date();
         const pad = n => String(n).padStart(2, '0');
-        return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '_' + pad(d.getHours()) + pad(d.getMinutes());
+        return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) +
+               '_' + pad(d.getHours()) + pad(d.getMinutes());
     },
 
     _sanitizeSheetName(name, usedNames) {
-        let clean = String(name).replace(/[:\\/\?\*\[\]]/g, ' ').replace(/\s+/g, ' ').trim();
+        let clean = String(name).replace(/[:\\/\?\*\[\]]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
         if (clean.length > 31) clean = clean.slice(0, 31);
         if (!clean) clean = 'Sheet';
         const base = clean;
@@ -3524,40 +3855,61 @@ const ExportEngine = {
     getFilterInfoText(kind) {
         if (kind === 'mtm') {
             const mf = appState.mtmFilters;
-            const mtmPeriod = (mf.monthFrom && mf.monthTo) ?
-                (mf.monthFrom.replace(/\[\d+\]\s*/, '') + ' - ' + mf.monthTo.replace(/\[\d+\]\s*/, '')) :
-                t('allData');
-            const mtmDimension = (mf.staff && mf.staff !== 'all') ? (t('thStaff') + '=' + mf.staff) : t('allData');
+            const mtmPeriod = (mf.monthFrom && mf.monthTo)
+                ? (mf.monthFrom.replace(/\[\d+\]\s*/, '') + ' - ' +
+                   mf.monthTo.replace(/\[\d+\]\s*/, ''))
+                : t('allData');
+            const mtmDimension = (mf.staff && mf.staff !== 'all')
+                ? (t('thStaff') + '=' + mf.staff)
+                : t('allData');
             return t('period') + ': ' + mtmPeriod + ' | ' + t('dimension') + ': ' + mtmDimension;
         }
 
         const filters = appState.filters;
         const periodParts = [];
-        if (filters.month !== 'all') periodParts.push(filters.month.replace(/\[\d+\]\s*/, ''));
+        if (filters.month !== 'all') {
+            periodParts.push(filters.month.replace(/\[\d+\]\s*/, ''));
+        }
         if (filters.week !== 'all') periodParts.push(filters.week);
         const periodText = periodParts.length ? periodParts.join(' / ') : t('allMonths');
 
-        const dateRangeText = (filters.dateFrom || filters.dateTo) ?
-            ((filters.dateFrom || '…') + ' ' + t('to') + ' ' + (filters.dateTo || '…')) : '-';
+        const dateRangeText = (filters.dateFrom || filters.dateTo)
+            ? ((filters.dateFrom || '…') + ' ' + t('to') + ' ' + (filters.dateTo || '…'))
+            : '-';
 
         const dimensionParts = [];
         if (kind === 'task') {
-            if (filters.taskStaff !== 'all') dimensionParts.push(t('thStaff') + '=' + filters.taskStaff);
+            if (filters.taskStaff !== 'all') {
+                dimensionParts.push(t('thStaff') + '=' + filters.taskStaff);
+            }
         } else {
-            if (filters.product !== 'all') dimensionParts.push(t('prodTitle') + '=' + filters.product);
-            if (filters.tier !== 'all') dimensionParts.push(t('tierTitle') + '=' + Utils.String.formatTier(filters.tier));
-            if (filters.staff !== 'all') dimensionParts.push(t('thStaff') + '=' + filters.staff);
-            if (filters.shift !== 'all') dimensionParts.push(t('shiftTitle') + '=' + filters.shift);
+            if (filters.product !== 'all') {
+                dimensionParts.push(t('prodTitle') + '=' + filters.product);
+            }
+            if (filters.tier !== 'all') {
+                dimensionParts.push(t('tierTitle') + '=' + Utils.String.formatTier(filters.tier));
+            }
+            if (filters.staff !== 'all') {
+                dimensionParts.push(t('thStaff') + '=' + filters.staff);
+            }
+            if (filters.shift !== 'all') {
+                dimensionParts.push(t('shiftTitle') + '=' + filters.shift);
+            }
         }
         const dimensionText = dimensionParts.length ? dimensionParts.join(', ') : t('allData');
 
-        return t('period') + ': ' + periodText + ' | ' + t('dateRange') + ': ' + dateRangeText + ' | ' + t('dimension') + ': ' + dimensionText;
+        return t('period') + ': ' + periodText + ' | ' + t('dateRange') + ': ' + dateRangeText +
+               ' | ' + t('dimension') + ': ' + dimensionText;
     },
 
     buildTicketSections() {
         const tickets = appState.filteredTickets;
         const kpi = DataProcessor.calculateKPIs(tickets);
-        const artCur = DataProcessor.calculateART(appState.filteredResponseTimes, appState.filters.staff, appState.meta.responseTimeStaffCols);
+        const artCur = DataProcessor.calculateART(
+            appState.filteredResponseTimes,
+            appState.filters.staff,
+            appState.meta.responseTimeStaffCols
+        );
         const sections = [];
 
         sections.push({
@@ -3611,8 +3963,13 @@ const ExportEngine = {
         if (esc.activeRows.length) {
             sections.push({
                 name: t('activeEsc'),
-                header: [t('thClient'), t('thTask'), t('thTag'), t('thStatus'), t('thDate'), t('thEscalatedto')],
-                rows: esc.activeRows.map(r => [r.client, r.problem, r.product, r.priority, r.date, r.escalatedTo]),
+                header: [
+                    t('thClient'), t('thTask'), t('thTag'),
+                    t('thStatus'), t('thDate'), t('thEscalatedto'),
+                ],
+                rows: esc.activeRows.map(r => [
+                    r.client, r.problem, r.product, r.priority, r.date, r.escalatedTo,
+                ]),
             });
         }
 
@@ -3713,11 +4070,21 @@ const ExportEngine = {
         const taskRows = tasks.slice()
             .sort((a, b) => Utils.Date.parseTaskDate(b.start) - Utils.Date.parseTaskDate(a.start))
             .map(tk => {
-                return [tk.staff, tk.task, tk.note || '-', Utils.Duration.formatHMS(Utils.Duration.parse(tk.duration)), tk.status, Utils.Date.formatTaskDate(tk.start)];
+                return [
+                    tk.staff,
+                    tk.task,
+                    tk.note || '-',
+                    Utils.Duration.formatHMS(Utils.Duration.parse(tk.duration)),
+                    tk.status,
+                    Utils.Date.formatTaskDate(tk.start),
+                ];
             });
         sections.push({
             name: t('taskTableTitle'),
-            header: [t('thStaff'), t('thTask'), t('thTag'), 'Duration', t('thStatus'), t('thDate')],
+            header: [
+                t('thStaff'), t('thTask'), t('thTag'),
+                'Duration', t('thStatus'), t('thDate'),
+            ],
             rows: taskRows,
         });
 
@@ -3726,7 +4093,14 @@ const ExportEngine = {
 
     buildMTMSections() {
         const filters = appState.mtmFilters;
-        const data = DataProcessor.prepareMonthlyComparison(appState.tickets, filters.monthFrom, filters.monthTo, appState.responseTimes, appState.tasks, filters.staff);
+        const data = DataProcessor.prepareMonthlyComparison(
+            appState.tickets,
+            filters.monthFrom,
+            filters.monthTo,
+            appState.responseTimes,
+            appState.tasks,
+            filters.staff
+        );
         if (!data || !data.buckets.length) return [];
 
         const buckets = data.buckets;
@@ -3740,7 +4114,10 @@ const ExportEngine = {
             { id: 'activeEsc', get: k => k.activeEsc },
             { id: 'totalTasks', get: k => k.totalTasks },
             { id: 'aht', get: k => Utils.Duration.formatAHT(k.aht) },
-            { id: 'avgResponseTime', get: k => k.artCount > 0 ? Utils.Duration.formatAHT(k.artMinutes) : '-' },
+            {
+                id: 'avgResponseTime',
+                get: k => k.artCount > 0 ? Utils.Duration.formatAHT(k.artMinutes) : '-',
+            },
             { id: 'fcrRate', get: k => k.fcrRate.toFixed(1) + '%' },
             { id: 'sla', get: k => k.slaRate.toFixed(1) + '%' },
         ];
@@ -3819,29 +4196,42 @@ const ExportEngine = {
             lines.push([]);
         });
         const csv = Utils.CSV.rowsToCSV(lines);
-        Utils.File.download('\uFEFF' + csv, filenamePrefix + '_' + ExportEngine._timestamp() + '.csv', 'text/csv;charset=utf-8;');
+        Utils.File.download(
+            '\uFEFF' + csv,
+            filenamePrefix + '_' + ExportEngine._timestamp() + '.csv',
+            'text/csv;charset=utf-8;'
+        );
     },
 
     downloadTicket(format) {
         const sections = ExportEngine.buildTicketSections();
         const filterText = ExportEngine.getFilterInfoText('ticket');
-        if (format === 'xlsx') ExportEngine.exportExcel(sections, filterText, 'Ticket_Report');
-        else ExportEngine.exportCSV(sections, filterText, 'Ticket_Report');
+        if (format === 'xlsx') {
+            ExportEngine.exportExcel(sections, filterText, 'Ticket_Report');
+        } else {
+            ExportEngine.exportCSV(sections, filterText, 'Ticket_Report');
+        }
     },
 
     downloadTask(format) {
         const sections = ExportEngine.buildTaskSections();
         const filterText = ExportEngine.getFilterInfoText('task');
-        if (format === 'xlsx') ExportEngine.exportExcel(sections, filterText, 'Task_Report');
-        else ExportEngine.exportCSV(sections, filterText, 'Task_Report');
+        if (format === 'xlsx') {
+            ExportEngine.exportExcel(sections, filterText, 'Task_Report');
+        } else {
+            ExportEngine.exportCSV(sections, filterText, 'Task_Report');
+        }
     },
 
     downloadMTM(format) {
         const sections = ExportEngine.buildMTMSections();
         if (!sections.length) return;
         const filterText = ExportEngine.getFilterInfoText('mtm');
-        if (format === 'xlsx') ExportEngine.exportExcel(sections, filterText, 'MTM_Report');
-        else ExportEngine.exportCSV(sections, filterText, 'MTM_Report');
+        if (format === 'xlsx') {
+            ExportEngine.exportExcel(sections, filterText, 'MTM_Report');
+        } else {
+            ExportEngine.exportCSV(sections, filterText, 'MTM_Report');
+        }
     },
 };
 
@@ -3852,7 +4242,10 @@ const ExportEngine = {
 const EventHandlers = {
 
     init() {
-        const filterIds = ['filterMonth', 'filterWeek', 'filterProduct', 'filterTier', 'filterShift', 'filterStaff', 'filterTaskStaff'];
+        const filterIds = [
+            'filterMonth', 'filterWeek', 'filterProduct',
+            'filterTier', 'filterShift', 'filterStaff', 'filterTaskStaff',
+        ];
         const self = this;
 
         filterIds.forEach(id => {
@@ -4113,6 +4506,8 @@ const EventHandlers = {
 
         if (menu === 'mtm') {
             UIRenderer.renderMTM();
+        } else if (menu === 'task') {
+            UIRenderer.renderTaskSection(appState.tasks, appState.filters);
         }
 
         UIRenderer.scrollToTop();
@@ -4159,21 +4554,32 @@ const EventHandlers = {
             lblEscalation: 'escalation',
             lblDistribution: 'distribution',
             lblTrend: 'trend',
-            chartPriTitle: 'priTitle', chartPriSub: 'priSub',
-            chartTierTitle: 'tierTitle', chartTierSub: 'tierSub',
-            chartProdTitle: 'prodTitle', chartProdSub: 'prodSub',
-            chartStaffTitle: 'staffTitle', chartStaffSub: 'staffSub',
-            chartTrendTitle: 'trendTitle', chartTrendSub: 'trendSub',
-            chartTrend6MTitle: 'trend6MTitle', chartTrend6MSub: 'trend6MSub',
+            chartPriTitle: 'priTitle',
+            chartPriSub: 'priSub',
+            chartTierTitle: 'tierTitle',
+            chartTierSub: 'tierSub',
+            chartProdTitle: 'prodTitle',
+            chartProdSub: 'prodSub',
+            chartStaffTitle: 'staffTitle',
+            chartStaffSub: 'staffSub',
+            chartTrendTitle: 'trendTitle',
+            chartTrendSub: 'trendSub',
+            chartTrend6MTitle: 'trend6MTitle',
+            chartTrend6MSub: 'trend6MSub',
             chartShiftTitle: 'shiftTitle',
             lblTaskOverview: 'taskOverview',
-            chartTaskStatusTitle: 'taskStatusTitle', chartTaskStatusSub: 'taskStatusSub',
-            chartTaskStaffTitle: 'taskStaffTitle', chartTaskStaffSub: 'taskStaffSub',
-            chartTaskTableTitle: 'taskTableTitle', chartTaskTableSub: 'taskTableSub',
-            chartTopClientTitle: 'topClientTitle', chartTopClientSub: 'topClientSub',
+            chartTaskStatusTitle: 'taskStatusTitle',
+            chartTaskStatusSub: 'taskStatusSub',
+            chartTaskStaffTitle: 'taskStaffTitle',
+            chartTaskStaffSub: 'taskStaffSub',
+            chartTaskTableTitle: 'taskTableTitle',
+            chartTaskTableSub: 'taskTableSub',
+            chartTopClientTitle: 'topClientTitle',
+            chartTopClientSub: 'topClientSub',
             thTopClientName: 'topClientNameHeader',
             thTopClientTotal: 'topClientTotalHeader',
-            chartRecentIncidentTitle: 'recentIncidentTitle', chartRecentIncidentSub: 'recentIncidentSub',
+            chartRecentIncidentTitle: 'recentIncidentTitle',
+            chartRecentIncidentSub: 'recentIncidentSub',
             thIncidentStart: 'thIncidentStart',
             thIncidentEnd: 'thIncidentEnd',
             thIncidentProduct: 'thIncidentProduct',
@@ -4189,9 +4595,12 @@ const EventHandlers = {
             lblMTMPeriod: 'period',
             lblMTMDimension: 'dimension',
             optAllStaffMTM: 'allStaff',
-            chartMTMProdTitle: 'mtmProdTitle', chartMTMProdSub: 'mtmProdSub',
-            chartMTMStaffTitle: 'mtmStaffTitle', chartMTMStaffSub: 'mtmStaffSub',
-            chartMTMTaskStaffTitle: 'mtmTaskStaffTitle', chartMTMTaskStaffSub: 'mtmTaskStaffSub',
+            chartMTMProdTitle: 'mtmProdTitle',
+            chartMTMProdSub: 'mtmProdSub',
+            chartMTMStaffTitle: 'mtmStaffTitle',
+            chartMTMStaffSub: 'mtmStaffSub',
+            chartMTMTaskStaffTitle: 'mtmTaskStaffTitle',
+            chartMTMTaskStaffSub: 'mtmTaskStaffSub',
             chartMTMShiftTitle: 'mtmShiftTitle',
             btnResetMTMFilters: 'reset',
             lblDownload: 'download',
@@ -4261,7 +4670,9 @@ const EventHandlers = {
 
         const incidentLabel = document.getElementById('incidentBtnLabel');
         if (incidentLabel) {
-            incidentLabel.textContent = IncidentTracker.startTime ? t('incidentBtnStop') : t('incidentBtnStart');
+            incidentLabel.textContent = (IncidentTracker.state && IncidentTracker.state.active)
+                ? t('incidentBtnStop')
+                : t('incidentBtnStart');
         }
     },
 
@@ -4352,8 +4763,16 @@ const EventHandlers = {
         const filterSummary = FilterEngine.getFilterSummary(filters);
 
         const prevRtRows = FilterEngine.getPreviousResponseTimeData(appState.responseTimes, filters);
-        const artCur = DataProcessor.calculateART(appState.filteredResponseTimes, filters.staff, appState.meta.responseTimeStaffCols);
-        const artPrev = DataProcessor.calculateART(prevRtRows, filters.staff, appState.meta.responseTimeStaffCols);
+        const artCur = DataProcessor.calculateART(
+            appState.filteredResponseTimes,
+            filters.staff,
+            appState.meta.responseTimeStaffCols
+        );
+        const artPrev = DataProcessor.calculateART(
+            prevRtRows,
+            filters.staff,
+            appState.meta.responseTimeStaffCols
+        );
 
         UIRenderer.renderKPI(tickets, prevTicketData, filterSummary, null, null, { cur: artCur, prev: artPrev });
         UIRenderer.renderEscalation(tickets);
@@ -4467,7 +4886,8 @@ function getDateRangeFromFilters(tickets, month, week) {
         return { from: '', to: '' };
     }
 
-    const dates = filtered.map(r => Utils.Date.parseDate(r.date)).filter(d => d && !isNaN(d));
+    const dates = filtered.map(r => Utils.Date.parseDate(r.date))
+        .filter(d => d && !isNaN(d));
     if (dates.length === 0) {
         return { from: '', to: '' };
     }
@@ -4486,7 +4906,7 @@ function getDateRangeFromFilters(tickets, month, week) {
 
     return {
         from: formatDate(fromDate),
-        to: formatDate(toDate)
+        to: formatDate(toDate),
     };
 }
 
@@ -4581,9 +5001,14 @@ const Auth = {
     login(username, password) {
         if (username === CONFIG.AUTH.username && password === CONFIG.AUTH.password) {
             sessionStorage.setItem(CONFIG.AUTH.sessionKey, '1');
+            sessionStorage.setItem(CONFIG.AUTH.userKey, username || CONFIG.AUTH.username);
             return true;
         }
         return false;
+    },
+
+    getUsername() {
+        return sessionStorage.getItem(CONFIG.AUTH.userKey) || CONFIG.AUTH.username;
     },
 
     logout() {
@@ -4645,7 +5070,8 @@ const App = {
 
             document.documentElement.setAttribute('data-theme', appState.ui.theme);
             document.documentElement.setAttribute('lang', appState.ui.language);
-            document.getElementById('btnTheme').textContent = appState.ui.theme === 'dark' ? '🌙' : '☀️';
+            document.getElementById('btnTheme').textContent =
+                appState.ui.theme === 'dark' ? '🌙' : '☀️';
 
             EventHandlers.applyStaticTranslations();
             UIRenderer.populateDynamicFilters(appState.tickets, appState.tasks);
@@ -4658,7 +5084,9 @@ const App = {
             EventHandlers.init();
             EventHandlers.refreshUI();
 
-            LoadingOverlay.finish();
+            IncidentTracker.startPolling().then(() => {
+                LoadingOverlay.finish();
+            });
 
             setInterval(() => {
                 EventHandlers.onRefresh();
@@ -4815,118 +5243,214 @@ const AutoScroll = {
    ================================================================ */
 
 const IncidentTracker = {
-    startTime: null,
-    endTime: null,
-    timerId: null,
+    state: {
+        active: false,
+        startTime: null,
+        startedBy: '',
+        product: '',
+        problem: '',
+        rootCause: '',
+    },
+    pollTimerId: null,
+    tickTimerId: null,
+    isSubmitting: false,
 
     init() {
         const self = this;
 
         const btn = document.getElementById('btnIncident');
-        if (btn) btn.addEventListener('click', () => self.toggle());
+        if (btn) btn.addEventListener('click', () => self.onButtonClick());
 
         const form = document.getElementById('incidentForm');
         if (form) form.addEventListener('submit', e => { e.preventDefault();
-            self.save(); });
+            self.submitStop(); });
 
         const cancelBtn = document.getElementById('incidentCancelBtn');
-        if (cancelBtn) cancelBtn.addEventListener('click', () => self.cancel());
+        if (cancelBtn) cancelBtn.addEventListener('click', () => self.requestCancelIncident());
 
         const closeBtn = document.getElementById('incidentModalClose');
-        if (closeBtn) closeBtn.addEventListener('click', () => self.cancel());
+        if (closeBtn) closeBtn.addEventListener('click', () => self.minimizeModal());
 
         const overlay = document.getElementById('incidentModalOverlay');
         if (overlay) {
             overlay.addEventListener('click', e => {
-                if (e.target === overlay) self.cancel();
+                if (e.target === overlay) self.minimizeModal();
             });
         }
     },
 
-    toggle() {
-        if (this.startTime) {
-            this.stop();
+    startPolling() {
+        const self = this;
+        const initial = self.refreshState();
+        clearInterval(self.pollTimerId);
+        self.pollTimerId = setInterval(() => self.refreshState(), CONFIG.INCIDENT.pollIntervalMs);
+        return initial;
+    },
+
+    stopPolling() {
+        clearInterval(this.pollTimerId);
+        this.pollTimerId = null;
+    },
+
+    refreshState() {
+        const self = this;
+        const bust = (CONFIG.API.incidentState.indexOf('?') !== -1 ? '&' : '?') + '_t=' + Date.now();
+        return fetch(CONFIG.API.incidentState + bust, { cache: 'no-store' })
+            .then(res => res.json())
+            .then(json => {
+                if (!json || json.success === false) return;
+                self._applyState(json.data || { active: false });
+            })
+            .catch(err => {
+                console.warn('Failed to poll incident state:', err);
+            });
+    },
+
+    _applyState(data) {
+        const wasActive = this.state.active;
+
+        this.state.active = !!data.active;
+        this.state.startTime = data.startTime ? new Date(data.startTime) : null;
+        this.state.startedBy = data.startedBy || '';
+        this.state.product = data.product || '';
+        this.state.problem = data.problem || '';
+        this.state.rootCause = data.rootCause || '';
+
+        this._renderButton();
+
+        if (this.state.active) {
+            this._ensureTicking();
         } else {
-            this.start();
+            this._stopTicking();
+            if (wasActive && !this.isSubmitting) {
+                this.cancelModal();
+            }
         }
     },
 
-    start() {
-        this.startTime = new Date();
-        this.endTime = null;
-
+    _renderButton() {
         const btn = document.getElementById('btnIncident');
         const label = document.getElementById('incidentBtnLabel');
         const timerEl = document.getElementById('incidentTimer');
+        if (!btn || !label) return;
 
-        if (btn) btn.classList.add('is-recording');
-        if (label) label.textContent = t('incidentBtnStop');
-        if (timerEl) timerEl.style.display = '';
+        if (this.state.active) {
+            btn.classList.add('is-recording');
+            label.textContent = t('incidentBtnStop');
+            if (timerEl) timerEl.style.display = '';
+            this._tick();
+        } else {
+            btn.classList.remove('is-recording');
+            label.textContent = t('incidentBtnStart');
+            if (timerEl) {
+                timerEl.style.display = 'none';
+                timerEl.textContent = '00:00:00';
+            }
+        }
+    },
 
-        this._tick();
+    _ensureTicking() {
+        if (this.tickTimerId) return;
         const self = this;
-        this.timerId = setInterval(() => self._tick(), 1000);
+        this._tick();
+        this.tickTimerId = setInterval(() => self._tick(), 1000);
+    },
+
+    _stopTicking() {
+        clearInterval(this.tickTimerId);
+        this.tickTimerId = null;
     },
 
     _tick() {
         const timerEl = document.getElementById('incidentTimer');
-        if (!timerEl || !this.startTime) return;
-        const diffSec = Math.floor((Date.now() - this.startTime.getTime()) / 1000);
+        if (!timerEl || !this.state.startTime) return;
+        const diffSec = Math.max(0, Math.floor((Date.now() - this.state.startTime.getTime()) / 1000));
         const h = Math.floor(diffSec / 3600);
         const m = Math.floor((diffSec % 3600) / 60);
         const s = diffSec % 60;
-        timerEl.textContent = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+        timerEl.textContent = String(h).padStart(2, '0') + ':' +
+                              String(m).padStart(2, '0') + ':' +
+                              String(s).padStart(2, '0');
     },
 
-    stop() {
-        if (!this.startTime) return;
-        this.endTime = new Date();
-        clearInterval(this.timerId);
-        this.timerId = null;
-        this._openModal();
-    },
-
-    cancel() {
-        clearInterval(this.timerId);
-        this.timerId = null;
-        this.startTime = null;
-        this.endTime = null;
-
-        this._resetButton();
-        this._closeModal();
-
-        const form = document.getElementById('incidentForm');
-        if (form) form.reset();
-        const errEl = document.getElementById('incidentFormError');
-        if (errEl) errEl.textContent = '';
-    },
-
-    _resetButton() {
-        const btn = document.getElementById('btnIncident');
-        const label = document.getElementById('incidentBtnLabel');
-        const timerEl = document.getElementById('incidentTimer');
-
-        if (btn) btn.classList.remove('is-recording');
-        if (label) label.textContent = t('incidentBtnStart');
-        if (timerEl) {
-            timerEl.style.display = 'none';
-            timerEl.textContent = '00:00:00';
+    onButtonClick() {
+        if (this.state.active) {
+            this._openStopModal();
+        } else {
+            const self = this;
+            ConfirmModal.confirm(t('incidentConfirmStart'), () => self._requestStart(), {
+                confirmText: t('btnStartIncident'),
+                danger: false,
+            });
         }
     },
 
-    _openModal() {
+    _requestStart() {
+        const btn = document.getElementById('btnIncident');
+        if (btn) btn.disabled = true;
+
+        const self = this;
+        const startedBy = (typeof Auth !== 'undefined' && Auth.getUsername)
+            ? Auth.getUsername()
+            : '';
+
+        fetch(CONFIG.API.startIncident, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ startedBy }),
+        })
+            .then(res => res.json())
+            .then(json => {
+                if (!json || json.success === false) {
+                    return self.refreshState();
+                }
+                self._applyState(json.data || {
+                    active: true,
+                    startTime: new Date().toISOString(),
+                    startedBy,
+                });
+            })
+            .catch(err => {
+                console.error('Failed to start incident:', err);
+                self.refreshState();
+            })
+            .finally(() => {
+                if (btn) btn.disabled = false;
+            });
+    },
+
+    _openStopModal() {
         this._populateProductOptions();
 
         const startDisp = document.getElementById('incidentStartDisplay');
         const endDisp = document.getElementById('incidentEndDisplay');
         const durDisp = document.getElementById('incidentDurationDisplay');
 
-        if (startDisp) startDisp.textContent = this._formatDateTime(this.startTime);
-        if (endDisp) endDisp.textContent = this._formatDateTime(this.endTime);
-        if (durDisp) durDisp.textContent = this._formatDuration(this.startTime, this.endTime);
+        if (startDisp) startDisp.textContent = this._formatDateTime(this.state.startTime);
+        if (endDisp) endDisp.textContent = '-';
+        if (durDisp) durDisp.textContent = document.getElementById('incidentTimer')?.textContent || '-';
+
+        const productSel = document.getElementById('incidentProduct');
+        if (productSel && this.state.product) productSel.value = this.state.product;
+        const problemEl = document.getElementById('incidentProblem');
+        if (problemEl) problemEl.value = this.state.problem || '';
+        const rootCauseEl = document.getElementById('incidentRootCause');
+        if (rootCauseEl) rootCauseEl.value = this.state.rootCause || '';
 
         const overlay = document.getElementById('incidentModalOverlay');
         if (overlay) overlay.classList.add('is-open');
+    },
+
+    cancelModal() {
+        this._closeModal();
+        const form = document.getElementById('incidentForm');
+        if (form) form.reset();
+        const errEl = document.getElementById('incidentFormError');
+        if (errEl) errEl.textContent = '';
+    },
+
+    minimizeModal() {
+        this._closeModal();
     },
 
     _closeModal() {
@@ -4934,37 +5458,68 @@ const IncidentTracker = {
         if (overlay) overlay.classList.remove('is-open');
     },
 
+    requestCancelIncident() {
+        const cancelBtn = document.getElementById('incidentCancelBtn');
+        const errEl = document.getElementById('incidentFormError');
+        const self = this;
+
+        self.isSubmitting = true;
+        if (cancelBtn) {
+            cancelBtn.disabled = true;
+            cancelBtn.textContent = t('incidentCancelling');
+        }
+
+        fetch(CONFIG.API.cancelIncident, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({}),
+        })
+            .then(res => res.json())
+            .then(json => {
+                if (!json || json.success === false) {
+                    throw new Error((json && json.message) || 'Cancel failed');
+                }
+                self.cancelModal();
+                return self.refreshState();
+            })
+            .catch(err => {
+                console.error('Failed to cancel incident:', err);
+                if (errEl) errEl.textContent = t('incidentCancelFailed');
+            })
+            .finally(() => {
+                self.isSubmitting = false;
+                if (cancelBtn) {
+                    cancelBtn.disabled = false;
+                    cancelBtn.textContent = t('incidentCancelBtn');
+                }
+            });
+    },
+
     _formatDateTime(d) {
         if (!d) return '-';
         const pad = n => String(n).padStart(2, '0');
         return pad(d.getMonth() + 1) + '/' + pad(d.getDate()) + '/' + d.getFullYear() + ' ' +
-            pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
-    },
-
-    _formatDuration(start, end) {
-        if (!start || !end) return '-';
-        const totalSec = Math.max(0, Math.round((end.getTime() - start.getTime()) / 1000));
-        const h = Math.floor(totalSec / 3600);
-        const m = Math.floor((totalSec % 3600) / 60);
-        const s = totalSec % 60;
-        return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+               pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
     },
 
     _populateProductOptions() {
         const select = document.getElementById('incidentProduct');
         if (!select) return;
         const current = select.value;
-        const products = Utils.Array.distinct(appState.tickets.map(r => r.product)).filter(Boolean).sort();
+        const products = Utils.Array.distinct(appState.tickets.map(r => r.product))
+            .filter(Boolean)
+            .sort();
 
         select.innerHTML = '<option value="">' + t('incidentSelectProduct') + '</option>' +
             products.map(p => {
-                return '<option value="' + Utils.String.escapeHtml(p) + '">' + Utils.String.escapeHtml(p) + '</option>';
+                return '<option value="' + Utils.String.escapeHtml(p) + '">' +
+                    Utils.String.escapeHtml(p) + '</option>';
             }).join('');
 
         if (products.indexOf(current) !== -1) select.value = current;
     },
 
-    save() {
+    submitStop() {
         const productSel = document.getElementById('incidentProduct');
         const problemEl = document.getElementById('incidentProblem');
         const rootCauseEl = document.getElementById('incidentRootCause');
@@ -4981,42 +5536,36 @@ const IncidentTracker = {
         }
         if (errEl) errEl.textContent = '';
 
-        const payload = {
-            startTime: this.startTime.toISOString(),
-            endTime: this.endTime.toISOString(),
-            product,
-            problem,
-            rootCause,
-        };
-
         const self = this;
+        self.isSubmitting = true;
         if (saveBtn) {
             saveBtn.disabled = true;
             saveBtn.textContent = t('incidentSaving');
         }
 
-        fetch(CONFIG.API.incidentSave, {
+        fetch(CONFIG.API.stopIncident, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(payload),
+            body: JSON.stringify({ product, problem, rootCause }),
         })
             .then(res => res.json())
             .then(json => {
                 if (!json || json.success === false) {
-                    throw new Error((json && json.message) || 'Save failed');
+                    throw new Error((json && json.message) || 'Stop failed');
                 }
-                self.startTime = null;
-                self.endTime = null;
-                self._resetButton();
                 self._closeModal();
                 const form = document.getElementById('incidentForm');
                 if (form) form.reset();
+                return self.refreshState().then(() => {
+                    EventHandlers.onRefresh();
+                });
             })
             .catch(err => {
-                console.error('Failed to save incident:', err);
+                console.error('Failed to stop incident:', err);
                 if (errEl) errEl.textContent = t('incidentSaveFailed');
             })
             .finally(() => {
+                self.isSubmitting = false;
                 if (saveBtn) {
                     saveBtn.disabled = false;
                     saveBtn.textContent = t('incidentSaveBtn');
@@ -5031,6 +5580,19 @@ const IncidentTracker = {
 
 const ConfirmModal = {
     _onConfirm: null,
+
+    _icons: {
+        danger: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+            '<path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z" /></svg>',
+        question: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+            '<circle cx="12" cy="12" r="10" />' +
+            '<path d="M9.5 9a2.5 2.5 0 015 0c0 1.5-2.5 2-2.5 3.5" />' +
+            '<line x1="12" y1="17" x2="12.01" y2="17" /></svg>',
+        info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+            '<circle cx="12" cy="12" r="10" />' +
+            '<line x1="12" y1="16" x2="12" y2="12" />' +
+            '<line x1="12" y1="8" x2="12.01" y2="8" /></svg>',
+    },
 
     init() {
         const self = this;
@@ -5049,18 +5611,26 @@ const ConfirmModal = {
         });
     },
 
-    confirm(message, onConfirm) {
+    confirm(message, onConfirm, options) {
+        options = options || {};
+        const isDanger = options.danger !== false;
+
         const icon = document.getElementById('confirmModalIcon');
         const cancelBtn = document.getElementById('confirmModalCancelBtn');
         const confirmBtn = document.getElementById('confirmModalConfirmBtn');
 
-        document.getElementById('confirmModalTitle').textContent = t('confirmTitle');
+        document.getElementById('confirmModalTitle').textContent = options.title || t('confirmTitle');
         document.getElementById('confirmModalText').textContent = message;
-        if (icon) icon.classList.remove('is-info');
+        if (icon) {
+            icon.classList.toggle('is-info', !isDanger);
+            icon.innerHTML = isDanger
+                ? this._icons.danger
+                : (options.icon === 'info' ? this._icons.info : this._icons.question);
+        }
         if (cancelBtn) cancelBtn.style.display = '';
         if (confirmBtn) {
-            confirmBtn.textContent = t('btnDelete');
-            confirmBtn.classList.add('confirm-modal-danger-btn');
+            confirmBtn.textContent = options.confirmText || t('btnDelete');
+            confirmBtn.classList.toggle('confirm-modal-danger-btn', isDanger);
         }
 
         this._onConfirm = onConfirm || null;
@@ -5074,7 +5644,10 @@ const ConfirmModal = {
 
         document.getElementById('confirmModalTitle').textContent = t('alertTitle');
         document.getElementById('confirmModalText').textContent = message;
-        if (icon) icon.classList.add('is-info');
+        if (icon) {
+            icon.classList.add('is-info');
+            icon.innerHTML = this._icons.info;
+        }
         if (cancelBtn) cancelBtn.style.display = 'none';
         if (confirmBtn) {
             confirmBtn.textContent = t('btnOk');
@@ -5123,7 +5696,8 @@ const EscalationCRUD = {
     },
 
     _dayNamesEN: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-    _monthNamesEN: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+    _monthNamesEN: ['January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'],
 
     _populateSelects() {
         Object.keys(this._staticOptions).forEach(id => {
@@ -5131,7 +5705,8 @@ const EscalationCRUD = {
             if (!select) return;
             const current = select.value;
             select.innerHTML = this._staticOptions[id].map(v =>
-                '<option value="' + Utils.String.escapeHtml(v) + '">' + Utils.String.escapeHtml(v) + '</option>'
+                '<option value="' + Utils.String.escapeHtml(v) + '">' +
+                Utils.String.escapeHtml(v) + '</option>'
             ).join('');
             if (this._staticOptions[id].indexOf(current) !== -1) select.value = current;
         });
@@ -5141,7 +5716,8 @@ const EscalationCRUD = {
             const current = featureSelect.value;
             const features = Utils.Array.distinct(appState.tickets.map(r => r.feature).filter(Boolean)).sort();
             featureSelect.innerHTML = features.map(f =>
-                '<option value="' + Utils.String.escapeHtml(f) + '">' + Utils.String.escapeHtml(f) + '</option>'
+                '<option value="' + Utils.String.escapeHtml(f) + '">' +
+                Utils.String.escapeHtml(f) + '</option>'
             ).join('');
             if (features.indexOf(current) !== -1) featureSelect.value = current;
         }
@@ -5152,7 +5728,8 @@ const EscalationCRUD = {
             const staffList = Utils.Array.distinct(appState.tickets.map(r => r.staff).filter(Boolean)).sort();
             if (current && staffList.indexOf(current) === -1) staffList.push(current);
             createdBySelect.innerHTML = staffList.map(s =>
-                '<option value="' + Utils.String.escapeHtml(s) + '">' + Utils.String.escapeHtml(s) + '</option>'
+                '<option value="' + Utils.String.escapeHtml(s) + '">' +
+                Utils.String.escapeHtml(s) + '</option>'
             ).join('');
             if (staffList.indexOf(current) !== -1) createdBySelect.value = current;
         }
@@ -5210,9 +5787,9 @@ const EscalationCRUD = {
         if (startSec !== null) {
             const hour = Math.floor(startSec / 3600);
             let shift;
-            if (hour >= 0 && hour < 9) shift = 'Malam';
-            else if (hour >= 9 && hour < 15) shift = 'Pagi';
-            else shift = 'Siang';
+            if (hour >= 6 && hour < 14) shift = 'Pagi';
+            else if (hour >= 14 && hour < 22) shift = 'Siang';
+            else shift = 'Malam';
             if (shiftInput) shiftInput.value = shift;
         } else if (shiftInput) {
             shiftInput.value = '';
@@ -5305,8 +5882,14 @@ const EscalationCRUD = {
     },
 
     _validate(payload) {
-        const requiredFields = ['ticketDate', 'clientName', 'createdBy', 'product', 'type', 'escalationStatus', 'status', 'priority', 'feature', 'startTime', 'solvedTime', 'clientCategory', 'problem'];
-        return requiredFields.every(f => payload[f] !== '' && payload[f] !== null && payload[f] !== undefined);
+        const requiredFields = [
+            'ticketDate', 'clientName', 'createdBy', 'product', 'type',
+            'escalationStatus', 'status', 'priority', 'feature',
+            'startTime', 'solvedTime', 'clientCategory', 'problem',
+        ];
+        return requiredFields.every(f =>
+            payload[f] !== '' && payload[f] !== null && payload[f] !== undefined
+        );
     },
 
     save() {
