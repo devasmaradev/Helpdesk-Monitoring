@@ -40,17 +40,17 @@ const CONFIG = {
         pollIntervalMs: 5000,
     },
     API: {
-        tickets: 'https://script.google.com/macros/s/AKfycbxERDUaKOf4G9TDFdIXIxFcC-bTTMLEEgLALhMs9GXmtE6kh-AhovlQY4QexmtkbpDfkA/exec?action=tickets',
-        tasks: 'https://script.google.com/macros/s/AKfycbxERDUaKOf4G9TDFdIXIxFcC-bTTMLEEgLALhMs9GXmtE6kh-AhovlQY4QexmtkbpDfkA/exec?action=tasks',
-        responseTime: 'https://script.google.com/macros/s/AKfycbxERDUaKOf4G9TDFdIXIxFcC-bTTMLEEgLALhMs9GXmtE6kh-AhovlQY4QexmtkbpDfkA/exec?action=responsetime',
-        incidents: 'https://script.google.com/macros/s/AKfycbxERDUaKOf4G9TDFdIXIxFcC-bTTMLEEgLALhMs9GXmtE6kh-AhovlQY4QexmtkbpDfkA/exec?action=incident',
-        incidentSave: 'https://script.google.com/macros/s/AKfycbxERDUaKOf4G9TDFdIXIxFcC-bTTMLEEgLALhMs9GXmtE6kh-AhovlQY4QexmtkbpDfkA/exec?action=incident',
-        incidentState: 'https://script.google.com/macros/s/AKfycbxERDUaKOf4G9TDFdIXIxFcC-bTTMLEEgLALhMs9GXmtE6kh-AhovlQY4QexmtkbpDfkA/exec?action=incidentstate',
-        startIncident: 'https://script.google.com/macros/s/AKfycbxERDUaKOf4G9TDFdIXIxFcC-bTTMLEEgLALhMs9GXmtE6kh-AhovlQY4QexmtkbpDfkA/exec?action=startincident',
-        stopIncident: 'https://script.google.com/macros/s/AKfycbxERDUaKOf4G9TDFdIXIxFcC-bTTMLEEgLALhMs9GXmtE6kh-AhovlQY4QexmtkbpDfkA/exec?action=stopincident',
-        cancelIncident: 'https://script.google.com/macros/s/AKfycbxERDUaKOf4G9TDFdIXIxFcC-bTTMLEEgLALhMs9GXmtE6kh-AhovlQY4QexmtkbpDfkA/exec?action=cancelincident',
-        updateTicket: 'https://script.google.com/macros/s/AKfycbxERDUaKOf4G9TDFdIXIxFcC-bTTMLEEgLALhMs9GXmtE6kh-AhovlQY4QexmtkbpDfkA/exec?action=updateticket',
-        deleteTicket: 'https://script.google.com/macros/s/AKfycbxERDUaKOf4G9TDFdIXIxFcC-bTTMLEEgLALhMs9GXmtE6kh-AhovlQY4QexmtkbpDfkA/exec?action=deleteticket',
+        tickets: 'https://script.google.com/macros/s/AKfycbwyh3SBrT8alhpEOy8T1XJIbFE-w7OBbL3aX2X5awe4iv0-1BshjlIFq9j89yxbvQ7i4g/exec?action=tickets',
+        tasks: 'https://script.google.com/macros/s/AKfycbwyh3SBrT8alhpEOy8T1XJIbFE-w7OBbL3aX2X5awe4iv0-1BshjlIFq9j89yxbvQ7i4g/exec?action=tasks',
+        responseTime: 'https://script.google.com/macros/s/AKfycbwyh3SBrT8alhpEOy8T1XJIbFE-w7OBbL3aX2X5awe4iv0-1BshjlIFq9j89yxbvQ7i4g/exec?action=responsetime',
+        incidents: 'https://script.google.com/macros/s/AKfycbwyh3SBrT8alhpEOy8T1XJIbFE-w7OBbL3aX2X5awe4iv0-1BshjlIFq9j89yxbvQ7i4g/exec?action=incident',
+        incidentSave: 'https://script.google.com/macros/s/AKfycbwyh3SBrT8alhpEOy8T1XJIbFE-w7OBbL3aX2X5awe4iv0-1BshjlIFq9j89yxbvQ7i4g/exec?action=incident',
+        incidentState: 'https://script.google.com/macros/s/AKfycbwyh3SBrT8alhpEOy8T1XJIbFE-w7OBbL3aX2X5awe4iv0-1BshjlIFq9j89yxbvQ7i4g/exec?action=incidentstate',
+        startIncident: 'https://script.google.com/macros/s/AKfycbwyh3SBrT8alhpEOy8T1XJIbFE-w7OBbL3aX2X5awe4iv0-1BshjlIFq9j89yxbvQ7i4g/exec?action=startincident',
+        stopIncident: 'https://script.google.com/macros/s/AKfycbwyh3SBrT8alhpEOy8T1XJIbFE-w7OBbL3aX2X5awe4iv0-1BshjlIFq9j89yxbvQ7i4g/exec?action=stopincident',
+        cancelIncident: 'https://script.google.com/macros/s/AKfycbwyh3SBrT8alhpEOy8T1XJIbFE-w7OBbL3aX2X5awe4iv0-1BshjlIFq9j89yxbvQ7i4g/exec?action=cancelincident',
+        updateTicket: 'https://script.google.com/macros/s/AKfycbwyh3SBrT8alhpEOy8T1XJIbFE-w7OBbL3aX2X5awe4iv0-1BshjlIFq9j89yxbvQ7i4g/exec?action=updateticket',
+        deleteTicket: 'https://script.google.com/macros/s/AKfycbwyh3SBrT8alhpEOy8T1XJIbFE-w7OBbL3aX2X5awe4iv0-1BshjlIFq9j89yxbvQ7i4g/exec?action=deleteticket',
     },
     AUTH: {
         username: 'admin',
@@ -616,6 +616,17 @@ const Utils = {
             const p = Utils.Date.toJakartaParts(str);
             if (!p) return '';
             return String(p.hour).padStart(2, '0') + ':' +
+                   String(p.minute).padStart(2, '0') + ':' +
+                   String(p.second).padStart(2, '0');
+        },
+
+        isoToDatetimeLocalString(isoStr) {
+            const p = Utils.Date.toJakartaParts(isoStr);
+            if (!p) return '';
+            return p.year + '-' +
+                   String(p.month).padStart(2, '0') + '-' +
+                   String(p.day).padStart(2, '0') + 'T' +
+                   String(p.hour).padStart(2, '0') + ':' +
                    String(p.minute).padStart(2, '0') + ':' +
                    String(p.second).padStart(2, '0');
         },
@@ -5842,7 +5853,7 @@ const EscalationCRUD = {
         document.getElementById('escFeature').value = ticket.feature || '';
         document.getElementById('escStartTime').value = Utils.Date.isoToTimeString(ticket.startTime || '');
         document.getElementById('escSolvedTime').value = Utils.Date.isoToTimeString(ticket.solvedTime || '');
-        document.getElementById('escSolvedBug').value = Utils.Date.isoToTimeString(ticket.solvedBug || '');
+        document.getElementById('escSolvedBug').value = Utils.Date.isoToDatetimeLocalString(ticket.solvedBug || '');
         document.getElementById('escEscalatedTo').value = ticket.escalatedTo || '';
         document.getElementById('escClientCategory').value = ticket.tier || '';
         document.getElementById('escProblem').value = ticket.problem || '';
